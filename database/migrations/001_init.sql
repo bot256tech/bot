@@ -1,11 +1,8 @@
 -- =====================================================
 -- AGRICHAIN 360™ — Full Production Schema
 -- Migration: 001_init.sql
--- Covers: Users, Farmers, Partners, Products,
---         Quality Passports, Bookings, Sessions
 -- =====================================================
 
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- =====================================================
@@ -30,7 +27,7 @@ EXCEPTION
 END $$;
 
 -- =====================================================
--- USERS TABLE (Core Authentication)
+-- USERS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -51,7 +48,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- =====================================================
--- SESSIONS TABLE (for express-session with PostgreSQL)
+-- SESSIONS TABLE (express-session with PostgreSQL)
 -- =====================================================
 CREATE TABLE IF NOT EXISTS sessions (
     sid VARCHAR NOT NULL PRIMARY KEY,
@@ -153,7 +150,6 @@ CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     buyer_id INTEGER REFERENCES users(id),
     product_id INTEGER REFERENCES products(id),
-    batch_id INTEGER,
     quantity DECIMAL(10,2),
     total_amount DECIMAL(12,2) NOT NULL,
     commission DECIMAL(12,2) DEFAULT 0,
@@ -163,21 +159,30 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 -- =====================================================
--- INDEXES FOR PERFORMANCE
+-- PERFORMANCE INDEXES
 -- =====================================================
 CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
 CREATE INDEX IF NOT EXISTS idx_farmers_user_id ON farmers(user_id);
+CREATE INDEX IF NOT EXISTS idx_farmers_district ON farmers(district);
+CREATE INDEX IF NOT EXISTS idx_farmers_verification ON farmers(verification_status);
+CREATE INDEX IF NOT EXISTS idx_partners_user_id ON partners(user_id);
 CREATE INDEX IF NOT EXISTS idx_partners_type ON partners(partner_type);
 CREATE INDEX IF NOT EXISTS idx_partners_approved ON partners(approved);
+CREATE INDEX IF NOT EXISTS idx_partners_location ON partners(location);
 CREATE INDEX IF NOT EXISTS idx_products_farmer ON products(farmer_id);
 CREATE INDEX IF NOT EXISTS idx_products_crop ON products(crop);
 CREATE INDEX IF NOT EXISTS idx_products_available ON products(available);
+CREATE INDEX IF NOT EXISTS idx_products_quality ON products(quality_status);
 CREATE INDEX IF NOT EXISTS idx_quality_passports_batch ON quality_passports(batch_number);
 CREATE INDEX IF NOT EXISTS idx_quality_passports_farmer ON quality_passports(farmer_id);
+CREATE INDEX IF NOT EXISTS idx_quality_passports_grade ON quality_passports(quality_grade);
 CREATE INDEX IF NOT EXISTS idx_bookings_farmer ON bookings(farmer_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_partner ON bookings(partner_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_orders_buyer ON orders(buyer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 
 -- =====================================================
 -- AUTO-UPDATE TRIGGER
@@ -197,14 +202,14 @@ CREATE TRIGGER update_users_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
--- SEED: Default admin user (password: admin123)
+-- SEED: Default admin (password: admin123)
 -- =====================================================
 INSERT INTO users (name, phone, email, password_hash, role, status)
 VALUES (
     'System Admin',
     '+256700000000',
     'admin@agrichain360.com',
-    '$2a$10$rK5R3gQ7sP6xL9y0wJmKYdOWKz3n7WzR3gQ7sP6xL9y0wJmKYdOWe',
+    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
     'ADMIN',
     'ACTIVE'
 ) ON CONFLICT (phone) DO NOTHING;
