@@ -172,6 +172,7 @@ async function startServer() {
     { path: '/api/v1/payments', module: './api/routes/payment.routes', name: 'Payments', limiter: paymentLimiter },
     { path: '/api/v1/buyers', module: './api/routes/buyer.routes', name: 'Buyers', limiter: apiLimiter },
     { path: '/api/v1/subscriptions', module: './api/routes/subscription.routes', name: 'Subscriptions', limiter: apiLimiter },
+    { path: '/api/v1/ai', module: './api/routes/ai.routes', name: 'AI Advisor', limiter: apiLimiter },
   ];
 
   for (const api of apiModules) {

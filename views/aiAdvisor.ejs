@@ -1,38 +1,115 @@
-<div class="grid grid2">
+<div style="max-width:800px;margin:0 auto">
   <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px">🤖 AI Crop Advisor — Real-time Insights</h3>
-    
-    <div class="chat" id="aiChat" style="height:320px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:1.5rem">🤖</div>
+      <div>
+        <h3 style="font-weight:800;margin:0">AgriIntel AI</h3>
+        <div style="font-size:.78rem;color:var(--tx2)">Live market data • Real-time crop intelligence</div>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat" id="aiChat" style="height:400px;margin-bottom:16px;padding:20px">
       <div class="chat-msg">
-        <div class="chat-bub ai">Hello! I’m AgriIntel AI. Ask me anything about harvest timing, drying, markets, or disease risk for your crops in Jinja, Iganga, Kamuli or Mayuge.</div>
-      </div>
-    </div>
-    
-    <div style="display:flex;gap:8px">
-      <input id="aiInput" type="text" placeholder="Ask about harvest timing, markets, drying..." style="flex:1;padding:12px 16px;border-radius:50px" onkeypress="if(event.key==='Enter')askAI()">
-      <button class="btn btn-p" onclick="askAI()">Ask AI</button>
-    </div>
-    
-    <div style="margin-top:16px">
-      <div style="font-size:.75rem;color:var(--tx2);margin-bottom:6px">Quick questions:</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        <button class="btn btn-o btn-sm" onclick="quickAsk(0)">When to harvest maize?</button>
-        <button class="btn btn-o btn-sm" onclick="quickAsk(1)">Disease risk?</button>
-        <button class="btn btn-o btn-sm" onclick="quickAsk(2)">Best groundnut market?</button>
-        <button class="btn btn-o btn-sm" onclick="quickAsk(3)">Drying cost?</button>
-      </div>
-    </div>
-  </div>
-  
-  <div class="card">
-    <h3 style="font-weight:800;margin-bottom:12px">📋 Sample AI Responses (Live Database)</h3>
-    <div style="font-size:.85rem;line-height:1.65">
-      <% aiAdvice.forEach(function(a,i) { %>
-        <div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--bd)">
-          <div style="font-weight:700;color:var(--g)">Q: <%= a.q %></div>
-          <div style="margin-top:4px"><%= a.a %></div>
+        <div class="chat-bub ai">
+          👋 Hello! I'm <strong>AgriIntel AI</strong> — your intelligent farming assistant powered by live data from the AGRICHAIN 360 platform.<br><br>
+          Ask me about harvest timing, market prices, disease risk, drying costs, quality certification, transport, or weather for your crops.
         </div>
-      <% }) %>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div style="display:flex;gap:8px">
+      <input id="aiInput" type="text" placeholder="Ask anything about your crops, markets, or services..."
+        style="flex:1;padding:14px 20px;border-radius:50px;font-size:.9rem;border:2px solid var(--bd)"
+        onkeypress="if(event.key==='Enter')askAI()">
+      <button class="btn btn-p" onclick="askAI()" id="aiSendBtn" style="padding:14px 24px">
+        Send
+      </button>
+    </div>
+
+    <!-- Quick Questions -->
+    <div style="margin-top:16px">
+      <div style="font-size:.75rem;color:var(--tx2);margin-bottom:8px;font-weight:600">SUGGESTED QUESTIONS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="suggestionBtns">
+        <button class="btn btn-o btn-sm" onclick="quickAsk('When should I harvest my maize?')">🌽 Harvest timing</button>
+        <button class="btn btn-o btn-sm" onclick="quickAsk('Any disease risk in my area?')">🦠 Disease risk</button>
+        <button class="btn btn-o btn-sm" onclick="quickAsk('What are current market prices?')">📈 Market prices</button>
+        <button class="btn btn-o btn-sm" onclick="quickAsk('How much does solar drying cost?')">☀️ Drying costs</button>
+        <button class="btn btn-o btn-sm" onclick="quickAsk('Tell me about quality passports')">📜 Quality passport</button>
+        <button class="btn btn-o btn-sm" onclick="quickAsk('What transport options are available?')">🚛 Transport</button>
+        <button class="btn btn-o btn-sm" onclick="quickAsk('What is the weather like today?')">🌤️ Weather</button>
+        <button class="btn btn-o btn-sm" onclick="quickAsk('How does storage work?')">🏭 Storage</button>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+// ══ AgriIntel AI Chat — Real API calls ══
+var aiLoading = false;
+
+function askAI() {
+  var inp = document.getElementById('aiInput');
+  var btn = document.getElementById('aiSendBtn');
+  if (!inp || !inp.value.trim() || aiLoading) return;
+
+  var question = inp.value.trim();
+  var chat = document.getElementById('aiChat');
+
+  // Add user message
+  chat.innerHTML += '<div class="chat-msg user"><div class="chat-bub user">' + escapeHtml(question) + '</div></div>';
+  inp.value = '';
+  chat.scrollTop = chat.scrollHeight;
+
+  // Show loading state
+  aiLoading = true;
+  btn.disabled = true;
+  btn.textContent = '...';
+  var loadingId = 'loading-' + Date.now();
+  chat.innerHTML += '<div class="chat-msg" id="' + loadingId + '"><div class="chat-bub ai" style="color:var(--tx2)"><span class="pulse">⏳ Thinking...</span></div></div>';
+  chat.scrollTop = chat.scrollHeight;
+
+  // Call the AI API
+  fetch('/api/v1/ai/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question: question })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    // Remove loading indicator
+    var loadingEl = document.getElementById(loadingId);
+    if (loadingEl) loadingEl.remove();
+
+    if (data.success && data.data) {
+      chat.innerHTML += '<div class="chat-msg"><div class="chat-bub ai">' + data.data.answer + '</div></div>';
+    } else {
+      chat.innerHTML += '<div class="chat-msg"><div class="chat-bub ai">⚠️ Sorry, I encountered an issue. Please try again.</div></div>';
+    }
+    chat.scrollTop = chat.scrollHeight;
+  })
+  .catch(function(err) {
+    var loadingEl = document.getElementById(loadingId);
+    if (loadingEl) loadingEl.remove();
+    chat.innerHTML += '<div class="chat-msg"><div class="chat-bub ai">⚠️ Connection issue. Please check your internet and try again.</div></div>';
+    chat.scrollTop = chat.scrollHeight;
+  })
+  .finally(function() {
+    aiLoading = false;
+    btn.disabled = false;
+    btn.textContent = 'Send';
+  });
+}
+
+function quickAsk(question) {
+  document.getElementById('aiInput').value = question;
+  askAI();
+}
+
+function escapeHtml(text) {
+  var d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+</script>
