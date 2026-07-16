@@ -11,7 +11,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{--g:#2E7D32;--g2:#4CAF50;--gd:#1B5E20;--gl:#E8F5E9;--a:#FBC02D;--ad:#F57F17;--bg:#f5f7f5;--bg2:#eef2ee;--card:#fff;--tx:#1a1a1a;--tx2:#555;--tx3:#999;--bd:#e0e0e0;--sh:0 4px 20px rgba(0,0,0,.06);--shl:0 12px 40px rgba(0,0,0,.1)}
+:root{
+  /* 3-COLOR PALETTE: Deep Green + Gold + Charcoal */
+  --g:#1B5E20;--g2:#2E7D32;--gd:#0d3b0f;--gl:rgba(27,94,32,.08);
+  --a:#D4AF37;--ad:#B8960C;
+  --bg:#FAFAF5;--bg2:#F2F0E8;
+  --card:#fff;--tx:#333333;--tx2:#666;--tx3:#999;
+  --bd:rgba(27,94,32,.12);
+  --sh:0 4px 20px rgba(27,94,32,.06);
+  --shl:0 12px 40px rgba(27,94,32,.12);
+}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -41,9 +50,10 @@ img{max-width:100%;height:auto;display:block}
 /* ─── NAVBAR ─── */
 .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.06);transition:all .3s}
 .navbar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.08)}
-.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1200px;margin:0 auto;padding:0 20px}
-.nav-brand{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.2rem;color:var(--g);display:flex;align-items:center;gap:6px}
-.nav-brand sup{font-size:.5rem}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1200px;margin:0 auto;padding:0 20px;gap:12px}
+.nav-brand{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.15rem;color:var(--g);display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
+.nav-brand sup{font-size:.45rem}
+.nav-brand .brand-360{color:var(--a)}
 .nav-links{display:flex;align-items:center;gap:6px}
 .nav-link{padding:8px 14px;border-radius:50px;font-weight:500;font-size:.82rem;color:var(--tx2);transition:all .2s}
 .nav-link:hover{color:var(--g);background:var(--gl)}
@@ -52,8 +62,18 @@ img{max-width:100%;height:auto;display:block}
 .nav-cta-o:hover{border-color:var(--g);color:var(--g)}
 .nav-cta-f{background:var(--g);color:white;box-shadow:0 4px 16px rgba(46,125,50,.25)}
 .nav-cta-f:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(46,125,50,.35);color:white}
-.nav-mob{display:none;background:none;border:none;font-size:1.4rem;color:var(--tx);cursor:pointer}
-@media(max-width:768px){.nav-links .nav-link{display:none}.nav-mob{display:block}}
+.nav-mob{display:none;background:none;border:none;font-size:1.4rem;color:var(--tx);cursor:pointer;flex-shrink:0}
+@media(max-width:900px){
+  .nav-links .nav-link{display:none}
+  .nav-mob{display:block}
+  .nav-cta{padding:6px 14px!important;font-size:.75rem!important}
+}
+@media(max-width:480px){
+  .brand-360,.nav-brand sup{display:none}
+  .nav-brand{font-size:1rem}
+  .nav-inner{gap:8px}
+  .nav-cta-o{display:none!important}
+}
 
 /* Mobile Nav */
 .mob-nav{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:white;z-index:2000;box-shadow:-4px 0 30px rgba(0,0,0,.15);transition:right .35s;padding:24px;display:flex;flex-direction:column;gap:6px}
@@ -266,7 +286,7 @@ img{max-width:100%;height:auto;display:block}
 <!-- Navbar -->
 <nav class="navbar" id="navbar">
   <div class="nav-inner">
-    <a class="nav-brand" href="/">🌾 AGRICHAIN <span style="color:var(--a)">360</span><sup>™</sup></a>
+    <a class="nav-brand" href="/">🌾 AGRICHAIN <span class="brand-360">360</span><sup>™</sup></a>
     <div class="nav-links">
       <a href="/marketplace" class="nav-link">Marketplace</a>
       <a href="/ai-advisor" class="nav-link">AI Advisor</a>
@@ -574,7 +594,7 @@ img{max-width:100%;height:auto;display:block}
   <div class="container">
     <div class="footer-grid">
       <div>
-        <h5>🌾 AGRICHAIN 360™</h5>
+        <h5>🌾 AGRICHAIN <span style="color:var(--a)">360</span>™</h5>
         <p>Uganda's complete post-harvest platform. Connecting farmers, buyers, and service providers with verified quality, real-time IoT monitoring, and digital traceability.</p>
         <div style="display:flex;gap:12px;margin-top:14px">
           <a href="#" style="font-size:1.1rem"><i class="fab fa-twitter"></i></a>
