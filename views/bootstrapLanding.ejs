@@ -85,8 +85,9 @@ img{max-width:100%;height:auto;display:block}
 .mob-nav a:hover{background:var(--gl);color:var(--g)}
 
 /* ─── HERO ─── */
-.hero{position:relative;background:linear-gradient(135deg,#0d3b0f 0%,#1B5E20 30%,#2E7D32 60%,#388E3C 100%);color:white;padding:120px 0 100px;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")}
+.hero{position:relative;background:linear-gradient(160deg,#0a2e0a 0%,#0d3b0d 20%,#1B5E20 50%,#2E7D32 80%,#1B5E20 100%);color:white;padding:120px 0 100px;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cdefs%3E%3Cpattern id='grain' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='25' cy='25' r='1' fill='white' opacity='.03'/%3E%3Ccircle cx='75' cy='75' r='.8' fill='white' opacity='.02'/%3E%3Ccircle cx='50' cy='10' r='.6' fill='white' opacity='.025'/%3E%3Ccircle cx='10' cy='60' r='.7' fill='white' opacity='.02'/%3E%3Ccircle cx='90' cy='40' r='.5' fill='%23D4AF37' opacity='.03'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grain)'/%3E%3C/svg%3E")}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,rgba(250,250,245,.04),transparent)}
 .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;z-index:2}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);padding:6px 16px;border-radius:50px;font-size:.78rem;margin-bottom:20px;backdrop-filter:blur(8px)}
 .hero-title{font-size:3rem;font-weight:900;line-height:1.08;margin-bottom:20px}
@@ -133,15 +134,27 @@ img{max-width:100%;height:auto;display:block}
 }
 
 /* ─── SECTIONS ─── */
-.section{padding:80px 0}
+.section{padding:80px 0;position:relative}
 .section-sm{padding:50px 0}
 .section-title{font-weight:800;font-size:2rem;text-align:center;margin-bottom:12px}
 .section-sub{text-align:center;color:var(--tx2);margin-bottom:48px;font-size:1rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.7}
-@media(max-width:768px){.section{padding:50px 0}.section-title{font-size:1.4rem}.section-sub{font-size:.9rem;margin-bottom:32px}}
+.section-accent{background:var(--bg2);position:relative}
+.section-accent::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1' fill='%231B5E20' opacity='.03'/%3E%3C/svg%3E");pointer-events:none}
+
+/* Section Dividers — diagonal cuts between sections */
+.divider-wave{position:relative;height:60px;margin-top:-60px;z-index:5;pointer-events:none}
+.divider-wave svg{position:absolute;bottom:0;width:100%;height:60px}
+
+/* Gold accent line */
+.section-line{width:60px;height:3px;background:linear-gradient(90deg,var(--a),transparent);margin:0 auto 16px;border-radius:2px}
+.section-line-left{width:60px;height:3px;background:linear-gradient(90deg,var(--a),transparent);margin-bottom:16px;border-radius:2px}
+
+@media(max-width:768px){.section{padding:50px 0}.section-title{font-size:1.4rem}.section-sub{font-size:.9rem;margin-bottom:32px}.divider-wave{height:30px;margin-top:-30px}}
 
 /* ─── PROBLEM SECTION ─── */
-.problem{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;padding:80px 0;position:relative;overflow:hidden}
-.problem::before{content:'';position:absolute;top:0;right:0;width:50%;height:100%;background:url('/images/post-harvest-problem.jpg') center/cover;opacity:.15}
+.problem{background:linear-gradient(135deg,#1a1a1a 0%,#2C2C2C 50%,#333333 100%);color:white;padding:80px 0;position:relative;overflow:hidden}
+.problem::before{content:'';position:absolute;top:0;right:0;width:50%;height:100%;background:url('/images/post-harvest-problem.jpg') center/cover;opacity:.12}
+.problem::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23D4AF37' fill-opacity='0.03'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2l2 3.5-2 3z'/%3E%3C/g%3E%3C/svg%3E")}
 .problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;z-index:2}
 .problem h2{font-size:2rem;font-weight:800;margin-bottom:16px;color:white}
 .problem h2 span{color:#D4AF37}
@@ -174,8 +187,10 @@ img{max-width:100%;height:auto;display:block}
 
 /* ─── FEATURES ─── */
 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.feat{background:white;border-radius:20px;padding:32px;border:1px solid var(--bd);text-align:center;transition:all .35s cubic-bezier(.25,.8,.25,1)}
-.feat:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(0,0,0,.1);border-color:var(--g)}
+.feat{background:white;border-radius:20px;padding:32px;border:1px solid var(--bd);text-align:center;transition:all .35s cubic-bezier(.25,.8,.25,1);position:relative;overflow:hidden}
+.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--g),var(--a));transform:scaleX(0);transition:transform .35s ease;transform-origin:left}
+.feat:hover::before{transform:scaleX(1)}
+.feat:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(27,94,32,.1);border-color:var(--g)}
 .feat-ico{font-size:2.5rem;margin-bottom:14px}
 .feat h4{font-weight:700;margin-bottom:8px;font-size:1rem}
 .feat p{font-size:.85rem;color:var(--tx2);line-height:1.6;margin-bottom:16px}
@@ -187,7 +202,8 @@ img{max-width:100%;height:auto;display:block}
 /* ─── SPLIT ─── */
 .split{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
 .split-rev{direction:rtl}.split-rev>*{direction:ltr}
-.split-img{border-radius:20px;overflow:hidden;box-shadow:var(--shl)}
+.split-img{border-radius:20px;overflow:hidden;box-shadow:var(--shl);position:relative}
+.split-img::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--a),var(--g));z-index:2;border-radius:4px 0 0 4px}
 .split-img img{width:100%;height:340px;object-fit:cover;transition:transform .5s}
 .split-img:hover img{transform:scale(1.05)}
 .split-c h3{font-weight:800;font-size:1.5rem;margin-bottom:14px}
@@ -198,13 +214,16 @@ img{max-width:100%;height:auto;display:block}
 @media(max-width:768px){.split{grid-template-columns:1fr;gap:24px}.split-rev{direction:ltr}.split-img img{height:220px}.split-c h3{font-size:1.2rem}}
 
 /* ─── INVESTOR SECTION ─── */
-.investor{background:linear-gradient(135deg,#0d3b0f,#1B5E20);color:white;padding:80px 0;position:relative;overflow:hidden}
-.investor::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(212,175,55,.1),transparent 70%);border-radius:50%}
+.investor{background:linear-gradient(160deg,#0d3b0d 0%,#1B5E20 40%,#0d3b0d 100%);color:white;padding:80px 0;position:relative;overflow:hidden}
+.investor::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23D4AF37' stroke-opacity='0.06' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3Ccircle cx='30' cy='30' r='10'/%3E%3C/g%3E%3C/svg%3E")}
+.investor::after{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(212,175,55,.08),transparent 70%);border-radius:50%}
 .investor h2{color:white}
 .investor .section-sub{color:rgba(255,255,255,.7)}
 .inv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.inv-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px;backdrop-filter:blur(8px);transition:all .3s}
+.inv-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px;backdrop-filter:blur(8px);transition:all .3s;position:relative;overflow:hidden}
+.inv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--a),transparent);opacity:0;transition:opacity .3s}
 .inv-card:hover{background:rgba(255,255,255,.12);transform:translateY(-4px)}
+.inv-card:hover::before{opacity:1}
 .inv-card-ico{font-size:2rem;margin-bottom:12px}
 .inv-card h4{font-weight:700;margin-bottom:8px;font-size:1rem}
 .inv-card p{font-size:.82rem;opacity:.8;line-height:1.6}
@@ -214,8 +233,9 @@ img{max-width:100%;height:auto;display:block}
 @media(max-width:768px){.inv-grid{grid-template-columns:1fr}}
 
 /* ─── NGO SECTION ─── */
-.ngo{background:linear-gradient(135deg,#1B5E20,#0d3b0d);color:white;padding:80px 0;position:relative;overflow:hidden}
-.ngo::before{content:'';position:absolute;bottom:-30%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%);border-radius:50%}
+.ngo{background:linear-gradient(160deg,#3E2723 0%,#2C1810 30%,#1a2e1a 70%,#1B5E20 100%);color:white;padding:80px 0;position:relative;overflow:hidden}
+.ngo::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23D4AF37' fill-opacity='0.04'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2V0zm0 4l4-4h2l-6 6V4zm0 4l8-8h2L40 10V8zm0 4L52 0h2L40 14v-2zm0 4L56 0h2L40 18v-2zm0 4L60 0h2L40 22v-2zm0 4L64 0h2L40 26v-2zm0 4L68 0h2L40 30v-2zm0 4L72 0h2L40 34v-2zm0 4L76 0h2L40 38v-2zm0 4L80 0v2L42 40h-2zm4 0L80 4v2L46 40h-2zm4 0L80 8v2L50 40h-2zm4 0l28-28v2L54 40h-2zm4 0l24-24v2L58 40h-2zm4 0l20-20v2L62 40h-2zm4 0l16-16v2L66 40h-2zm4 0l12-12v2L70 40h-2zm4 0l8-8v2l-6 6h-2zm4 0l4-4v2l-2 2h-2z'/%3E%3C/g%3E%3C/svg%3E")}
+.ngo::after{content:'';position:absolute;bottom:-30%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(212,175,55,.06),transparent 70%);border-radius:50%}
 .ngo h2{color:white}
 .ngo .section-sub{color:rgba(255,255,255,.7)}
 .ngo-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;z-index:2}
@@ -247,8 +267,8 @@ img{max-width:100%;height:auto;display:block}
 .crop-s{font-size:.68rem;color:var(--tx3);margin-top:2px}
 
 /* ─── CTA ─── */
-.cta{background:linear-gradient(135deg,#2E7D32,#1B5E20);color:white;padding:80px 0;text-align:center;position:relative;overflow:hidden}
-.cta::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M20 20h20v20H20z'/%3E%3C/g%3E%3C/svg%3E")}
+.cta{background:linear-gradient(160deg,#1B5E20 0%,#0d3b0d 50%,#1B5E20 100%);color:white;padding:80px 0;text-align:center;position:relative;overflow:hidden}
+.cta::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23D4AF37' stroke-opacity='.04' stroke-width='.5'/%3E%3Ccircle cx='50' cy='50' r='15' fill='none' stroke='%23D4AF37' stroke-opacity='.03' stroke-width='.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23p)'/%3E%3C/svg%3E")}
 .cta h2{font-size:2rem;font-weight:800;margin-bottom:12px;position:relative}
 .cta p{opacity:.9;font-size:1rem;margin-bottom:32px;position:relative}
 .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative}
@@ -364,6 +384,7 @@ img{max-width:100%;height:auto;display:block}
 <section class="section">
   <div class="container">
     <h2 class="section-title reveal">How AGRICHAIN 360 Works</h2>
+    <div class="section-line reveal d1"></div>
     <p class="section-sub reveal d1">Simple 4-step process from farm to market — powered by IoT, AI, and blockchain-style traceability</p>
     <div class="steps">
       <div class="step reveal d1"><div class="step-n" style="background:var(--g)">1</div><div class="step-ico">👨‍🌾</div><div class="step-t">Farmer Registration</div><div class="step-d">Register via USSD (*284#) or web. GPS-mapped farms. Instant verification.</div></div>
@@ -378,6 +399,7 @@ img{max-width:100%;height:auto;display:block}
 <section class="section" style="background:var(--bg2)">
   <div class="container">
     <h2 class="section-title reveal">Platform Features</h2>
+    <div class="section-line reveal d1"></div>
     <p class="section-sub reveal d1">Everything you need to transform post-harvest agriculture</p>
     <div class="feat-grid">
       <div class="feat reveal d1"><div class="feat-ico">🤖</div><h4>AI Crop Advisor</h4><p>Disease detection, growth prediction, and yield forecasting using AI. Voice-enabled in English and Luganda.</p><a href="/ai-advisor" class="feat-link feat-link-g">Try AI Advisor <i class="fas fa-arrow-right"></i></a></div>
@@ -471,6 +493,7 @@ img{max-width:100%;height:auto;display:block}
 <section class="investor" id="investors">
   <div class="container">
     <h2 class="section-title reveal">Why Invest in AGRICHAIN 360</h2>
+    <div class="section-line reveal d1"></div>
     <p class="section-sub reveal d1">A scalable, revenue-generating platform addressing a $4 billion problem in African agriculture</p>
     <div class="inv-grid">
       <div class="inv-card reveal d1">
@@ -552,6 +575,7 @@ img{max-width:100%;height:auto;display:block}
 <section class="section">
   <div class="container">
     <h2 class="section-title reveal">Supported Crops</h2>
+    <div class="section-line reveal d1"></div>
     <p class="section-sub reveal d1">Quality-certified produce across 6+ crop types with full traceability</p>
     <div class="crops-row">
       <div class="crop reveal d1"><div class="crop-e">🌽</div><div class="crop-n">Maize</div><div class="crop-s">Grade A/B</div></div>
