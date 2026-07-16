@@ -4,7 +4,14 @@
   <%- include('partials/head', { title }) %>
 </head>
 <body>
+  <!-- Page Load Transition -->
+  <div class="page-loader">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Sidebar Overlay (mobile) -->
   <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
   <div class="app">
     <%- include('partials/sidebar', { page }) %>
     <main class="main">
@@ -12,8 +19,30 @@
       <div class="page active" id="pg-<%= page %>">
         <%- include(body, data) %>
       </div>
+      <!-- Bottom padding for mobile bottom bar -->
+      <div style="height:70px" class="d-block d-md-none"></div>
     </main>
   </div>
+
+  <!-- Mobile Bottom App Bar -->
+  <div class="bottom-bar d-flex d-md-none">
+    <a href="/" class="bottom-item <%= page === 'landing' || page === 'landingPage' || page === 'bootstrapLanding' ? 'active' : '' %>">
+      <i class="fas fa-home"></i><span>Home</span>
+    </a>
+    <a href="/marketplace" class="bottom-item <%= page === 'marketplace' ? 'active' : '' %>">
+      <i class="fas fa-store"></i><span>Market</span>
+    </a>
+    <a href="/ai-advisor" class="bottom-item <%= page === 'ai-advisor' || page === 'ai-disease' ? 'active' : '' %>">
+      <i class="fas fa-brain"></i><span>AI</span>
+    </a>
+    <a href="/iot-dryer" class="bottom-item <%= page === 'iot-dryer' || page === 'dryer' ? 'active' : '' %>">
+      <i class="fas fa-solar-panel"></i><span>IoT</span>
+    </a>
+    <a href="/roles" class="bottom-item">
+      <i class="fas fa-user"></i><span>Account</span>
+    </a>
+  </div>
+
   <%- include('partials/scripts') %>
 </body>
 </html>

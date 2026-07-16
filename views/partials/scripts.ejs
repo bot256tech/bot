@@ -205,4 +205,36 @@ document.addEventListener('DOMContentLoaded', function() {
     if (overlay) overlay.classList.remove('active');
     document.body.style.overflow = '';
   }
+
+  // ══ Page Load Transition ══
+  window.addEventListener('load', function() {
+    var loader = document.querySelector('.page-loader');
+    if (loader) {
+      setTimeout(function() { loader.classList.add('loaded'); }, 300);
+      setTimeout(function() { loader.remove(); }, 1000);
+    }
+  });
+
+  // ══ Intersection Observer — Scroll Animations ══
+  document.addEventListener('DOMContentLoaded', function() {
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Don't unobserve — allows re-animation on scroll back
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+      document.querySelectorAll('.fade-up,.fade-left,.fade-right,.scale-in,.stagger').forEach(function(el) {
+        observer.observe(el);
+      });
+    } else {
+      // Fallback: show everything
+      document.querySelectorAll('.fade-up,.fade-left,.fade-right,.scale-in,.stagger').forEach(function(el) {
+        el.classList.add('visible');
+      });
+    }
+  });
 </script>

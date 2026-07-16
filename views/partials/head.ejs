@@ -183,4 +183,72 @@
     .btn{padding:8px 16px;font-size:.8rem}
     .grid2,.grid3,.grid4{gap:12px}
   }
+  /* ═══════════════ SMOOTH TRANSITIONS & ANIMATIONS ═══════════════ */
+  html{scroll-behavior:smooth}
+
+  /* Page Load Transition */
+  .page-loader{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity .6s ease,visibility .6s ease}
+  .page-loader.loaded{opacity:0;visibility:hidden;pointer-events:none}
+  .page-loader .spinner{width:40px;height:40px;border:3px solid var(--bd);border-top-color:var(--g);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Scroll-triggered fade-in */
+  .fade-up{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+  .fade-up.visible{opacity:1;transform:translateY(0)}
+  .fade-left{opacity:0;transform:translateX(-30px);transition:opacity .7s ease,transform .7s ease}
+  .fade-left.visible{opacity:1;transform:translateX(0)}
+  .fade-right{opacity:0;transform:translateX(30px);transition:opacity .7s ease,transform .7s ease}
+  .fade-right.visible{opacity:1;transform:translateX(0)}
+  .scale-in{opacity:0;transform:scale(.9);transition:opacity .5s ease,transform .5s ease}
+  .scale-in.visible{opacity:1;transform:scale(1)}
+
+  /* Stagger children */
+  .stagger > *{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease}
+  .stagger.visible > *:nth-child(1){transition-delay:.1s}
+  .stagger.visible > *:nth-child(2){transition-delay:.2s}
+  .stagger.visible > *:nth-child(3){transition-delay:.3s}
+  .stagger.visible > *:nth-child(4){transition-delay:.4s}
+  .stagger.visible > *:nth-child(5){transition-delay:.5s}
+  .stagger.visible > *:nth-child(6){transition-delay:.6s}
+  .stagger.visible > *{opacity:1;transform:translateY(0)}
+
+  /* Card enhanced hover */
+  .card-lift{transition:all .35s cubic-bezier(.25,.8,.25,1)}
+  .card-lift:hover{transform:translateY(-8px);box-shadow:var(--shl)}
+
+  /* Image styles */
+  .img-cover{width:100%;height:100%;object-fit:cover;border-radius:var(--rd)}
+  .img-rounded{border-radius:16px;overflow:hidden}
+  .img-shadow{box-shadow:0 8px 30px rgba(0,0,0,.12)}
+
+  /* Skeleton loading */
+  .skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bd) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  /* Floating animation */
+  .float{animation:float 3s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+  /* Gradient text */
+  .gradient-text{background:linear-gradient(135deg,var(--g),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+  /* Bottom App Bar (mobile only) */
+  .bottom-bar{display:none;position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--card);border-top:1px solid var(--bd);z-index:50;box-shadow:0 -4px 20px rgba(0,0,0,.08);justify-content:space-around;align-items:center;padding:0 8px}
+  .bottom-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;color:var(--tx2);font-size:.6rem;font-weight:600;cursor:pointer;transition:color .2s;text-decoration:none;border-radius:8px}
+  .bottom-item.active,.bottom-item:hover{color:var(--g)}
+  .bottom-item i{font-size:1.15rem}
+
+  /* Counter animation */
+  .counter{display:inline-block;transition:all .3s}
+
+  /* Glassmorphism */
+  .glass{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.3)}
+  .dark .glass{background:rgba(24,32,24,.7);border:1px solid rgba(255,255,255,.08)}
+
+  /* Section divider wave */
+  .wave-divider{position:relative;width:100%;overflow:hidden;line-height:0}
+  .wave-divider svg{position:relative;display:block;width:calc(100% + 1.3px);height:60px}
+
+  /* Print */
+  @media print{.sidebar,.topbar,.bottom-bar,.page-loader,.btn{display:none!important}.main{margin-left:0!important}}
 </style>
