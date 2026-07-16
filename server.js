@@ -121,6 +121,28 @@ async function startServer() {
   const dbOk = await testConnection();
   const pool = dbOk ? getPool() : null;
 
+  // 2. Auto-run migrations on startup (no shell access needed)
+  if (dbOk) {
+    try {
+      const fs = require('fs');
+      const migrationsDir = path.join(__dirname, 'database', 'migrations');
+      if (fs.existsSync(migrationsDir)) {
+        const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
+        for (const file of files) {
+          const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
+          try {
+            await pool.query(sql);
+            logger.info(`Migration OK: ${file}`);
+          } catch (e) {
+            logger.warn(`Migration ${file} warning: ${e.message}`);
+          }
+        }
+      }
+    } catch (e) {
+      logger.warn('Auto-migration skipped:', e.message);
+    }
+  }
+
   // 2. Create session middleware (graceful fallback)
   const sessionMiddleware = createSessionMiddleware(pool);
   app.use(sessionMiddleware);
