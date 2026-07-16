@@ -1,6 +1,6 @@
 <header class="topbar">
   <div class="topbar-left">
-    <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+    <button class="menu-btn" onclick="openSidebar()" aria-label="Open menu">☰</button>
     <span><%= typeof title !== 'undefined' ? title : 'AGRICHAIN 360' %></span>
   </div>
   <div class="topbar-right">
