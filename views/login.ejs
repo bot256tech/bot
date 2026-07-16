@@ -1,29 +1,32 @@
-<div class="card" style="max-width:480px;margin:40px auto">
-  <h2 style="font-weight:800;margin-bottom:8px">Welcome to AGRICHAIN 360</h2>
-  <p style="color:var(--tx2);margin-bottom:24px">Please select your role to continue</p>
-  
-  <form action="/login" method="POST">
-    <div style="margin-bottom:16px">
-      <label style="display:block;margin-bottom:6px;font-weight:600">Select Role</label>
-      <select name="role" required style="width:100%;padding:12px;border-radius:10px">
-        <option value="farmer">👨‍🌾 Farmer</option>
-        <option value="buyer">🏢 Enterprise Buyer</option>
-        <option value="field_officer">🧑‍🌾 Field Officer</option>
-        <option value="quality_officer">🔬 Quality Officer</option>
-        <option value="lab">🧪 Laboratory Staff</option>
-        <option value="admin">⚙️ Administrator</option>
-      </select>
-    </div>
+<div style="max-width:440px;margin:40px auto;padding:0 16px">
+  <div class="card" style="padding:28px">
+    <h2 style="font-weight:800;margin-bottom:4px">Login to AGRICHAIN 360</h2>
+    <p style="color:var(--tx2);margin-bottom:20px;font-size:.9rem">Enter your phone number and password</p>
     
-    <div style="margin-bottom:16px">
-      <label style="display:block;margin-bottom:6px;font-weight:600">Phone Number</label>
-      <input type="tel" name="phone" value="+256774123456" required style="width:100%;padding:12px;border-radius:10px">
-    </div>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div style="background:#fff3e0;border:1px solid #ff9800;border-radius:10px;padding:12px;margin-bottom:16px;font-size:.85rem;color:#e65100">
+        ⚠️ <%= error %>
+      </div>
+    <% } %>
     
-    <button type="submit" class="btn btn-p" style="width:100%;padding:14px">Login / Continue</button>
-  </form>
-  
-  <div style="margin-top:20px;text-align:center;font-size:0.85rem;color:var(--tx2)">
-    Don't have an account? <a href="/roles">Create one</a>
+    <form action="/login" method="POST">
+      <input type="hidden" name="redirect" value="<%= typeof redirect !== 'undefined' ? redirect : '' %>">
+      
+      <div style="margin-bottom:14px">
+        <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Phone Number</label>
+        <input type="tel" name="phone" placeholder="+256 7XX XXX XXX" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem" value="+256">
+      </div>
+      
+      <div style="margin-bottom:20px">
+        <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Password</label>
+        <input type="password" name="password" placeholder="Your password" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem">
+      </div>
+      
+      <button type="submit" class="btn btn-p" style="width:100%;padding:14px;font-size:1rem;justify-content:center">Login</button>
+    </form>
+    
+    <div style="margin-top:20px;text-align:center;font-size:.85rem;color:var(--tx2);border-top:1px solid var(--bd);padding-top:16px">
+      Don't have an account? <a href="/roles" style="font-weight:700">Create one here</a>
+    </div>
   </div>
 </div>

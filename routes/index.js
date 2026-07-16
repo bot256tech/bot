@@ -299,42 +299,44 @@ router.get('/login', (req, res) => {
   });
 });
 
-// Login Handler (Real Authentication)
+// Login Handler — uses AuthService with password verification
 router.post('/login', async (req, res) => {
-  const { role, phone } = req.body;
+  const { phone, password } = req.body;
+  const redirect = req.body.redirect || '';
   
   try {
-    // Try to find existing user
-    let user = await userService.findByPhone(phone);
-    
-    if (!user) {
-      // Create new user if not exists
-      user = await userService.createUser(phone, 'User', role);
-    }
+    const AuthService = require('../services/auth.service');
+    const result = await AuthService.loginUser(phone, password);
+    const user = result.user;
     
     // Set session
     req.session.user = {
       id: user.id,
       phone: user.phone,
       name: user.name,
-      role: user.role || role
+      role: user.role,
+      token: result.token
     };
     
     // Role-based redirects
-    let redirectTo = req.body.redirect || '/';
+    let redirectTo = redirect || '/';
+    const role = user.role.toUpperCase();
     
-    if (user.role === 'farmer' || role === 'farmer') redirectTo = '/farmer-dashboard';
-    if (user.role === 'buyer' || role === 'buyer') redirectTo = '/buyer-dashboard';
-    if (role === 'field_officer') redirectTo = '/field-officer';
-    if (role === 'quality_officer') redirectTo = '/quality-officer';
-    if (role === 'lab') redirectTo = '/lab-dashboard';
-    if (role === 'admin') redirectTo = '/admin-dashboard';
+    if (role === 'FARMER') redirectTo = redirectTo || '/farmer-dashboard';
+    else if (role === 'BUYER') redirectTo = redirectTo || '/buyer-dashboard';
+    else if (role === 'PARTNER') redirectTo = redirectTo || '/';
+    else if (role === 'VILLAGE_AGENT') redirectTo = redirectTo || '/';
+    else if (role === 'ADMIN') redirectTo = redirectTo || '/admin-dashboard';
+    else if (role === 'FIELD_OFFICER') redirectTo = redirectTo || '/field-officer';
+    else if (role === 'QUALITY_OFFICER') redirectTo = redirectTo || '/quality-officer';
+    else if (role === 'LAB') redirectTo = redirectTo || '/lab-dashboard';
+    else redirectTo = redirectTo || '/';
     
     res.redirect(redirectTo);
     
   } catch (error) {
-    console.error('Login error:', error);
-    res.redirect('/login?error=1');
+    console.error('Login error:', error.message);
+    res.redirect('/login?error=' + encodeURIComponent(error.message));
   }
 });
 
@@ -348,31 +350,119 @@ router.get('/signup', (req, res) => {
   });
 });
 
-// Sign Up Handler (Real)
+// Sign Up Handler — creates user + role-specific profile
 router.post('/signup', async (req, res) => {
-  const { role, phone, name } = req.body;
+  const { role, phone, name, email, password, district, village, crops, farm_size, national_id,
+          business_type, registration_number, city, website,
+          partner_type, partner_location, business_name,
+          territory, sub_county, parish, agent_village,
+          org_name, focus_area, org_country, org_website } = req.body;
   
   try {
-    const user = await userService.createUser(phone, name || 'New User', role);
-    
+    const AuthService = require('../services/auth.service');
+    const Farmer = require('../models/Farmer');
+    const Buyer = require('../models/Buyer');
+    const Partner = require('../models/Partner');
+    const VillageAgent = require('../models/VillageAgent');
+
+    // Map frontend roles to backend roles
+    const roleMap = {
+      'farmer': 'FARMER', 'buyer': 'BUYER', 'partner': 'PARTNER',
+      'village_agent': 'PARTNER', 'input_dealer': 'PARTNER',
+      'cooperative': 'BUYER', 'ngo': 'ADMIN', 'finance': 'BUYER',
+      'researcher': 'ADMIN', 'field_officer': 'FARMER',
+      'quality_officer': 'FARMER', 'lab': 'FARMER', 'admin': 'ADMIN'
+    };
+    const backendRole = roleMap[role] || 'FARMER';
+
+    // Create user via AuthService
+    const result = await AuthService.registerUser({
+      name: name || org_name || 'User',
+      phone,
+      email: email || null,
+      password: password || 'changeme123',
+      role: backendRole
+    });
+
+    const user = result.user;
+
+    // Create role-specific profiles
+    if (role === 'farmer' || role === 'field_officer' || role === 'quality_officer' || role === 'lab') {
+      try {
+        const cropsArray = Array.isArray(crops) ? crops : (crops ? [crops] : []);
+        await Farmer.create({
+          user_id: user.id,
+          district: district || null,
+          village: village || null,
+          crops: cropsArray,
+          farm_size: farm_size ? parseFloat(farm_size) : null,
+          national_id: national_id || null
+        });
+      } catch (e) { console.error('Farmer profile creation:', e.message); }
+    }
+
+    if (role === 'buyer' || role === 'cooperative' || role === 'finance') {
+      try {
+        const bType = role === 'cooperative' ? 'COOPERATIVE' : (business_type || 'OTHER');
+        await Buyer.createProfile({
+          user_id: user.id,
+          company_name: org_name || name || 'Company',
+          business_type: bType,
+          registration_number: registration_number || null,
+          city: city || null,
+          website: website || org_website || null
+        });
+      } catch (e) { console.error('Buyer profile creation:', e.message); }
+    }
+
+    if (role === 'partner' || role === 'input_dealer') {
+      try {
+        await Partner.create({
+          user_id: user.id,
+          partner_type: partner_type || (role === 'input_dealer' ? 'WAREHOUSE' : 'DRYER'),
+          business_name: business_name || name || 'Partner',
+          location: partner_location || null,
+          services: [],
+          pricing: null
+        });
+      } catch (e) { console.error('Partner profile creation:', e.message); }
+    }
+
+    if (role === 'village_agent') {
+      try {
+        await VillageAgent.create({
+          user_id: user.id,
+          territory: territory || district || null,
+          sub_county: sub_county || null,
+          parish: parish || null,
+          village: agent_village || village || null
+        });
+      } catch (e) { console.error('Village agent creation:', e.message); }
+    }
+
+    // Set session
     req.session.user = {
       id: user.id,
       phone: user.phone,
       name: user.name,
-      role: user.role
+      role: user.role,
+      token: result.token
     };
-    
+
+    // Redirect based on role
     let redirectTo = '/';
-    
     if (role === 'farmer') redirectTo = '/farmer-dashboard';
-    if (role === 'buyer') redirectTo = '/buyer-dashboard';
-    if (role === 'admin') redirectTo = '/admin-dashboard';
-    
+    else if (role === 'buyer') redirectTo = '/buyer-dashboard';
+    else if (role === 'partner' || role === 'input_dealer') redirectTo = '/';
+    else if (role === 'village_agent') redirectTo = '/';
+    else if (role === 'admin' || role === 'ngo' || role === 'researcher') redirectTo = '/admin-dashboard';
+    else redirectTo = '/';
+
     res.redirect(redirectTo);
-    
+
   } catch (error) {
-    console.error('Signup error:', error);
-    res.redirect('/signup?error=1');
+    console.error('Signup error:', error.message);
+    res.redirect('/signup?error=' + encodeURIComponent(error.message));
   }
 });
 

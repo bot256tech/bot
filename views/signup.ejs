@@ -1,34 +1,285 @@
-<div class="card" style="max-width:520px;margin:40px auto">
-  <h2 style="font-weight:800;margin-bottom:8px">Create Your Account</h2>
-  <p style="color:var(--tx2);margin-bottom:24px">Join AGRICHAIN 360 and transform post-harvest agriculture</p>
-  
-  <form action="/signup" method="POST">
-    <div style="margin-bottom:16px">
-      <label style="display:block;margin-bottom:6px;font-weight:600">Full Name</label>
-      <input type="text" name="name" placeholder="John Mukasa" required style="width:100%;padding:12px;border-radius:10px">
+<div style="max-width:600px;margin:20px auto;padding:0 16px">
+  <div class="card" style="padding:28px">
+    <h2 style="font-weight:800;margin-bottom:4px">Create Your Account</h2>
+    <p style="color:var(--tx2);margin-bottom:20px;font-size:.9rem" id="roleDescription">Select your role and fill in your details</p>
+
+    <form id="signupForm" method="POST" action="/signup">
+      <!-- Role Selection -->
+      <div style="margin-bottom:18px">
+        <label style="display:block;margin-bottom:6px;font-weight:700;font-size:.85rem">I am a...</label>
+        <select name="role" id="roleSelect" required onchange="showRoleFields()" style="width:100%;padding:12px;border-radius:10px;font-size:.9rem">
+          <option value="">-- Select your role --</option>
+          <option value="farmer">👨‍🌾 Farmer</option>
+          <option value="village_agent">🤝 Village Agent</option>
+          <option value="buyer">🏢 Enterprise Buyer / Exporter</option>
+          <option value="partner">☀️ Service Partner (Dryer/Lab/Transport)</option>
+          <option value="input_dealer">🌱 Agro-Input Dealer</option>
+          <option value="cooperative">👥 Cooperative</option>
+          <option value="ngo">🌍 NGO / Development Partner</option>
+          <option value="finance">🏦 Financial Institution</option>
+          <option value="researcher">🔬 Researcher / Agronomist</option>
+          <option value="field_officer">🧑‍🌾 Field Officer</option>
+          <option value="quality_officer">🔬 Quality Officer</option>
+          <option value="lab">🧪 Laboratory Staff</option>
+          <option value="admin">⚙️ Administrator</option>
+        </select>
+      </div>
+
+      <!-- Common Fields (always shown) -->
+      <div id="commonFields" style="display:none">
+        <div style="margin-bottom:14px">
+          <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Full Name / Organization Name</label>
+          <input type="text" name="name" id="nameField" placeholder="e.g. John Mukasa or ABC Exporters Ltd" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem">
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Phone Number</label>
+          <input type="tel" name="phone" placeholder="+256 7XX XXX XXX" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem" value="+256">
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Email (optional)</label>
+          <input type="email" name="email" placeholder="you@example.com" style="width:100%;padding:12px;border-radius:10px;font-size:.9rem">
+        </div>
+        <div style="margin-bottom:18px">
+          <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Password</label>
+          <input type="password" name="password" placeholder="Create a secure password (min 6 characters)" required minlength="6" style="width:100%;padding:12px;border-radius:10px;font-size:.9rem">
+        </div>
+      </div>
+
+      <!-- FARMER Fields -->
+      <div id="farmerFields" style="display:none;border-top:2px solid var(--g);padding-top:16px;margin-top:8px">
+        <div style="font-weight:800;color:var(--g);margin-bottom:12px;font-size:.9rem">📋 Farmer Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">District</label>
+            <select name="district" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+              <option value="">Select district</option>
+              <option>Mayuge</option><option>Jinja</option><option>Iganga</option><option>Kamuli</option>
+              <option>Bugiri</option><option>Namutumba</option><option>Kaliro</option><option>Luuka</option>
+              <option>Buyende</option><option>Kampala</option><option>Mbale</option><option>Tororo</option>
+              <option>Busia</option><option>Soroti</option><option>Lira</option><option>Gulu</option>
+              <option>Mubende</option><option>Masaka</option><option>Mbarara</option><option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Village</label>
+            <input type="text" name="village" placeholder="Your village" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Main Crops</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Maize"> Maize</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Coffee"> Coffee</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Beans"> Beans</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Rice"> Rice</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Groundnuts"> Groundnuts</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Cassava"> Cassava</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Banana"> Banana</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Cocoa"> Cocoa</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Soybeans"> Soybeans</label>
+            <label style="font-size:.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" name="crops" value="Sunflower"> Sunflower</label>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Farm Size (acres)</label>
+            <input type="number" name="farm_size" step="0.1" min="0" placeholder="e.g. 3.5" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">National ID (optional)</label>
+            <input type="text" name="national_id" placeholder="CMXXXXXXXXXX" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+        </div>
+      </div>
+
+      <!-- BUYER Fields -->
+      <div id="buyerFields" style="display:none;border-top:2px solid #0277bd;padding-top:16px;margin-top:8px">
+        <div style="font-weight:800;color:#0277bd;margin-bottom:12px;font-size:.9rem">🏢 Enterprise Buyer Details</div>
+        <div style="margin-bottom:12px">
+          <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Business Type</label>
+          <select name="business_type" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+            <option value="">Select type</option>
+            <option value="EXPORTER">Exporter</option>
+            <option value="PROCESSOR">Processor / Miller</option>
+            <option value="TRADER">Grain Trader</option>
+            <option value="MANUFACTURER">Food Manufacturer</option>
+            <option value="COOPERATIVE">Cooperative Union</option>
+            <option value="GOVERNMENT">Government Agency</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Registration Number</label>
+            <input type="text" name="registration_number" placeholder="Company reg #" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">City</label>
+            <input type="text" name="city" placeholder="e.g. Kampala" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Website (optional)</label>
+          <input type="url" name="website" placeholder="https://..." style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+        </div>
+      </div>
+
+      <!-- PARTNER Fields -->
+      <div id="partnerFields" style="display:none;border-top:2px solid var(--a);padding-top:16px;margin-top:8px">
+        <div style="font-weight:800;color:var(--ad);margin-bottom:12px;font-size:.9rem">☀️ Service Partner Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Service Type</label>
+            <select name="partner_type" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+              <option value="DRYER">☀️ Solar Dryer</option>
+              <option value="LAB">🧪 Quality Lab</option>
+              <option value="TRANSPORTER">🚛 Transporter</option>
+              <option value="WAREHOUSE">🏭 Warehouse</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Location</label>
+            <input type="text" name="partner_location" placeholder="e.g. Mayuge Town" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Business Name</label>
+          <input type="text" name="business_name" placeholder="Your business name" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+        </div>
+      </div>
+
+      <!-- VILLAGE AGENT Fields -->
+      <div id="agentFields" style="display:none;border-top:2px solid #6a1b9a;padding-top:16px;margin-top:8px">
+        <div style="font-weight:800;color:#6a1b9a;margin-bottom:12px;font-size:.9rem">🤝 Village Agent Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Territory / District</label>
+            <input type="text" name="territory" placeholder="e.g. Mayuge" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Sub-County</label>
+            <input type="text" name="sub_county" placeholder="Sub-county" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Parish</label>
+            <input type="text" name="parish" placeholder="Parish" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Village</label>
+            <input type="text" name="agent_village" placeholder="Village" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+        </div>
+      </div>
+
+      <!-- NGO / FINANCE / RESEARCHER Fields -->
+      <div id="orgFields" style="display:none;border-top:2px solid #00695c;padding-top:16px;margin-top:8px">
+        <div style="font-weight:800;color:#00695c;margin-bottom:12px;font-size:.9rem" id="orgTitle">🌍 Organization Details</div>
+        <div style="margin-bottom:12px">
+          <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Organization Name</label>
+          <input type="text" name="org_name" placeholder="Full organization name" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Focus Area</label>
+            <select name="focus_area" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+              <option value="food_security">Food Security</option>
+              <option value="climate">Climate-Smart Agriculture</option>
+              <option value="youth">Youth Employment</option>
+              <option value="women">Women in Agriculture</option>
+              <option value="finance">Agricultural Finance</option>
+              <option value="research">Research & Data</option>
+              <option value="digital">Digital Inclusion</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Country / Region</label>
+            <input type="text" name="org_country" placeholder="e.g. Uganda" value="Uganda" style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="display:block;margin-bottom:4px;font-weight:600;font-size:.8rem">Website</label>
+          <input type="url" name="org_website" placeholder="https://..." style="width:100%;padding:10px;border-radius:10px;font-size:.85rem">
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div id="submitSection" style="display:none;margin-top:24px">
+        <button type="submit" class="btn btn-p" style="width:100%;padding:14px;font-size:1rem;justify-content:center">
+          Create Account
+        </button>
+        <div style="margin-top:12px;text-align:center;font-size:.8rem;color:var(--tx2)">
+          By creating an account you agree to our Terms of Service
+        </div>
+      </div>
+    </form>
+
+    <div style="margin-top:20px;text-align:center;font-size:.85rem;color:var(--tx2);border-top:1px solid var(--bd);padding-top:16px">
+      Already have an account? <a href="/login" style="font-weight:700">Login here</a>
     </div>
-    
-    <div style="margin-bottom:16px">
-      <label style="display:block;margin-bottom:6px;font-weight:600">Phone Number</label>
-      <input type="tel" name="phone" value="+256" required style="width:100%;padding:12px;border-radius:10px">
-    </div>
-    
-    <div style="margin-bottom:20px">
-      <label style="display:block;margin-bottom:6px;font-weight:600">I am a...</label>
-      <select name="role" required style="width:100%;padding:12px;border-radius:10px">
-        <option value="farmer">👨‍🌾 Farmer</option>
-        <option value="buyer">🏢 Enterprise Buyer / Exporter</option>
-        <option value="field_officer">🧑‍🌾 Field Officer</option>
-        <option value="quality_officer">🔬 Quality Officer</option>
-        <option value="lab">🧪 Laboratory Staff</option>
-        <option value="admin">⚙️ Administrator / NGO</option>
-      </select>
-    </div>
-    
-    <button type="submit" class="btn btn-p" style="width:100%;padding:14px">Create Account</button>
-  </form>
-  
-  <div style="margin-top:20px;text-align:center;font-size:0.85rem;color:var(--tx2)">
-    Already have an account? <a href="/login">Login here</a>
   </div>
 </div>
+
+<script>
+function showRoleFields() {
+  var role = document.getElementById('roleSelect').value;
+  // Hide all role-specific fields
+  document.getElementById('commonFields').style.display = 'none';
+  document.getElementById('farmerFields').style.display = 'none';
+  document.getElementById('buyerFields').style.display = 'none';
+  document.getElementById('partnerFields').style.display = 'none';
+  document.getElementById('agentFields').style.display = 'none';
+  document.getElementById('orgFields').style.display = 'none';
+  document.getElementById('submitSection').style.display = 'none';
+
+  if (!role) {
+    document.getElementById('roleDescription').textContent = 'Select your role and fill in your details';
+    return;
+  }
+
+  // Show common fields for all roles
+  document.getElementById('commonFields').style.display = 'block';
+  document.getElementById('submitSection').style.display = 'block';
+
+  // Show role-specific fields
+  if (role === 'farmer' || role === 'field_officer' || role === 'quality_officer' || role === 'lab') {
+    document.getElementById('farmerFields').style.display = 'block';
+    document.getElementById('roleDescription').textContent = '👨‍🌾 Register as a farmer to access drying, testing, marketplace, and credit';
+    document.getElementById('nameField').placeholder = 'Your full name';
+  } else if (role === 'buyer') {
+    document.getElementById('buyerFields').style.display = 'block';
+    document.getElementById('roleDescription').textContent = '🏢 Register your business to source verified produce and quality certificates';
+    document.getElementById('nameField').placeholder = 'Your full name (contact person)';
+  } else if (role === 'partner' || role === 'input_dealer') {
+    document.getElementById('partnerFields').style.display = 'block';
+    document.getElementById('roleDescription').textContent = role === 'input_dealer' ? '🌱 Register to sell verified seeds, fertilizer, and equipment to farmers' : '☀️ Register your service to receive bookings from farmers';
+    document.getElementById('nameField').placeholder = 'Contact person name';
+  } else if (role === 'village_agent') {
+    document.getElementById('agentFields').style.display = 'block';
+    document.getElementById('roleDescription').textContent = '🤝 Register as a village agent to onboard farmers and earn commissions';
+    document.getElementById('nameField').placeholder = 'Your full name';
+  } else if (role === 'ngo' || role === 'finance' || role === 'researcher' || role === 'cooperative') {
+    document.getElementById('orgFields').style.display = 'block';
+    var titles = { ngo: '🌍 NGO / Development Partner', finance: '🏦 Financial Institution', researcher: '🔬 Research / Agronomy', cooperative: '👥 Cooperative' };
+    var descs = { ngo: 'Connect to access regional analytics, track impact, and coordinate programs', finance: 'Connect to access farmer credit profiles and offer digital financial products', researcher: 'Access anonymized agricultural data, disease patterns, and yield trends', cooperative: 'Register your cooperative to manage members and coordinate bulk operations' };
+    document.getElementById('orgTitle').textContent = titles[role] || '📋 Organization Details';
+    document.getElementById('roleDescription').textContent = descs[role] || 'Register your organization';
+    document.getElementById('nameField').placeholder = 'Contact person name';
+  } else {
+    document.getElementById('roleDescription').textContent = 'Fill in your details to create your account';
+    document.getElementById('nameField').placeholder = 'Your full name';
+  }
+}
+
+// Pre-select role from URL parameter
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var role = params.get('role');
+  if (role) {
+    document.getElementById('roleSelect').value = role;
+    showRoleFields();
+  }
+})();
+</script>
