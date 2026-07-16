@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const AuthService = require('../../services/auth.service');
 const { protect } = require('../middleware/authMiddleware');
+const { registerValidation, loginValidation } = require('../middleware/validate');
+const { registerLimiter, authLimiter } = require('../../config/rateLimiter');
 
 // ─────────────────────────────────────────────────────
 // AUTHENTICATION ROUTES
@@ -9,22 +11,11 @@ const { protect } = require('../middleware/authMiddleware');
 
 /**
  * POST /api/v1/auth/register
- * Register a new user
- * 
- * Body: {
- *   name: string (required),
- *   phone: string (required),
- *   email: string (optional),
- *   password: string (required),
- *   role: string (required: FARMER | BUYER | PARTNER | ADMIN),
- *   profile: {  // optional, for FARMER role
- *     district, village, crops[], farm_size, national_id
- *   }
- * }
+ * Register a new user (rate limited: 5/hour)
  */
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, registerValidation, async (req, res) => {
   try {
-    const result = await AuthService.registerUser(req.body);
+    const result = await AuthService.registerUser(req.body, req);
     res.status(201).json({
       success: true,
       message: 'Registration successful.',
@@ -40,15 +31,12 @@ router.post('/register', async (req, res) => {
 
 /**
  * POST /api/v1/auth/login
- * Login with phone + password
- * 
- * Body: { phone: string, password: string }
- * Returns: { token, user }
+ * Login with phone + password (rate limited: 10/15min)
  */
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, loginValidation, async (req, res) => {
   try {
     const { phone, password } = req.body;
-    const result = await AuthService.loginUser(phone, password);
+    const result = await AuthService.loginUser(phone, password, req);
 
     res.json({
       success: true,

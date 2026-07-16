@@ -94,6 +94,17 @@ class Payment {
     return rows[0];
   }
 
+  static async updateTransactionId(id, transaction_id) {
+    const query = `
+      UPDATE payments
+      SET transaction_id = $1
+      WHERE id = $2
+      RETURNING *;
+    `;
+    const { rows } = await db.query(query, [transaction_id, id]);
+    return rows[0];
+  }
+
   static async markRefunded(id) {
     const query = `
       UPDATE payments SET status = 'REFUNDED'

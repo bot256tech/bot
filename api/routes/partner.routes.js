@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const PartnerService = require('../../services/partner.service');
 const { protect } = require('../middleware/authMiddleware');
+const { createPartnerValidation, bookPartnerValidation, idParamValidation } = require('../middleware/validate');
 
 // ─────────────────────────────────────────────────────
 // PARTNER REGISTRATION & MANAGEMENT
 // ─────────────────────────────────────────────────────
 
 // Register as Partner (Protected — user must be logged in)
-router.post('/register', protect(), async (req, res) => {
+router.post('/register', protect(), createPartnerValidation, async (req, res) => {
   try {
     const partner = await PartnerService.createPartner(req.user.id, req.body);
     res.status(201).json({
@@ -22,7 +23,7 @@ router.post('/register', protect(), async (req, res) => {
 });
 
 // Approve Partner (Admin only)
-router.put('/approve/:id', protect(['ADMIN', 'admin']), async (req, res) => {
+router.put('/approve/:id', protect(['ADMIN', 'admin']), idParamValidation, async (req, res) => {
   try {
     const partner = await PartnerService.approvePartner(req.params.id);
 
@@ -56,7 +57,7 @@ router.get('/search', async (req, res) => {
 });
 
 // Get partner by ID (Public)
-router.get('/:id', async (req, res) => {
+router.get('/:id', idParamValidation, async (req, res) => {
   try {
     const partner = await PartnerService.getPartnerById(req.params.id);
 
@@ -75,7 +76,7 @@ router.get('/:id', async (req, res) => {
 // ─────────────────────────────────────────────────────
 
 // Create Booking (Farmer books a partner service)
-router.post('/book', protect(['FARMER', 'farmer']), async (req, res) => {
+router.post('/book', protect(['FARMER', 'farmer']), bookPartnerValidation, async (req, res) => {
   try {
     const Farmer = require('../../models/Farmer');
     const farmer = await Farmer.findByUserId(req.user.id);

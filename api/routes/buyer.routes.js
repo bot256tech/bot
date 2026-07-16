@@ -2,9 +2,14 @@ const express = require('express');
 const router = express.Router();
 const BuyerService = require('../../services/buyer.service');
 const { protect } = require('../middleware/authMiddleware');
+const { createBuyerProfileValidation } = require('../middleware/validate');
+
+// ─────────────────────────────────────────────────────
+// BUYER ROUTES
+// ─────────────────────────────────────────────────────
 
 // Create buyer profile (Protected)
-router.post('/profile', protect(['BUYER', 'buyer']), async (req, res) => {
+router.post('/profile', protect(['BUYER', 'buyer']), createBuyerProfileValidation, async (req, res) => {
   try {
     const profile = await BuyerService.createBuyerProfile(req.user.id, req.body);
     res.status(201).json({
@@ -28,9 +33,9 @@ router.get('/profile', protect(['BUYER', 'buyer']), async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 // ENTERPRISE BUYER DASHBOARD
-// ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 
 // Dashboard stats
 router.get('/dashboard', protect(['BUYER', 'buyer']), async (req, res) => {
@@ -79,9 +84,9 @@ router.get('/reports/quality', protect(['BUYER', 'buyer']), async (req, res) => 
   }
 });
 
-// ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 // ADMIN: Manage buyers
-// ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 
 // List all buyers (Admin)
 router.get('/admin/all', protect(['ADMIN', 'admin']), async (req, res) => {

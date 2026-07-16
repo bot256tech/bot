@@ -1,20 +1,21 @@
 const User = require('../models/User');
 const Farmer = require('../models/Farmer');
 const jwt = require('jsonwebtoken');
+const NotificationService = require('./notification.service');
+const { logAudit, AUDIT_ACTIONS } = require('../api/middleware/auditLog');
+const logger = require('../config/logger');
 
 class AuthService {
   /**
-   * Register a new user with optional role-specific profile data
-   * Supports: FARMER, BUYER, PARTNER, ADMIN
+   * Register a new user with optional farmer profile creation
    */
-  static async registerUser(userData) {
+  static async registerUser(userData, req) {
     const { name, phone, email, password, role, profile } = userData;
 
     // Validate required fields
     if (!name || !phone || !password) {
       throw new Error('Name, phone, and password are required.');
     }
-
     if (!role) {
       throw new Error('Role is required (FARMER, BUYER, PARTNER, or ADMIN).');
     }
@@ -25,7 +26,7 @@ class AuthService {
       throw new Error('Phone number is already registered.');
     }
 
-    // Create the user record
+    // Create user
     const user = await User.create({
       name,
       phone,
@@ -34,8 +35,8 @@ class AuthService {
       role: role.toUpperCase()
     });
 
-    // Auto-create farmer profile if registering as FARMER
-    if (role.toUpperCase() === 'FARMER' && profile) {
+    // Auto-create farmer profile if FARMER
+    if (user.role === 'FARMER' && profile) {
       try {
         await Farmer.create({
           user_id: user.id,
@@ -46,17 +47,30 @@ class AuthService {
           national_id: profile.national_id || null
         });
       } catch (err) {
-        console.error('Failed to create farmer profile:', err.message);
-        // Don't fail registration if profile creation fails
+        logger.error('Failed to create farmer profile during registration', { error: err.message });
       }
     }
 
-    // Generate token immediately on registration
+    // Generate token
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET || 'agrichain360_jwt_secret',
       { expiresIn: '30d' }
     );
+
+    // Send welcome SMS (non-blocking)
+    try {
+      await NotificationService.notifyWelcome(phone, name);
+    } catch (err) {
+      logger.warn('Failed to send welcome SMS', { error: err.message });
+    }
+
+    // Audit log
+    logAudit(AUDIT_ACTIONS.USER_REGISTERED, {
+      user_id: user.id,
+      role: user.role,
+      phone: phone.replace(/(\d{4})\d+(\d{3})/, '$1****$2') // Mask phone for logs
+    }, req);
 
     return {
       token,
@@ -73,9 +87,8 @@ class AuthService {
 
   /**
    * Login user by phone and password
-   * Returns JWT token + user profile
    */
-  static async loginUser(phone, password) {
+  static async loginUser(phone, password, req) {
     if (!phone || !password) {
       throw new Error('Phone number and password are required.');
     }
@@ -83,10 +96,10 @@ class AuthService {
     const user = await User.findByPhone(phone);
 
     if (!user) {
+      logAudit(AUDIT_ACTIONS.USER_LOGIN_FAILED, { phone }, req);
       throw new Error('Invalid phone number or password.');
     }
 
-    // Check if user has a password set
     if (!user.password_hash) {
       throw new Error('This account was created without a password. Please contact support.');
     }
@@ -94,6 +107,9 @@ class AuthService {
     const isMatch = await User.verifyPassword(password, user.password_hash);
 
     if (!isMatch) {
+      logAudit(AUDIT_ACTIONS.USER_LOGIN_FAILED, {
+        phone: phone.replace(/(\d{4})\d+(\d{3})/, '$1****$2')
+      }, req);
       throw new Error('Invalid phone number or password.');
     }
 
@@ -101,15 +117,18 @@ class AuthService {
       throw new Error('Your account is currently suspended or pending approval.');
     }
 
-    // Generate JWT token
+    // Generate JWT
     const token = jwt.sign(
-      {
-        id: user.id,
-        role: user.role
-      },
+      { id: user.id, role: user.role },
       process.env.JWT_SECRET || 'agrichain360_jwt_secret',
       { expiresIn: '30d' }
     );
+
+    // Audit log
+    logAudit(AUDIT_ACTIONS.USER_LOGIN, {
+      user_id: user.id,
+      role: user.role
+    }, req);
 
     return {
       token,
@@ -128,11 +147,8 @@ class AuthService {
    */
   static async getProfile(userId) {
     const user = await User.findById(userId);
-    if (!user) {
-      throw new Error('User not found.');
-    }
+    if (!user) throw new Error('User not found.');
 
-    // Attach role-specific profile data
     let profile = null;
     if (user.role === 'FARMER' || user.role === 'farmer') {
       profile = await Farmer.findByUserId(user.id);

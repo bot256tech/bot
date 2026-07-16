@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const MarketplaceService = require('../../services/marketplace.service');
 const { protect } = require('../middleware/authMiddleware');
+const { createListingValidation, idParamValidation } = require('../middleware/validate');
 
 // ─────────────────────────────────────────────────────
 // MARKETPLACE ROUTES
 // ─────────────────────────────────────────────────────
 
 // Create Product Listing (Protected — Farmers only)
-router.post('/listing', protect(['FARMER', 'farmer']), async (req, res) => {
+router.post('/listing', protect(['FARMER', 'farmer']), createListingValidation, async (req, res) => {
   try {
     const Farmer = require('../../models/Farmer');
     const farmer = await Farmer.findByUserId(req.user.id);
@@ -60,7 +61,7 @@ router.get('/verified', async (req, res) => {
 });
 
 // Get a single product by ID (Public)
-router.get('/product/:id', async (req, res) => {
+router.get('/product/:id', idParamValidation, async (req, res) => {
   try {
     const Product = require('../../models/Product');
     const product = await Product.findById(req.params.id);
@@ -94,9 +95,13 @@ router.get('/my-listings', protect(['FARMER', 'farmer']), async (req, res) => {
 });
 
 // Update product availability (Protected — Owner farmer)
-router.put('/listing/:id/availability', protect(['FARMER', 'farmer']), async (req, res) => {
+router.put('/listing/:id/availability', protect(['FARMER', 'farmer']), idParamValidation, async (req, res) => {
   try {
     const { available } = req.body;
+    if (typeof available !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'available must be true or false' });
+    }
+
     const product = await MarketplaceService.updateProductAvailability(req.params.id, available);
 
     if (!product) {

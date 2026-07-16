@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const SubscriptionService = require('../../services/subscription.service');
 const { protect } = require('../middleware/authMiddleware');
+const { subscribeValidation } = require('../middleware/validate');
+
+// ─────────────────────────────────────────────────────
+// SUBSCRIPTION ROUTES
+// ─────────────────────────────────────────────────────
 
 // Get available plans (Public)
 router.get('/plans', async (req, res) => {
@@ -25,24 +30,23 @@ router.get('/plans/:name', async (req, res) => {
 });
 
 // Subscribe to a plan (Protected — Buyer)
-router.post('/subscribe', protect(['BUYER', 'buyer']), async (req, res) => {
+router.post('/subscribe', protect(['BUYER', 'buyer']), subscribeValidation, async (req, res) => {
   try {
     const { plan_name, billing_cycle, payment_method } = req.body;
-
-    if (!plan_name) {
-      return res.status(400).json({ success: false, message: 'plan_name is required.' });
-    }
 
     const result = await SubscriptionService.subscribeBuyer(
       req.user.id,
       plan_name.toUpperCase(),
       billing_cycle,
-      payment_method
+      payment_method,
+      req
     );
 
     res.status(201).json({
       success: true,
-      message: `Subscribed to ${result.plan.display_name}.`,
+      message: result.status === 'ACTIVE'
+        ? `Subscribed to ${result.plan.display_name}.`
+        : `Subscription created. Complete payment to activate ${result.plan.display_name}.`,
       data: result
     });
   } catch (error) {
@@ -66,7 +70,7 @@ router.get('/my-subscription', protect(['BUYER', 'buyer']), async (req, res) => 
 // Cancel my subscription
 router.post('/cancel/:id', protect(['BUYER', 'buyer']), async (req, res) => {
   try {
-    const result = await SubscriptionService.cancelSubscription(req.params.id);
+    const result = await SubscriptionService.cancelSubscription(req.params.id, req);
     res.json({ success: true, message: 'Subscription cancelled.', data: result });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });

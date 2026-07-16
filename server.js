@@ -1,10 +1,21 @@
 /**
- * AGRICHAIN 360™ — Decoupled Server Gateway
+ * AGRICHAIN 360™ — Decoupled Server Gateway v3.0
  *
  * Architecture:
- *   config/database.js  → PostgreSQL pool (graceful failure)
- *   config/session.js   → Session store (falls back to in-memory)
- *   config/websocket.js → Socket.IO (isolated from main server)
+ *   config/database.js   → PostgreSQL pool (graceful failure)
+ *   config/session.js    → Session store (falls back to in-memory)
+ *   config/websocket.js  → Socket.IO (isolated from main server)
+ *   config/logger.js     → Winston structured logging
+ *   config/rateLimiter.js → Rate limiting configuration
+ *   config/cors.js       → CORS configuration
+ *
+ * Security:
+ *   ✅ Rate limiting on all API routes
+ *   ✅ CORS restricted to allowed origins
+ *   ✅ Helmet security headers
+ *   ✅ HTTPS enforcement in production
+ *   ✅ Audit logging on all critical actions
+ *   ✅ Input validation on all endpoints
  *
  * If database is down → server still starts, returns 503 on DB routes
  * If MQTT crashes      → WebSocket silently skips IoT updates
@@ -19,31 +30,66 @@ const http = require('http');
 const morgan = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
-const cors = require('cors');
 
 const { getPool, testConnection, isConnected: dbConnected } = require('./config/database');
 const { createSessionMiddleware } = require('./config/session');
 const { initWebSocket } = require('./config/websocket');
+const logger = require('./config/logger');
+const { apiLimiter, authLimiter, paymentLimiter, registerLimiter } = require('./config/rateLimiter');
+const { getCorsConfig } = require('./config/cors');
+const { auditContext } = require('./api/middleware/auditLog');
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
 // ═══════════════════════════════════════════
+// HTTPS ENFORCEMENT (Production only)
+// ═══════════════════════════════════════════
+
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(`https://${req.headers.host}${req.url}`);
+    }
+    next();
+  });
+}
+
+// ═══════════════════════════════════════════
 // BASE MIDDLEWARE (always works)
 // ═══════════════════════════════════════════
 
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({
+  contentSecurityPolicy: false,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}));
 app.use(compression());
-app.use(cors());
-app.use(morgan('combined'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(getCorsConfig());
+app.use(morgan('combined', {
+  stream: { write: (message) => logger.info(message.trim()) }
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Audit context middleware (attaches request metadata)
+app.use(auditContext);
 
 // Database availability middleware
 app.use((req, res, next) => {
   req.dbAvailable = dbConnected;
+  next();
+});
+
+// Request ID for tracing
+app.use((req, res, next) => {
+  req.id = require('crypto').randomBytes(8).toString('hex');
+  res.setHeader('X-Request-Id', req.id);
   next();
 });
 
@@ -55,7 +101,7 @@ app.get('/health', (req, res) => {
   res.json({
     success: true,
     message: 'AGRICHAIN 360™ is running',
-    version: '2.1.0',
+    version: '3.0.0',
     timestamp: new Date().toISOString(),
     services: {
       database: dbConnected ? 'connected' : 'disconnected',
@@ -87,30 +133,33 @@ async function startServer() {
   try {
     const webRoutes = require('./routes/index');
     app.use('/', webRoutes);
-    console.log('✅ Web routes mounted');
+    logger.info('Web routes mounted');
   } catch (err) {
-    console.error('❌ Web routes failed to load:', err.message);
-    console.warn('⚠️  Web views unavailable — API-only mode');
+    logger.error('Web routes failed to load', { error: err.message });
+    logger.warn('Web views unavailable — API-only mode');
   }
 
-  // 5. Mount API v1 routes (each isolated)
+  // 5. Mount API v1 routes (each isolated, with rate limiting)
   const apiModules = [
-    { path: '/api/v1/auth', module: './api/routes/auth.routes', name: 'Auth' },
-    { path: '/api/v1/partners', module: './api/routes/partner.routes', name: 'Partners' },
-    { path: '/api/v1/quality', module: './api/routes/quality.routes', name: 'Quality' },
-    { path: '/api/v1/marketplace', module: './api/routes/marketplace.routes', name: 'Marketplace' },
-    { path: '/api/v1/bookings', module: './api/routes/booking.routes', name: 'Bookings' },
-    { path: '/api/v1/payments', module: './api/routes/payment.routes', name: 'Payments' },
-    { path: '/api/v1/buyers', module: './api/routes/buyer.routes', name: 'Buyers' },
-    { path: '/api/v1/subscriptions', module: './api/routes/subscription.routes', name: 'Subscriptions' },
+    { path: '/api/v1/auth', module: './api/routes/auth.routes', name: 'Auth', limiter: authLimiter },
+    { path: '/api/v1/partners', module: './api/routes/partner.routes', name: 'Partners', limiter: apiLimiter },
+    { path: '/api/v1/quality', module: './api/routes/quality.routes', name: 'Quality', limiter: apiLimiter },
+    { path: '/api/v1/marketplace', module: './api/routes/marketplace.routes', name: 'Marketplace', limiter: apiLimiter },
+    { path: '/api/v1/bookings', module: './api/routes/booking.routes', name: 'Bookings', limiter: apiLimiter },
+    { path: '/api/v1/payments', module: './api/routes/payment.routes', name: 'Payments', limiter: paymentLimiter },
+    { path: '/api/v1/buyers', module: './api/routes/buyer.routes', name: 'Buyers', limiter: apiLimiter },
+    { path: '/api/v1/subscriptions', module: './api/routes/subscription.routes', name: 'Subscriptions', limiter: apiLimiter },
   ];
 
   for (const api of apiModules) {
     try {
+      if (api.limiter) {
+        app.use(api.path, api.limiter);
+      }
       app.use(api.path, require(api.module));
-      console.log(`✅ API ${api.name} mounted at ${api.path}`);
+      logger.info(`API ${api.name} mounted at ${api.path}`);
     } catch (err) {
-      console.error(`❌ API ${api.name} failed:`, err.message);
+      logger.error(`API ${api.name} failed to load`, { error: err.message });
       app.use(api.path, (req, res) => {
         res.status(503).json({
           success: false,
@@ -159,13 +208,22 @@ async function startServer() {
 
   // 8. Global error handler
   app.use((err, req, res, next) => {
-    console.error('❌ Server Error:', err.stack);
+    logger.error('Server Error', {
+      error: err.message,
+      stack: err.stack,
+      path: req.path,
+      method: req.method,
+      requestId: req.id
+    });
+
     if (req.path.startsWith('/api/')) {
       return res.status(err.status || 500).json({
         success: false,
-        message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
+        message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+        requestId: req.id
       });
     }
+
     res.status(err.status || 500).render('layout', {
       title: 'Error — AGRICHAIN 360',
       page: 'error',
@@ -177,32 +235,31 @@ async function startServer() {
   // 9. Initialize WebSocket (isolated)
   try {
     initWebSocket(server, sessionMiddleware);
-    console.log('✅ WebSocket initialized');
+    logger.info('WebSocket initialized');
   } catch (err) {
-    console.error('❌ WebSocket failed:', err.message);
-    console.warn('⚠️  Real-time features disabled');
+    logger.error('WebSocket failed', { error: err.message });
+    logger.warn('Real-time features disabled');
   }
 
   // 10. Start listening
   server.listen(PORT, () => {
-    console.log('');
-    console.log('╔══════════════════════════════════════════════════════════╗');
-    console.log('║  🌾 AGRICHAIN 360™ — Decoupled Server v2.1              ║');
-    console.log('╠══════════════════════════════════════════════════════════╣');
-    console.log(`║  📍 http://localhost:${PORT}                               ║`);
-    console.log(`║  🗄️  Database:  ${dbOk ? 'Connected ✅' : 'Disconnected ❌'}                           ║`);
-    console.log('║  🌐 Web:       EJS + Sessions                           ║');
-    console.log('║  🔌 API:       /api/v1/*                                ║');
-    console.log('║  ⚡ WebSocket:  Real-time IoT                           ║');
-    console.log(`║  📦 Env:       ${process.env.NODE_ENV || 'development'}                              ║`);
-    console.log('╚══════════════════════════════════════════════════════════╝');
-    console.log('');
+    logger.info('');
+    logger.info('═══════════════════════════════════════════════');
+    logger.info('  AGRICHAIN 360 — Decoupled Server v3.0');
+    logger.info('═══════════════════════════════════════════════');
+    logger.info(`  Port:        ${PORT}`);
+    logger.info(`  Database:    ${dbOk ? 'Connected' : 'Disconnected'}`);
+    logger.info(`  Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info('  Security:    Rate limiting + CORS + HTTPS');
+    logger.info('  Monitoring:  Winston structured logging');
+    logger.info('═══════════════════════════════════════════════');
+    logger.info('');
   });
 }
 
 // Start the server
 startServer().catch((err) => {
-  console.error('💀 Fatal startup error:', err);
+  logger.error('Fatal startup error', { error: err.message, stack: err.stack });
   process.exit(1);
 });
 

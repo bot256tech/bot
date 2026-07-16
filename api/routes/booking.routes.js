@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PartnerService = require('../../services/partner.service');
 const { protect } = require('../middleware/authMiddleware');
+const { updateBookingStatusValidation, idParamValidation } = require('../middleware/validate');
 
 // ─────────────────────────────────────────────────────
 // BOOKING ROUTES
@@ -18,7 +19,7 @@ router.get('/my-bookings', protect(['FARMER', 'farmer']), async (req, res) => {
     }
 
     const bookings = await PartnerService.getFarmerBookings(farmer.id);
-    res.json({ success: true, data: bookings });
+    res.json({ success: true, count: bookings.length, data: bookings });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -35,14 +36,14 @@ router.get('/partner-bookings', protect(['PARTNER', 'lab']), async (req, res) =>
     }
 
     const bookings = await PartnerService.getPartnerBookings(partner.id);
-    res.json({ success: true, data: bookings });
+    res.json({ success: true, count: bookings.length, data: bookings });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
 });
 
 // Get a single booking by ID
-router.get('/:id', protect(), async (req, res) => {
+router.get('/:id', protect(), idParamValidation, async (req, res) => {
   try {
     const booking = await PartnerService.getBookingById(req.params.id);
 
@@ -57,7 +58,7 @@ router.get('/:id', protect(), async (req, res) => {
 });
 
 // Update booking status (partner confirms/completes, farmer cancels)
-router.put('/:id/status', protect(), async (req, res) => {
+router.put('/:id/status', protect(), idParamValidation, updateBookingStatusValidation, async (req, res) => {
   try {
     const { status } = req.body;
     const booking = await PartnerService.updateBookingStatus(req.params.id, status);
