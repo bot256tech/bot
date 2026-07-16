@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><%= typeof title !== 'undefined' ? title : 'AGRICHAIN 360™' %></title>
 <meta name="description" content="AGRICHAIN 360 — Uganda's Complete Post-Harvest Platform. Connect farmers, buyers, and service providers with verified quality, real-time IoT monitoring, and digital traceability.">
-<meta name="theme-color" content="#2E7D32">
+<meta name="theme-color" content="#1B5E20">
 <meta name="author" content="Batesa Ibrahim">
 <link rel="icon" href="/images/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,20 +12,34 @@
 <link rel="stylesheet" href="/css/main.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  /* ═══════════════ DESIGN SYSTEM — INLINE TAILWIND-STYLE CSS ═══════════════ */
+  /* ═══════════════ DESIGN SYSTEM — 4-COLOR PALETTE ═══════════════ */
+  /* Deep Green #1B5E20 | Gold #D4AF37 | Charcoal #333333 | Cream #FAFAF5 */
   :root {
-    --g: #2E7D32; --g2: #4CAF50; --gd: #1B5E20; --a: #FBC02D; --ad: #F57F17;
-    --br: #6D4C41; --bg: #f5f7f5; --bg2: #eef2ee; --card: #fff; --card2: #f8faf8;
-    --tx: #1a1a1a; --tx2: #666; --bd: #e0e0e0; --sh: 0 4px 20px rgba(0,0,0,.06);
-    --shl: 0 12px 40px rgba(0,0,0,.1); --gl: rgba(255,255,255,.65);
-    --glb: rgba(255,255,255,.35); --nav: rgba(255,255,255,.88); --rd: 16px;
+    --g: #1B5E20; --g2: #2E7D32; --gd: #0d3b0d;
+    --a: #D4AF37; --ad: #B8960C;
+    --br: #6D4C41;
+    --bg: #FAFAF5; --bg2: #F2F0E8;
+    --card: #fff; --card2: #FAFAF5;
+    --tx: #333333; --tx2: #666;
+    --bd: rgba(27,94,32,.12);
+    --sh: 0 4px 20px rgba(27,94,32,.06);
+    --shl: 0 12px 40px rgba(27,94,32,.12);
+    --gl: rgba(27,94,32,.06);
+    --glb: rgba(27,94,32,.03);
+    --nav: rgba(250,250,245,.92);
+    --rd: 16px;
     --sidebar: 260px;
   }
   .dark {
-    --bg: #0b120b; --bg2: #111811; --card: #182018; --card2: #1d281d;
-    --tx: #e4e8e4; --tx2: #99a099; --bd: #2a322a; --sh: 0 4px 20px rgba(0,0,0,.3);
-    --shl: 0 12px 40px rgba(0,0,0,.5); --gl: rgba(24,32,24,.8);
-    --glb: rgba(255,255,255,.06); --nav: rgba(11,18,11,.92);
+    --bg: #0F1A0F; --bg2: #162016;
+    --card: #1A2B1A; --card2: #1F301F;
+    --tx: #E8E8E0; --tx2: #999;
+    --bd: rgba(45,128,50,.2);
+    --sh: 0 4px 20px rgba(0,0,0,.3);
+    --shl: 0 12px 40px rgba(0,0,0,.5);
+    --gl: rgba(27,94,32,.15);
+    --glb: rgba(27,94,32,.08);
+    --nav: rgba(15,26,15,.95);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{font-family:'Inter',system-ui,sans-serif;font-size:15px;background:var(--bg);color:var(--tx);overflow-x:hidden;line-height:1.5;min-height:100vh}
@@ -65,9 +79,9 @@
 
   /* Buttons */
   .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:50px;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .25s;border:none;text-decoration:none}
-  .btn-p{background:var(--g);color:#fff;box-shadow:0 4px 16px rgba(46,125,50,.25)}
-  .btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(46,125,50,.35)}
-  .btn-g{background:var(--a);color:#3e2723;box-shadow:0 4px 16px rgba(251,192,45,.25)}
+  .btn-p{background:var(--g);color:#fff;box-shadow:0 4px 16px rgba(27,94,32,.25)}
+  .btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(27,94,32,.35)}
+  .btn-g{background:var(--a);color:#3e2723;box-shadow:0 4px 16px rgba(212,175,55,.25)}
   .btn-g:hover{transform:translateY(-2px)}
   .btn-o{border:2px solid var(--bd);background:transparent;color:var(--tx)}
   .btn-o:hover{border-color:var(--g);color:var(--g)}
@@ -75,8 +89,8 @@
 
   /* Tags & Tables */
   .tag{display:inline-block;font-size:.7rem;font-weight:700;padding:4px 12px;border-radius:50px}
-  .tag-g{background:rgba(46,125,50,.1);color:var(--g)}
-  .tag-a{background:rgba(251,192,45,.15);color:var(--ad)}
+  .tag-g{background:rgba(27,94,32,.1);color:var(--g)}
+  .tag-a{background:rgba(212,175,55,.15);color:var(--ad)}
   .tag-b{background:rgba(2,119,189,.1);color:#0277bd}
   .tag-r{background:rgba(198,40,40,.1);color:#c62828}
   .tbl-wrap{overflow-x:auto;border-radius:var(--rd);border:1px solid var(--bd)}
@@ -84,7 +98,7 @@
   thead th{background:var(--g);color:#fff;padding:12px 14px;text-align:left;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
   tbody td{padding:10px 14px;border-bottom:1px solid var(--bd)}
   tbody tr:nth-child(even){background:var(--card2)}
-  tbody tr:hover{background:rgba(46,125,50,.03)}
+  tbody tr:hover{background:rgba(27,94,32,.03)}
 
   /* Charts, Chat, Progress */
   .chart-wrap{position:relative;width:100%;height:300px}

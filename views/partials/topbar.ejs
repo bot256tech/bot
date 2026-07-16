@@ -13,7 +13,7 @@
     <% if (typeof user !== 'undefined' && user) { %>
       <!-- Logged in user -->
       <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:32px;height:32px;background:var(--grad-g, linear-gradient(135deg,#2E7D32,#4CAF50));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.8rem;flex-shrink:0">
+        <div style="width:32px;height:32px;background:var(--grad-g, linear-gradient(135deg,#1B5E20,#2E7D32));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.8rem;flex-shrink:0">
           <%= (user.name || user.phone || 'U').charAt(0).toUpperCase() %>
         </div>
         <span style="font-size:.82rem;font-weight:600;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis" class="hide-mobile"><%= user.name || user.phone %></span>

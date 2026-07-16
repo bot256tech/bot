@@ -144,8 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
           labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
           datasets: [
-            { label: 'Farmers Onboarded', data: [50,120,200,280,370,460,540,620,700,750,780,800], borderColor: '#2E7D32', backgroundColor: 'rgba(46,125,50,.1)', fill: true, tension: 0.4 },
-            { label: 'Revenue (UGX M)', data: [2.5,3.8,5.2,5.8,6.5,7.1,7.8,6.0,4.8,3.5,2.8,2.0], borderColor: '#FBC02D', backgroundColor: 'rgba(251,192,45,.1)', fill: true, tension: 0.4 }
+            { label: 'Farmers Onboarded', data: [50,120,200,280,370,460,540,620,700,750,780,800], borderColor: '#1B5E20', backgroundColor: 'rgba(27,94,32,.1)', fill: true, tension: 0.4 },
+            { label: 'Revenue (UGX M)', data: [2.5,3.8,5.2,5.8,6.5,7.1,7.8,6.0,4.8,3.5,2.8,2.0], borderColor: '#D4AF37', backgroundColor: 'rgba(212,175,55,.1)', fill: true, tension: 0.4 }
           ]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { grid: { color: '#e0e0e0' } }, x: { grid: { display: false } } } }
@@ -160,8 +160,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
           labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
           datasets: [
-            { label: 'Revenue (UGX M)', data: [3.2,4.1,5.8,6.3,7.2,8.1,8.9,6.5,5.2,4.0,3.1,2.2], backgroundColor: '#2E7D32', borderRadius: 8 },
-            { label: 'Farmers', data: [100,180,260,340,420,500,580,640,700,750,780,800], backgroundColor: '#FBC02D', borderRadius: 8 }
+            { label: 'Revenue (UGX M)', data: [3.2,4.1,5.8,6.3,7.2,8.1,8.9,6.5,5.2,4.0,3.1,2.2], backgroundColor: '#1B5E20', borderRadius: 8 },
+            { label: 'Farmers', data: [100,180,260,340,420,500,580,640,700,750,780,800], backgroundColor: '#D4AF37', borderRadius: 8 }
           ]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { grid: { color: '#e0e0e0' } }, x: { grid: { display: false } } } }
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
         type: 'doughnut',
         data: {
           labels: ['Maize', 'Groundnuts', 'Sunflower', 'Rice', 'Soybeans'],
-          datasets: [{ data: [45, 25, 15, 10, 5], backgroundColor: ['#2E7D32', '#FBC02D', '#F57F17', '#0277bd', '#6a1b9a'] }]
+          datasets: [{ data: [45, 25, 15, 10, 5], backgroundColor: ['#1B5E20', '#D4AF37', '#B8960C', '#0277bd', '#6a1b9a'] }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
       });
