@@ -3,8 +3,8 @@ const db = require('../database/connection');
 class Booking {
   static async create({ farmer_id, partner_id, service_type, scheduled_date, amount, notes }) {
     const query = `
-      INSERT INTO bookings (farmer_id, partner_id, service_type, scheduled_date, amount, notes, status, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, 'PENDING', NOW())
+      INSERT INTO bookings (farmer_id, partner_id, service_type, scheduled_date, amount, notes, status, payment_status, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, 'PENDING', 'UNPAID', NOW())
       RETURNING *;
     `;
     const values = [farmer_id, partner_id, service_type, scheduled_date, amount, notes || null];
@@ -80,14 +80,38 @@ class Booking {
     return rows;
   }
 
+  static async findByPaymentStatus(payment_status) {
+    const query = `
+      SELECT b.*,
+             p.business_name AS partner_name,
+             u.name AS farmer_name,
+             u.phone AS farmer_phone
+      FROM bookings b
+      LEFT JOIN partners p ON b.partner_id = p.id
+      LEFT JOIN farmers f ON b.farmer_id = f.id
+      LEFT JOIN users u ON f.user_id = u.id
+      WHERE b.payment_status = $1
+      ORDER BY b.created_at DESC;
+    `;
+    const { rows } = await db.query(query, [payment_status]);
+    return rows;
+  }
+
   static async updateStatus(id, status) {
     const query = `
-      UPDATE bookings
-      SET status = $1
-      WHERE id = $2
-      RETURNING *;
+      UPDATE bookings SET status = $1
+      WHERE id = $2 RETURNING *;
     `;
     const { rows } = await db.query(query, [status, id]);
+    return rows[0];
+  }
+
+  static async updatePaymentStatus(id, payment_status) {
+    const query = `
+      UPDATE bookings SET payment_status = $1
+      WHERE id = $2 RETURNING *;
+    `;
+    const { rows } = await db.query(query, [payment_status, id]);
     return rows[0];
   }
 

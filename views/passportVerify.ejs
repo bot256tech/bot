@@ -1,0 +1,138 @@
+<!-- AGRICHAIN 360™ — Digital Quality Passport (Public Verification Page) -->
+<div class="passport-verify-page" style="max-width:720px;margin:0 auto;padding:20px;font-family:'Segoe UI',system-ui,sans-serif;">
+
+  <!-- Header -->
+  <div style="text-align:center;padding:30px 0 20px;border-bottom:3px solid #2e7d32;">
+    <div style="font-size:14px;letter-spacing:3px;color:#666;text-transform:uppercase;">AGRICHAIN 360™</div>
+    <h1 style="margin:10px 0 5px;color:#1b5e20;font-size:24px;">Digital Quality Passport</h1>
+    <div style="font-size:13px;color:#888;">Verified Agricultural Produce Certificate</div>
+  </div>
+
+  <% if (data.error && !data.passport) { %>
+    <!-- Not Found -->
+    <div style="margin-top:30px;padding:30px;background:#fff3e0;border:2px solid #ff9800;border-radius:12px;text-align:center;">
+      <div style="font-size:48px;">⚠️</div>
+      <h2 style="color:#e65100;margin:10px 0;">Passport Not Found</h2>
+      <p style="color:#666;">No quality passport found for batch: <strong><%= data.batchId %></strong></p>
+      <p style="color:#999;font-size:13px;margin-top:15px;">This batch may not have been tested yet, or the batch number may be incorrect.</p>
+    </div>
+
+  <% } else if (data.passport) { %>
+    <% var p = data.passport; %>
+    <% var isVerified = p.verified_at || p.quality_grade; %>
+    <% var gradeColors = { A: '#2e7d32', B: '#1565c0', C: '#f57f17', REJECTED: '#c62828', PENDING: '#757575' }; %>
+    <% var gradeColor = gradeColors[p.quality_grade] || '#757575'; %>
+
+    <!-- Batch Number -->
+    <div style="margin-top:25px;text-align:center;">
+      <div style="display:inline-block;padding:8px 20px;background:#f5f5f5;border-radius:20px;font-family:monospace;font-size:15px;letter-spacing:1px;color:#333;">
+        <%= p.batch_number %>
+      </div>
+    </div>
+
+    <!-- Verification Status Banner -->
+    <div style="margin-top:20px;padding:15px;border-radius:10px;text-align:center;
+      <%= isVerified ? 'background:#e8f5e9;border:2px solid #4caf50;' : 'background:#fff8e1;border:2px solid #ffc107;' %>">
+      <div style="font-size:28px;"><%= isVerified ? '✅' : '⏳' %></div>
+      <div style="font-size:18px;font-weight:700;color:<%= isVerified ? '#2e7d32' : '#f57f17' %>;">
+        <%= isVerified ? 'VERIFIED' : 'PENDING VERIFICATION' %>
+      </div>
+      <% if (p.verified_at) { %>
+        <div style="font-size:12px;color:#666;margin-top:5px;">
+          Verified on: <%= new Date(p.verified_at).toLocaleDateString('en-UG', { year:'numeric', month:'long', day:'numeric' }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Quality Grade Badge -->
+    <% if (p.quality_grade) { %>
+    <div style="margin-top:20px;text-align:center;">
+      <div style="display:inline-block;width:80px;height:80px;border-radius:50%;
+        background:<%= gradeColor %>;color:#fff;line-height:80px;font-size:36px;font-weight:900;
+        box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+        <%= p.quality_grade %>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:#666;">Quality Grade</div>
+    </div>
+    <% } %>
+
+    <!-- Details Grid -->
+    <div style="margin-top:25px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:#f9f9f9;padding:15px;border-radius:8px;">
+        <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Crop</div>
+        <div style="font-size:16px;font-weight:600;color:#333;margin-top:4px;"><%= p.crop_type %></div>
+      </div>
+      <div style="background:#f9f9f9;padding:15px;border-radius:8px;">
+        <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Quantity</div>
+        <div style="font-size:16px;font-weight:600;color:#333;margin-top:4px;"><%= p.quantity %> kg</div>
+      </div>
+      <div style="background:#f9f9f9;padding:15px;border-radius:8px;">
+        <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Moisture Level</div>
+        <div style="font-size:16px;font-weight:600;margin-top:4px;
+          color:<%= p.moisture_level && parseFloat(p.moisture_level) <= 13 ? '#2e7d32' : p.moisture_level && parseFloat(p.moisture_level) <= 15 ? '#f57f17' : '#c62828' %>;">
+          <%= p.moisture_level ? p.moisture_level + '%' : 'Not tested' %>
+        </div>
+      </div>
+      <div style="background:#f9f9f9;padding:15px;border-radius:8px;">
+        <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Aflatoxin</div>
+        <div style="font-size:16px;font-weight:600;margin-top:4px;
+          color:<%= p.aflatoxin_result && parseFloat(p.aflatoxin_result) <= 10 ? '#2e7d32' : p.aflatoxin_result && parseFloat(p.aflatoxin_result) <= 20 ? '#f57f17' : '#c62828' %>;">
+          <%= p.aflatoxin_result ? p.aflatoxin_result + ' ppb' : 'Not tested' %>
+          <% if (p.aflatoxin_result && parseFloat(p.aflatoxin_result) <= 10) { %>
+            <span style="font-size:12px;color:#2e7d32;">✓ Safe</span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Traceability -->
+    <div style="margin-top:20px;padding:20px;background:#e3f2fd;border-radius:10px;border:1px solid #90caf9;">
+      <div style="font-size:13px;font-weight:700;color:#1565c0;margin-bottom:10px;">📋 Traceability Information</div>
+      <table style="width:100%;font-size:13px;">
+        <tr>
+          <td style="padding:5px 0;color:#666;">Issued:</td>
+          <td style="padding:5px 0;font-weight:600;"><%= new Date(p.created_at).toLocaleDateString('en-UG', { year:'numeric', month:'long', day:'numeric' }) %></td>
+        </tr>
+        <% if (p.testing_partner_id) { %>
+        <tr>
+          <td style="padding:5px 0;color:#666;">Testing Lab:</td>
+          <td style="padding:5px 0;font-weight:600;">Verified Partner Lab</td>
+        </tr>
+        <% } %>
+        <tr>
+          <td style="padding:5px 0;color:#666;">Origin:</td>
+          <td style="padding:5px 0;font-weight:600;">Uganda</td>
+        </tr>
+        <tr>
+          <td style="padding:5px 0;color:#666;">Platform:</td>
+          <td style="padding:5px 0;font-weight:600;">AGRICHAIN 360™</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Grading Reference -->
+    <div style="margin-top:15px;padding:15px;background:#fafafa;border-radius:8px;font-size:11px;color:#999;">
+      <strong style="color:#666;">Grading Standards:</strong><br>
+      Grade A: Moisture ≤ 13% & Aflatoxin ≤ 5 ppb &nbsp;|&nbsp;
+      Grade B: Moisture ≤ 14% & Aflatoxin ≤ 10 ppb &nbsp;|&nbsp;
+      Grade C: Moisture ≤ 15% & Aflatoxin ≤ 20 ppb
+    </div>
+
+    <!-- Footer -->
+    <div style="margin-top:25px;text-align:center;padding-top:20px;border-top:1px solid #eee;">
+      <div style="font-size:12px;color:#999;">
+        This certificate was digitally issued by AGRICHAIN 360™.<br>
+        To verify authenticity, scan the QR code or visit:<br>
+        <a href="https://agrichain360.com/passport/<%= p.batch_number %>" style="color:#1565c0;">
+          agrichain360.com/passport/<%= p.batch_number %>
+        </a>
+      </div>
+      <div style="margin-top:15px;">
+        <a href="/" style="display:inline-block;padding:10px 25px;background:#2e7d32;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-weight:600;">
+          Visit AGRICHAIN 360™
+        </a>
+      </div>
+    </div>
+
+  <% } %>
+</div>

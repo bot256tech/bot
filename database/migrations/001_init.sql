@@ -1,6 +1,9 @@
 -- =====================================================
 -- AGRICHAIN 360™ — Full Production Schema
 -- Migration: 001_init.sql
+-- Covers: Users, Farmers, Partners, Products,
+--         Quality Passports, Bookings, Payments,
+--         Subscriptions, Buyer Profiles, Orders
 -- =====================================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -129,6 +132,7 @@ CREATE TABLE IF NOT EXISTS quality_passports (
 
 -- =====================================================
 -- BOOKINGS TABLE (Partnership Marketplace)
+-- Now includes payment_status for tracking payment state
 -- =====================================================
 CREATE TABLE IF NOT EXISTS bookings (
     id SERIAL PRIMARY KEY,
@@ -137,9 +141,99 @@ CREATE TABLE IF NOT EXISTS bookings (
     service_type VARCHAR(50) NOT NULL,
     status VARCHAR(20) DEFAULT 'PENDING'
         CHECK (status IN ('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED')),
+    payment_status VARCHAR(20) DEFAULT 'UNPAID'
+        CHECK (payment_status IN ('UNPAID', 'PARTIAL', 'PAID', 'REFUNDED')),
     scheduled_date DATE,
     amount DECIMAL(12,2),
+    commission DECIMAL(12,2) DEFAULT 0,
     notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- PAYMENTS TABLE (Revenue Engine)
+-- Tracks all monetary transactions on the platform
+-- =====================================================
+CREATE TABLE IF NOT EXISTS payments (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
+    amount DECIMAL(12,2) NOT NULL,
+    commission DECIMAL(12,2) DEFAULT 0,
+    partner_payout DECIMAL(12,2) DEFAULT 0,
+    method VARCHAR(30) NOT NULL
+        CHECK (method IN ('MOBILE_MONEY', 'BANK_TRANSFER', 'CASH', 'CARD')),
+    provider VARCHAR(50),
+    transaction_id VARCHAR(100),
+    reference VARCHAR(100),
+    status VARCHAR(20) DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'PAID', 'FAILED', 'REFUNDED')),
+    description TEXT,
+    metadata JSONB,
+    paid_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- SUBSCRIPTION PLANS TABLE
+-- Defines the tiers available for enterprise buyers
+-- =====================================================
+CREATE TABLE IF NOT EXISTS subscription_plans (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+        CHECK (name IN ('STARTER', 'PROFESSIONAL', 'ENTERPRISE', 'FREE_TRIAL')),
+    display_name VARCHAR(100) NOT NULL,
+    monthly_price DECIMAL(12,2) NOT NULL,
+    annual_price DECIMAL(12,2),
+    currency VARCHAR(10) DEFAULT 'UGX',
+    max_users INTEGER DEFAULT 1,
+    max_suppliers_viewable INTEGER DEFAULT 50,
+    features JSONB NOT NULL DEFAULT '[]'::jsonb,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- BUYER PROFILES TABLE
+-- Extended profiles for enterprise buyers
+-- =====================================================
+CREATE TABLE IF NOT EXISTS buyer_profiles (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    company_name VARCHAR(200) NOT NULL,
+    business_type VARCHAR(50)
+        CHECK (business_type IN ('EXPORTER', 'PROCESSOR', 'TRADER', 'NGO',
+                                  'COOPERATIVE', 'GOVERNMENT', 'MANUFACTURER', 'OTHER')),
+    registration_number VARCHAR(100),
+    tin_number VARCHAR(50),
+    address TEXT,
+    city VARCHAR(50),
+    country VARCHAR(50) DEFAULT 'Uganda',
+    website VARCHAR(200),
+    procurement_crops TEXT[],
+    annual_volume_tonnes DECIMAL(12,2),
+    verified BOOLEAN DEFAULT FALSE,
+    verified_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- BUYER SUBSCRIPTIONS TABLE
+-- Tracks active subscriptions for buyer accounts
+-- =====================================================
+CREATE TABLE IF NOT EXISTS buyer_subscriptions (
+    id SERIAL PRIMARY KEY,
+    buyer_id INTEGER REFERENCES buyer_profiles(id) ON DELETE CASCADE,
+    plan_id INTEGER REFERENCES subscription_plans(id),
+    status VARCHAR(20) DEFAULT 'ACTIVE'
+        CHECK (status IN ('ACTIVE', 'EXPIRED', 'CANCELLED', 'SUSPENDED')),
+    billing_cycle VARCHAR(20) DEFAULT 'MONTHLY'
+        CHECK (billing_cycle IN ('MONTHLY', 'ANNUAL')),
+    start_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    end_date DATE,
+    auto_renew BOOLEAN DEFAULT TRUE,
+    amount_paid DECIMAL(12,2),
+    payment_id INTEGER REFERENCES payments(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -155,6 +249,7 @@ CREATE TABLE IF NOT EXISTS orders (
     commission DECIMAL(12,2) DEFAULT 0,
     status VARCHAR(20) DEFAULT 'pending'
         CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
+    payment_id INTEGER REFERENCES payments(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -181,6 +276,16 @@ CREATE INDEX IF NOT EXISTS idx_quality_passports_grade ON quality_passports(qual
 CREATE INDEX IF NOT EXISTS idx_bookings_farmer ON bookings(farmer_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_partner ON bookings(partner_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_payment_status ON bookings(payment_status);
+CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+CREATE INDEX IF NOT EXISTS idx_payments_method ON payments(method);
+CREATE INDEX IF NOT EXISTS idx_payments_transaction ON payments(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_buyer_profiles_user ON buyer_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_buyer_profiles_business ON buyer_profiles(business_type);
+CREATE INDEX IF NOT EXISTS idx_buyer_subs_buyer ON buyer_subscriptions(buyer_id);
+CREATE INDEX IF NOT EXISTS idx_buyer_subs_status ON buyer_subscriptions(status);
 CREATE INDEX IF NOT EXISTS idx_orders_buyer ON orders(buyer_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 
@@ -202,7 +307,22 @@ CREATE TRIGGER update_users_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
--- SEED: Default admin (password: admin123)
+-- SEED: Subscription Plans
+-- =====================================================
+INSERT INTO subscription_plans (name, display_name, monthly_price, annual_price, currency, max_users, max_suppliers_viewable, features)
+VALUES
+    ('FREE_TRIAL', 'Free Trial', 0, 0, 'UGX', 1, 10,
+     '["Search farmers (limited)", "View produce listings", "Basic market prices"]'::jsonb),
+    ('STARTER', 'Starter', 250000, 2500000, 'UGX', 2, 50,
+     '["Search all farmers", "View produce & quality data", "Contact suppliers", "Basic reports", "Market price alerts"]'::jsonb),
+    ('PROFESSIONAL', 'Professional', 750000, 7500000, 'UGX', 5, 500,
+     '["Everything in Starter", "Procurement tools", "Quality reports & certificates", "Supplier management", "Batch tracking", "Analytics dashboard", "Priority support"]'::jsonb),
+    ('ENTERPRISE', 'Enterprise', 2000000, 20000000, 'UGX', 20, 99999,
+     '["Everything in Professional", "API access", "Multi-user accounts", "Compliance reports", "Custom workflows", "Dedicated account manager", "White-label options", "Unlimited suppliers"]'::jsonb)
+ON CONFLICT (name) DO NOTHING;
+
+-- =====================================================
+-- SEED: Default Admin (password: admin123)
 -- =====================================================
 INSERT INTO users (name, phone, email, password_hash, role, status)
 VALUES (
