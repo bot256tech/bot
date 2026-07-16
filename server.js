@@ -31,7 +31,8 @@ const morgan = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
 
-const { getPool, testConnection, isConnected: dbConnected } = require('./config/database');
+const dbConfig = require('./config/database');
+const { getPool, testConnection } = dbConfig;
 const { createSessionMiddleware } = require('./config/session');
 const { initWebSocket } = require('./config/websocket');
 const logger = require('./config/logger');
@@ -82,7 +83,7 @@ app.use(auditContext);
 
 // Database availability middleware
 app.use((req, res, next) => {
-  req.dbAvailable = dbConnected;
+  req.dbAvailable = dbConfig.isConnected;
   next();
 });
 
@@ -101,10 +102,10 @@ app.get('/health', (req, res) => {
   res.json({
     success: true,
     message: 'AGRICHAIN 360™ is running',
-    version: '3.0.0',
+    version: '3.0.1',
     timestamp: new Date().toISOString(),
     services: {
-      database: dbConnected ? 'connected' : 'disconnected',
+      database: dbConfig.isConnected ? 'connected' : 'disconnected',
       api: 'active',
       web: 'active',
       websocket: 'active'
