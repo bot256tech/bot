@@ -3,6 +3,13 @@
     <h2 style="font-weight:800;margin-bottom:4px">Create Your Account</h2>
     <p style="color:var(--tx2);margin-bottom:20px;font-size:.9rem" id="roleDescription">Select your role and fill in your details</p>
 
+    <% var err = typeof error !== 'undefined' ? error : (typeof req !== 'undefined' && req.query ? req.query.error : ''); %>
+    <% if (err) { %>
+      <div style="background:#fff3e0;border:1px solid #ff9800;border-radius:10px;padding:12px;margin-bottom:16px;font-size:.85rem;color:#e65100">
+        ⚠️ <% if (err === 'name') { %>Please enter your full name (at least 2 characters)<% } else if (err === 'phone') { %>Please enter a valid phone number<% } else if (err === 'password') { %>Password must be at least 6 characters<% } else { %><%= err %><% } %>
+      </div>
+    <% } %>
+
     <form id="signupForm" method="POST" action="/signup">
       <!-- Role Selection -->
       <div style="margin-bottom:18px">

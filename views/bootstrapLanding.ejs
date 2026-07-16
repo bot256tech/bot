@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGRICHAIN 360™ — Uganda's Complete Post-Harvest Platform</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--g:#2E7D32;--g2:#4CAF50;--gd:#1B5E20;--a:#FBC02D;--ad:#F57F17;--bg:#f5f7f5;--card:#fff;--tx:#1a1a1a;--tx2:#666;--bd:#e0e0e0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em}
+.navbar-custom{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:12px 0;position:sticky;top:0;z-index:1000}
+.navbar-brand-custom{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.3rem;color:var(--g)!important}
+.hero-section{background:linear-gradient(135deg,#1B5E20 0%,#2E7D32 50%,#388E3C 100%);color:white;padding:80px 0 60px;position:relative;overflow:hidden}
+.hero-section::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-badge{display:inline-block;background:rgba(255,255,255,.15);color:white;padding:6px 16px;border-radius:50px;font-size:.85rem;margin-bottom:20px;border:1px solid rgba(255,255,255,.2)}
+.hero-title{font-size:3rem;font-weight:900;line-height:1.1;margin-bottom:20px}
+.hero-subtitle{font-size:1.15rem;opacity:.9;max-width:600px;margin:0 auto 30px;line-height:1.6}
+.btn-hero{padding:14px 32px;border-radius:50px;font-weight:700;font-size:1rem;border:none;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn-hero-primary{background:var(--a);color:#3e2723;box-shadow:0 4px 20px rgba(251,192,45,.4)}
+.btn-hero-primary:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(251,192,45,.5);color:#3e2723}
+.btn-hero-outline{background:transparent;color:white;border:2px solid rgba(255,255,255,.4)}
+.btn-hero-outline:hover{background:rgba(255,255,255,.1);border-color:white;color:white}
+.ticker-section{background:linear-gradient(135deg,rgba(46,125,50,.08),rgba(76,175,80,.04));border:1px solid rgba(46,125,50,.15);border-radius:20px;padding:30px;margin:-40px auto 40px;max-width:1000px;position:relative;z-index:10}
+.ticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center}
+@media(max-width:768px){.ticker-grid{grid-template-columns:repeat(2,1fr)}.hero-title{font-size:2rem}}
+.ticker-value{font-size:2rem;font-weight:900;font-family:'Space Grotesk',sans-serif;color:var(--g)}
+.ticker-label{font-size:.8rem;color:var(--tx2);margin-top:4px}
+.ticker-change{font-size:.75rem;color:var(--g);margin-top:2px}
+.section{padding:60px 0}
+.section-title{font-weight:800;font-size:1.8rem;text-align:center;margin-bottom:12px}
+.section-subtitle{text-align:center;color:var(--tx2);margin-bottom:40px;font-size:1rem}
+.step-card{text-align:center;padding:24px;position:relative}
+.step-number{width:40px;height:40px;background:var(--g);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:1rem;margin:0 auto 16px}
+.step-number.gold{background:var(--a);color:#3e2723}
+.step-number.green2{background:var(--g2)}
+.step-number.orange{background:var(--ad)}
+.feature-card{background:var(--card);border-radius:16px;padding:32px;border:1px solid var(--bd);text-align:center;transition:all .3s;height:100%}
+.feature-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.1);border-color:var(--g)}
+.feature-icon{font-size:2.5rem;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:16px;padding:24px;border:1px solid var(--bd);text-align:center}
+.stat-value{font-size:2rem;font-weight:900;font-family:'Space Grotesk',sans-serif}
+.cta-section{background:linear-gradient(135deg,#2E7D32 0%,#1B5E20 100%);color:white;padding:60px 0;text-align:center;border-radius:0}
+.crop-badge{display:inline-flex;flex-direction:column;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;width:120px;transition:all .3s}
+.crop-badge:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.crop-icon{font-size:2rem;margin-bottom:8px}
+.footer{background:#111;color:#ccc;padding:40px 0 20px}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-custom">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand-custom" href="/">🌾 AGRICHAIN <span style="color:var(--a)">360</span><sup style="font-size:.5rem">™</sup></a>
+    <div class="d-flex gap-2 align-items-center">
+      <a href="/marketplace" class="btn btn-sm" style="color:var(--tx2)">Marketplace</a>
+      <a href="/ai-advisor" class="btn btn-sm" style="color:var(--tx2)">AI Advisor</a>
+      <a href="/login" class="btn btn-sm" style="border:1px solid var(--bd);border-radius:50px;padding:6px 16px">Login</a>
+      <a href="/signup" class="btn btn-sm" style="background:var(--g);color:white;border-radius:50px;padding:6px 16px">Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container text-center">
+    <div class="hero-badge">
+      <i class="fas fa-award"></i> Uganda's Complete Post-Harvest Platform
+    </div>
+    <h1 class="hero-title">The Complete Post-Harvest<br>Platform for Uganda</h1>
+    <p class="hero-subtitle">Connect <strong>farmers</strong>, <strong>buyers</strong>, cooperatives and service providers with <strong style="color:var(--a)">verified quality</strong>, real-time <strong style="color:var(--a)">IoT monitoring</strong>, and <strong style="color:var(--a)">digital traceability</strong>.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="/marketplace" class="btn-hero btn-hero-primary"><i class="fas fa-store"></i> Browse Marketplace</a>
+      <a href="/roles" class="btn-hero btn-hero-outline"><i class="fas fa-rocket"></i> Get Started Free</a>
+    </div>
+  </div>
+</section>
+
+<!-- Live Impact Ticker -->
+<div class="container">
+  <div class="ticker-section">
+    <h4 style="text-align:center;margin-bottom:16px;color:var(--g);font-weight:700"><i class="fas fa-chart-line"></i> Live Platform Impact</h4>
+    <div class="ticker-grid">
+      <div><div class="ticker-value" id="tkFarmers">847</div><div class="ticker-label"><i class="fas fa-users"></i> Active Farmers</div><div class="ticker-change">+12 this week</div></div>
+      <div><div class="ticker-value" style="color:var(--a)" id="tkTons">42.8</div><div class="ticker-label"><i class="fas fa-weight-hanging"></i> Tons Dried</div><div class="ticker-change">+8.4 tons</div></div>
+      <div><div class="ticker-value" style="color:var(--g2)">UGX 15.6M</div><div class="ticker-label"><i class="fas fa-coins"></i> Revenue Traded</div><div class="ticker-change">+UGX 3.2M</div></div>
+      <div><div class="ticker-value" style="color:var(--ad)">38%</div><div class="ticker-label"><i class="fas fa-chart-bar"></i> Loss Reduction</div><div class="ticker-change">Target: 50%</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- How It Works -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">How AGRICHAIN 360 Works</h2>
+    <p class="section-subtitle">Simple 4-step process from farm to market</p>
+    <div class="row g-4">
+      <div class="col-md-3 col-6"><div class="step-card"><div class="step-number">1</div><div style="font-size:2rem;margin-bottom:8px">👨‍🌾</div><div style="font-weight:700;margin-bottom:4px">Farmer Registration</div><div style="font-size:.85rem;color:var(--tx2)">USSD or Web • Instant Verification</div></div></div>
+      <div class="col-md-3 col-6"><div class="step-card"><div class="step-number gold">2</div><div style="font-size:2rem;margin-bottom:8px">☀️</div><div style="font-weight:700;margin-bottom:4px">Quality Processing</div><div style="font-size:.85rem;color:var(--tx2)">IoT Solar Drying • Moisture & Aflatoxin Test</div></div></div>
+      <div class="col-md-3 col-6"><div class="step-card"><div class="step-number green2">3</div><div style="font-size:2rem;margin-bottom:8px">📜</div><div style="font-weight:700;margin-bottom:4px">Digital Passport</div><div style="font-size:.85rem;color:var(--tx2)">QR-Verified Certificate • Blockchain Traceability</div></div></div>
+      <div class="col-md-3 col-6"><div class="step-card"><div class="step-number orange">4</div><div style="font-size:2rem;margin-bottom:8px">💳</div><div style="font-weight:700;margin-bottom:4px">Trade & Payment</div><div style="font-size:.85rem;color:var(--tx2)">Buyers Purchase • Mobile Money Payout</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" style="background:var(--bg2,#eef2ee)">
+  <div class="container">
+    <h2 class="section-title">Platform Features</h2>
+    <p class="section-subtitle">Everything you need to transform post-harvest agriculture</p>
+    <div class="row g-4">
+      <div class="col-md-4"><div class="feature-card"><div class="feature-icon">🤖</div><h4 style="font-weight:700;margin-bottom:8px">AI Crop Advisor</h4><p style="font-size:.9rem;color:var(--tx2)">Disease detection, growth stage prediction, and yield forecasting using advanced AI.</p><a href="/ai-advisor" class="btn btn-sm mt-3" style="background:var(--g);color:white;border-radius:50px;padding:6px 20px">Try Now</a></div></div>
+      <div class="col-md-4"><div class="feature-card"><div class="feature-icon">📡</div><h4 style="font-weight:700;margin-bottom:8px">IoT Smart Dryers</h4><p style="font-size:.9rem;color:var(--tx2)">Real-time temperature, humidity, and moisture monitoring via MQTT and WebSocket.</p><a href="/iot-dryer" class="btn btn-sm mt-3" style="background:var(--g);color:white;border-radius:50px;padding:6px 20px">View Live</a></div></div>
+      <div class="col-md-4"><div class="feature-card"><div class="feature-icon">🔐</div><h4 style="font-weight:700;margin-bottom:8px">Digital Quality Passport</h4><p style="font-size:.9rem;color:var(--tx2)">Blockchain-style traceability with QR codes for every batch. Tamper-proof certificates.</p><a href="/passport/B247391" class="btn btn-sm mt-3" style="background:#7B1FA2;color:white;border-radius:50px;padding:6px 20px">Verify Now</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Supported Crops -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Supported Crops</h2>
+    <p class="section-subtitle">Quality-certified produce across 6+ crop types</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <div class="crop-badge"><div class="crop-icon">🌽</div><div style="font-weight:600">Maize</div><div style="font-size:.7rem;color:var(--tx2)">Grade A/B</div></div>
+      <div class="crop-badge"><div class="crop-icon">☕</div><div style="font-weight:600">Coffee</div><div style="font-size:.7rem;color:var(--tx2)">Arabica/Robusta</div></div>
+      <div class="crop-badge"><div class="crop-icon">🌰</div><div style="font-weight:600">Cocoa</div><div style="font-size:.7rem;color:var(--tx2)">Premium</div></div>
+      <div class="crop-badge"><div class="crop-icon">🥜</div><div style="font-weight:600">Groundnuts</div><div style="font-size:.7rem;color:var(--tx2)">High Yield</div></div>
+      <div class="crop-badge"><div class="crop-icon">🌱</div><div style="font-weight:600">Beans</div><div style="font-size:.7rem;color:var(--tx2)">Multiple Varieties</div></div>
+      <div class="crop-badge"><div class="crop-icon">🌿</div><div style="font-weight:600">Cassava</div><div style="font-size:.7rem;color:var(--tx2)">Disease Resistant</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="section" style="background:var(--bg2,#eef2ee)">
+  <div class="container">
+    <h2 class="section-title">Our Impact in Numbers</h2>
+    <div class="row g-4 mt-2">
+      <div class="col-6 col-md-3"><div class="stat-card"><i class="fas fa-users" style="font-size:1.5rem;color:var(--g);margin-bottom:8px"></i><div class="stat-value" style="color:var(--g)">800+</div><div style="color:var(--tx2);font-size:.85rem">Registered Farmers</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><i class="fas fa-map-marked-alt" style="font-size:1.5rem;color:var(--a);margin-bottom:8px"></i><div class="stat-value" style="color:var(--a)">4</div><div style="color:var(--tx2);font-size:.85rem">Districts Covered</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><i class="fas fa-seedling" style="font-size:1.5rem;color:var(--g2);margin-bottom:8px"></i><div class="stat-value" style="color:var(--g2)">6+</div><div style="color:var(--tx2);font-size:.85rem">Crop Types</div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><i class="fas fa-chart-line" style="font-size:1.5rem;color:var(--ad);margin-bottom:8px"></i><div class="stat-value" style="color:var(--ad)">35%</div><div style="color:var(--tx2);font-size:.85rem">Loss Reduction</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2 style="font-size:2rem;font-weight:800;margin-bottom:12px">Ready to Transform Post-Harvest Agriculture?</h2>
+    <p style="opacity:.9;margin-bottom:30px;font-size:1.1rem">Join <strong>800+ farmers</strong> and <strong>50+ buyers</strong> already using the platform.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="/signup" class="btn-hero" style="background:white;color:var(--g)"><i class="fas fa-user-plus"></i> Create Free Account</a>
+      <a href="/marketplace" class="btn-hero" style="background:transparent;color:white;border:2px solid rgba(255,255,255,.4)"><i class="fas fa-store"></i> Explore Marketplace</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <h5 style="color:white;margin-bottom:12px">🌾 AGRICHAIN 360™</h5>
+        <p style="font-size:.85rem;line-height:1.6">Uganda's complete post-harvest platform. Connecting farmers, buyers, and service providers with verified quality and digital traceability.</p>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h5 style="color:white;margin-bottom:12px">Platform</h5>
+        <div style="font-size:.85rem;line-height:2"><a href="/marketplace" style="color:#ccc;text-decoration:none">Marketplace</a><br><a href="/ai-advisor" style="color:#ccc;text-decoration:none">AI Advisor</a><br><a href="/iot-dryer" style="color:#ccc;text-decoration:none">IoT Monitoring</a><br><a href="/roles" style="color:#ccc;text-decoration:none">Get Started</a></div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h5 style="color:white;margin-bottom:12px">Contact</h5>
+        <div style="font-size:.85rem;line-height:2">Batesa Ibrahim<br><a href="tel:+256746022547" style="color:#ccc;text-decoration:none">+256 746022547</a><br><a href="mailto:batesaibra6@gmail.com" style="color:#ccc;text-decoration:none">batesaibra6@gmail.com</a></div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #333;padding-top:16px;margin-top:16px;text-align:center;font-size:.8rem;color:#888">
+      © 2026 AGRICHAIN 360™. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<script>
+// Animate ticker numbers
+function animateTicker(id, target, isFloat) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let current = 0;
+  const step = target / 60;
+  const interval = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(interval); }
+    el.textContent = isFloat ? current.toFixed(1) : Math.floor(current).toLocaleString();
+  }, 25);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  animateTicker('tkFarmers', 847, false);
+  animateTicker('tkTons', 42.8, true);
+});
+</script>
+</body>
+</html>
