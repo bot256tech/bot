@@ -1,36 +1,142 @@
-<div class="card mb20">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+<!-- Farmer Dashboard — Shows real user data from session -->
+<div style="margin-bottom:24px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
     <div>
-      <h2 style="font-weight:800">Welcome back, <%= typeof user !== 'undefined' ? user.name : 'John Mukasa' %> 👋</h2>
-      <div style="color:var(--tx2)">Farmer Dashboard • Mayuge District</div>
+      <h2 style="font-weight:800;margin-bottom:4px">
+        Welcome back, <%= typeof user !== 'undefined' && user ? user.name : 'Farmer' %> 👋
+      </h2>
+      <div style="color:var(--tx2);font-size:.9rem">
+        Farmer Dashboard
+        <% if (typeof user !== 'undefined' && user && user.phone) { %>
+          • <%= user.phone %>
+        <% } %>
+      </div>
     </div>
-    <a href="/my-listings" class="btn btn-p">+ Add Listing</a>
-  </div>
-  
-  <div class="grid grid4">
-    <div class="metric"><div class="metric-val">4</div><div class="metric-lbl">Active Listings</div></div>
-    <div class="metric"><div class="metric-val">UGX 8.4M</div><div class="metric-lbl">Total Earnings</div></div>
-    <div class="metric"><div class="metric-val">12</div><div class="metric-lbl">Batches Sold</div></div>
-    <div class="metric"><div class="metric-val">91</div><div class="metric-lbl">Quality Score</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="/marketplace" class="btn btn-o btn-sm"><i class="fas fa-store"></i> Marketplace</a>
+      <a href="/dryer" class="btn btn-p btn-sm"><i class="fas fa-solar-panel"></i> Book Drying</a>
+    </div>
   </div>
 </div>
 
+<!-- Quick Stats -->
+<div class="grid grid4" style="margin-bottom:24px">
+  <div class="metric">
+    <div class="metric-val">0</div>
+    <div class="metric-lbl">Active Listings</div>
+    <div class="metric-tr" style="color:var(--tx3)">Add your first listing</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" style="color:var(--a)">UGX 0</div>
+    <div class="metric-lbl">Total Earnings</div>
+    <div class="metric-tr" style="color:var(--tx3)">Start selling today</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" style="color:var(--g2)">0</div>
+    <div class="metric-lbl">Batches Processed</div>
+    <div class="metric-tr" style="color:var(--tx3)">Book drying service</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" style="color:var(--ad)">—</div>
+    <div class="metric-lbl">Quality Score</div>
+    <div class="metric-tr" style="color:var(--tx3)">Pending first test</div>
+  </div>
+</div>
+
+<!-- Main Content Grid -->
 <div class="grid grid2">
+  <!-- Getting Started Guide -->
   <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px">Recent Activity</h3>
+    <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-rocket" style="color:var(--g)"></i> Getting Started</h3>
     <div style="font-size:.9rem">
-      <div style="padding:10px 0;border-bottom:1px solid var(--bd)">✅ Batch B247 sold to GrainCorp EA</div>
-      <div style="padding:10px 0;border-bottom:1px solid var(--bd)">📡 IoT Dryer completed (Moisture: 13.2%)</div>
-      <div style="padding:10px 0">📱 SMS alert sent for harvest timing</div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd)">
+        <div style="width:32px;height:32px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--g);font-size:.85rem">1</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">Register Your Farm</div>
+          <div style="color:var(--tx2);font-size:.82rem">Add your farm location, crops, and farm size</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd)">
+        <div style="width:32px;height:32px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--g);font-size:.85rem">2</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">Book Solar Drying</div>
+          <div style="color:var(--tx2);font-size:.82rem">Schedule IoT-powered drying at nearest hub</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd)">
+        <div style="width:32px;height:32px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--g);font-size:.85rem">3</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">Get Quality Passport</div>
+          <div style="color:var(--tx2);font-size:.82rem">Moisture & aflatoxin tested, QR certificate issued</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0">
+        <div style="width:32px;height:32px;background:rgba(251,192,45,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--ad);font-size:.85rem">4</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">List on Marketplace</div>
+          <div style="color:var(--tx2);font-size:.82rem">Sell certified produce to verified buyers</div>
+        </div>
+      </div>
     </div>
   </div>
-  
+
+  <!-- Quick Actions -->
   <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px">Quick Actions</h3>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <a href="/ai-disease" class="btn btn-o">🔍 Run AI Disease Scan</a>
-      <a href="/iot-dryer" class="btn btn-o">📡 Monitor My Dryer</a>
-      <a href="/my-sales" class="btn btn-o">📈 View My Sales</a>
+    <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-bolt" style="color:var(--a)"></i> Quick Actions</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <a href="/marketplace" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
+        <div style="font-size:1.8rem;margin-bottom:8px">🛒</div>
+        <div style="font-weight:600;font-size:.85rem">Marketplace</div>
+        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Browse & sell</div>
+      </a>
+      <a href="/ai-advisor" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
+        <div style="font-size:1.8rem;margin-bottom:8px">🤖</div>
+        <div style="font-weight:600;font-size:.85rem">AI Advisor</div>
+        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Ask anything</div>
+      </a>
+      <a href="/ai-disease" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
+        <div style="font-size:1.8rem;margin-bottom:8px">🦠</div>
+        <div style="font-weight:600;font-size:.85rem">Disease Scan</div>
+        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Upload photo</div>
+      </a>
+      <a href="/iot-dryer" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
+        <div style="font-size:1.8rem;margin-bottom:8px">📡</div>
+        <div style="font-weight:600;font-size:.85rem">IoT Monitor</div>
+        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Live data</div>
+      </a>
+      <a href="/dryer" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
+        <div style="font-size:1.8rem;margin-bottom:8px">☀️</div>
+        <div style="font-weight:600;font-size:.85rem">Solar Drying</div>
+        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Book service</div>
+      </a>
+      <a href="/finance" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
+        <div style="font-size:1.8rem;margin-bottom:8px">💳</div>
+        <div style="font-weight:600;font-size:.85rem">Wallet</div>
+        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Payments</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Account Info -->
+<div class="card" style="margin-top:24px">
+  <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-user-circle" style="color:var(--g)"></i> Your Account</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;font-size:.9rem">
+    <div>
+      <div style="color:var(--tx2);font-size:.78rem;margin-bottom:4px">Name</div>
+      <div style="font-weight:600"><%= typeof user !== 'undefined' && user ? user.name : 'Not set' %></div>
+    </div>
+    <div>
+      <div style="color:var(--tx2);font-size:.78rem;margin-bottom:4px">Phone</div>
+      <div style="font-weight:600"><%= typeof user !== 'undefined' && user ? user.phone : 'Not set' %></div>
+    </div>
+    <div>
+      <div style="color:var(--tx2);font-size:.78rem;margin-bottom:4px">Role</div>
+      <div><span class="tag tag-g"><%= typeof user !== 'undefined' && user ? user.role : 'FARMER' %></span></div>
+    </div>
+    <div>
+      <div style="color:var(--tx2);font-size:.78rem;margin-bottom:4px">Status</div>
+      <div><span class="tag tag-g">Active</span></div>
     </div>
   </div>
 </div>

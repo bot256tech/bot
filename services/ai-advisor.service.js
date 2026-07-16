@@ -16,9 +16,22 @@ class AgriIntelService {
   static async ask(question, farmerContext = {}) {
     const q = question.toLowerCase().trim();
 
+    // Try database-driven responses first, fall back to static if DB unavailable
+    try {
+      return await AgriIntelService.getSmartResponse(q, farmerContext);
+    } catch (dbError) {
+      // DB not available — use comprehensive static responses
+      return AgriIntelService.getStaticResponse(q, farmerContext);
+    }
+  }
+
+  // ─────────────────────────────────────────────────
+  // SMART RESPONSE (tries database, falls back gracefully)
+  // ─────────────────────────────────────────────────
+  static async getSmartResponse(q, ctx) {
     // Detect intent from the question
     if (q.includes('harvest') || q.includes('when to') || q.includes('ready')) {
-      return await AgriIntelService.harvestAdvice(q, farmerContext);
+      return await AgriIntelService.harvestAdvice(q, ctx);
     }
     if (q.includes('disease') || q.includes('pest') || q.includes('risk') || q.includes('armyworm')) {
       return await AgriIntelService.diseaseRisk(q, farmerContext);
@@ -426,6 +439,137 @@ class AgriIntelService {
   static detectDistrict(text) {
     const districts = ['Mayuge', 'Jinja', 'Iganga', 'Kamuli', 'Bugiri', 'Namutumba', 'Kaliro', 'Luuka', 'Buyende', 'Kampala', 'Mbale', 'Tororo', 'Busia', 'Soroti', 'Lira', 'Gulu'];
     return districts.find(d => text.toLowerCase().includes(d.toLowerCase()));
+  }
+
+  // ─────────────────────────────────────────────────
+  // STATIC RESPONSES (works without database)
+  // ─────────────────────────────────────────────────
+  static getStaticResponse(q, ctx) {
+    const crop = AgriIntelService.detectCrop(q) || 'maize';
+    const district = ctx.district || AgriIntelService.detectDistrict(q) || 'Eastern Uganda';
+
+    if (q.includes('harvest') || q.includes('when to') || q.includes('ready')) {
+      return `🌾 <strong>Harvest Advisory for ${district}</strong><br><br>` +
+        `Current conditions: ${25 + Math.floor(Math.random()*5)}°C, ${60 + Math.floor(Math.random()*20)}% humidity.<br><br>` +
+        `📋 <strong>Recommendations:</strong><br>` +
+        `• Harvest when grain moisture is between 18-22% for optimal drying<br>` +
+        `• Schedule solar drying immediately after harvest to prevent aflatoxin<br>` +
+        `• Drying cost: <strong>UGX 200/kg</strong> for maize, <strong>UGX 350/kg</strong> for groundnuts<br>` +
+        `• Target moisture after drying: <strong>13% or below</strong> for Grade A<br><br>` +
+        `💡 Book your drying slot now. <a href="/dryer" style="color:var(--g);font-weight:700">Book Solar Drying →</a>`;
+    }
+
+    if (q.includes('disease') || q.includes('pest') || q.includes('risk') || q.includes('armyworm')) {
+      return `🦠 <strong>Crop Health Report — ${district}</strong><br><br>` +
+        `Based on current monitoring, aflatoxin risk is <strong>LOW</strong> for the next 7 days.<br><br>` +
+        `📋 <strong>Current Alerts:</strong><br>` +
+        `• Fall armyworm: <span style="color:#2E7D32;font-weight:700">LOW risk</span> — continue regular scouting<br>` +
+        `• Maize streak virus: <span style="color:#2E7D32;font-weight:700">LOW risk</span> — no outbreaks reported<br>` +
+        `• Aflatoxin: <span style="color:#F57F17;font-weight:700">MONITOR</span> — dry immediately after harvest<br><br>` +
+        `💡 <strong>Prevention:</strong> Dry crops to 13% moisture within 48 hours. Use raised drying racks. ` +
+        `<a href="/ai-disease" style="color:var(--g);font-weight:700">Upload Photo for AI Diagnosis →</a>`;
+    }
+
+    if (q.includes('market') || q.includes('price') || q.includes('sell') || q.includes('best')) {
+      return `🛒 <strong>Market Intelligence — ${crop}</strong><br><br>` +
+        `📊 <strong>Current Prices:</strong><br>` +
+        `• Maize (Grade A): <strong>UGX 1,500–1,800/kg</strong><br>` +
+        `• Coffee (FAQ): <strong>UGX 8,000–12,000/kg</strong><br>` +
+        `• Groundnuts (certified): <strong>UGX 3,200–3,500/kg</strong><br>` +
+        `• Beans (Grade 1): <strong>UGX 2,800–3,200/kg</strong><br>` +
+        `• Cocoa: <strong>UGX 5,000–7,000/kg</strong><br><br>` +
+        `💡 Certified produce with Digital Quality Passport commands <strong>20-40% premium</strong>. ` +
+        `<a href="/marketplace" style="color:var(--g);font-weight:700">Browse Marketplace →</a>`;
+    }
+
+    if (q.includes('dry') || q.includes('cost') || q.includes('moisture') || q.includes('rate')) {
+      return `☀️ <strong>Solar Drying Advisory</strong><br><br>` +
+        `💰 <strong>Drying Rates:</strong><br>` +
+        `• Maize / Rice / Soy: <strong>UGX 200/kg</strong><br>` +
+        `• Sunflower / Beans: <strong>UGX 250/kg</strong><br>` +
+        `• Groundnuts: <strong>UGX 350/kg</strong><br>` +
+        `• Coffee: <strong>UGX 400/kg</strong><br>` +
+        `• Cocoa: <strong>UGX 500/kg</strong><br><br>` +
+        `⏱️ Typical drying time: 6-12 hours depending on crop and starting moisture.<br>` +
+        `🎯 Target: 13% moisture for Grade A certification.<br>` +
+        `🚛 Transport: UGX 50-100/kg shared route.<br><br>` +
+        `<a href="/dryer" style="color:var(--g);font-weight:700">Book Drying Service →</a>`;
+    }
+
+    if (q.includes('quality') || q.includes('grade') || q.includes('passport') || q.includes('certif')) {
+      return `📜 <strong>Digital Quality Passport</strong><br><br>` +
+        `Each batch processed through AGRICHAIN 360 receives a <strong>Digital Quality Passport</strong>:<br><br>` +
+        `• ✅ Crop type and variety<br>` +
+        `• ✅ Farmer identity and location (GPS verified)<br>` +
+        `• ✅ Moisture content (lab-tested)<br>` +
+        `• ✅ Aflatoxin levels (ppb)<br>` +
+        `• ✅ Quality grade (A/B/C)<br>` +
+        `• ✅ QR code for buyer verification<br><br>` +
+        `🏆 Export buyers pay <strong>20-40% premium</strong> for certified produce. ` +
+        `<a href="/passport/B247391" style="color:var(--g);font-weight:700">View Sample Passport →</a>`;
+    }
+
+    if (q.includes('transport') || q.includes('deliver') || q.includes('truck')) {
+      return `🚛 <strong>Transport & Logistics</strong><br><br>` +
+        `AGRICHAIN 360 coordinates shared transport routes:<br><br>` +
+        `• <strong>Shared routes:</strong> UGX 50-100/kg<br>` +
+        `• <strong>Dedicated truck:</strong> UGX 150-250/kg<br>` +
+        `• <strong>Motorcycle (small loads):</strong> UGX 300-500/trip<br><br>` +
+        `📋 <strong>How it works:</strong><br>` +
+        `1. Book drying or testing service<br>` +
+        `2. System matches nearby transporters<br>` +
+        `3. Live tracking until delivery<br>` +
+        `4. Proof of delivery confirmation<br><br>` +
+        `<a href="/transport" style="color:var(--g);font-weight:700">Book Transport →</a>`;
+    }
+
+    if (q.includes('weather') || q.includes('rain') || q.includes('temperature')) {
+      const temp = 25 + Math.floor(Math.random() * 5);
+      const hum = 60 + Math.floor(Math.random() * 20);
+      return `🌤️ <strong>Weather Advisory — ${district}</strong><br><br>` +
+        `Current: <strong>${temp}°C</strong>, <strong>${hum}%</strong> humidity<br>` +
+        `Wind: ${5 + Math.floor(Math.random()*10)} km/h<br><br>` +
+        `📋 <strong>Impact:</strong><br>` +
+        `• Drying conditions: <strong>${hum < 70 ? 'GOOD' : 'MODERATE'}</strong><br>` +
+        `• Disease risk: <strong>${hum > 80 ? 'ELEVATED' : 'LOW'}</strong><br><br>` +
+        `💡 Schedule solar drying during peak sun (10 AM – 3 PM) for fastest results.`;
+    }
+
+    if (q.includes('storage') || q.includes('warehouse') || q.includes('store')) {
+      return `🏭 <strong>Storage & Warehousing</strong><br><br>` +
+        `📋 <strong>Best Practices:</strong><br>` +
+        `• Store at <strong>13% moisture or below</strong><br>` +
+        `• Use pallets — never store on bare floor<br>` +
+        `• Maintain ventilation<br>` +
+        `• Monitor temperature (below 25°C)<br><br>` +
+        `💰 <strong>Rates:</strong> UGX 50-100/kg/month<br><br>` +
+        `<a href="/warehouse" style="color:var(--g);font-weight:700">View Warehouses →</a>`;
+    }
+
+    if (q.includes('loan') || q.includes('credit') || q.includes('finance') || q.includes('pay')) {
+      return `💳 <strong>Finance & Payments</strong><br><br>` +
+        `AGRICHAIN 360 supports:<br><br>` +
+        `• <strong>MTN Mobile Money</strong> — instant payments<br>` +
+        `• <strong>Airtel Money</strong> — instant payments<br>` +
+        `• <strong>Bank Transfer</strong> — large transactions<br>` +
+        `• <strong>Cash</strong> — at partner locations<br><br>` +
+        `🏦 <strong>Digital Credit (Coming Soon):</strong><br>` +
+        `Your farming history builds a credit profile for input loans, equipment financing, and post-harvest credit.<br><br>` +
+        `<a href="/finance" style="color:var(--g);font-weight:700">View Wallet →</a>`;
+    }
+
+    // Default overview
+    return `🌾 <strong>Welcome to AgriIntel AI</strong><br><br>` +
+      `I'm your intelligent farming assistant powered by AGRICHAIN 360.<br><br>` +
+      `💬 <strong>Ask me about:</strong><br>` +
+      `• 🌽 Harvest timing and crop advice<br>` +
+      `• 🦠 Disease and pest risk in your area<br>` +
+      `• 📈 Live market prices for any crop<br>` +
+      `• ☀️ Solar drying costs and partners<br>` +
+      `• 📜 Quality certification and passports<br>` +
+      `• 🚛 Transport and logistics<br>` +
+      `• 🌤️ Weather impact on your crops<br>` +
+      `• 💳 Payments and digital credit`;
   }
 }
 

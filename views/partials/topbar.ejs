@@ -1,19 +1,39 @@
 <header class="topbar">
   <div class="topbar-left">
     <button class="menu-btn" onclick="openSidebar()" aria-label="Open menu">☰</button>
-    <span><%= typeof title !== 'undefined' ? title : 'AGRICHAIN 360' %></span>
+    <span style="font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px"><%= typeof title !== 'undefined' ? title : 'AGRICHAIN 360' %></span>
   </div>
   <div class="topbar-right">
-    <div class="search-box">
+    <!-- Search (hidden on mobile) -->
+    <div class="search-box" style="display:none" id="topbarSearch">
       <i class="fas fa-search"></i>
-      <input type="text" placeholder="Search crops, farmers, buyers..." id="globalSearch">
+      <input type="text" placeholder="Search..." id="globalSearch" style="width:160px" onkeyup="if(event.key==='Enter')window.location.href='/marketplace?q='+encodeURIComponent(this.value)">
     </div>
-    
+
     <% if (typeof user !== 'undefined' && user) { %>
-      <span style="font-size:0.85rem;color:var(--tx2);margin-right:8px"><%= user.name %></span>
-      <a href="/logout" class="btn btn-o btn-sm">Logout</a>
+      <!-- Logged in user -->
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:32px;height:32px;background:var(--grad-g, linear-gradient(135deg,#2E7D32,#4CAF50));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.8rem;flex-shrink:0">
+          <%= (user.name || user.phone || 'U').charAt(0).toUpperCase() %>
+        </div>
+        <span style="font-size:.82rem;font-weight:600;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis" class="hide-mobile"><%= user.name || user.phone %></span>
+        <a href="/logout" class="btn btn-o btn-sm" style="padding:5px 12px;font-size:.72rem;white-space:nowrap">Logout</a>
+      </div>
     <% } else { %>
-      <a href="/login" class="btn btn-o btn-sm">Login</a>
+      <!-- Not logged in -->
+      <a href="/login" class="btn btn-o btn-sm" style="padding:5px 12px;font-size:.72rem;white-space:nowrap">Login</a>
+      <a href="/signup" class="btn btn-p btn-sm" style="padding:5px 12px;font-size:.72rem;white-space:nowrap">Sign Up</a>
     <% } %>
   </div>
 </header>
+
+<style>
+  /* Show search on desktop */
+  @media(min-width:901px){
+    #topbarSearch{display:flex!important}
+  }
+  /* Hide username on small screens */
+  @media(max-width:600px){
+    .hide-mobile{display:none!important}
+  }
+</style>

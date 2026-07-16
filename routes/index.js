@@ -294,6 +294,16 @@ router.get('/buyer-dashboard', (req, res) => {
   });
 });
 
+// Admin Dashboard
+router.get('/admin-dashboard', (req, res) => {
+  res.render('layout', {
+    title: 'Admin Dashboard — AGRICHAIN 360',
+    page: 'admin-dashboard',
+    data: { user: req.session.user },
+    body: 'adminDashboard',
+  });
+});
+
 // Login Page
 router.get('/login', (req, res) => {
   res.render('layout', {
