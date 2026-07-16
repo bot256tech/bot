@@ -173,6 +173,10 @@ async function startServer() {
     { path: '/api/v1/buyers', module: './api/routes/buyer.routes', name: 'Buyers', limiter: apiLimiter },
     { path: '/api/v1/subscriptions', module: './api/routes/subscription.routes', name: 'Subscriptions', limiter: apiLimiter },
     { path: '/api/v1/ai', module: './api/routes/ai.routes', name: 'AI Advisor', limiter: apiLimiter },
+    { path: '/api/v1/village-agents', module: './api/routes/village-agent.routes', name: 'Village Agents', limiter: apiLimiter },
+    { path: '/api/v1/logistics', module: './api/routes/logistics.routes', name: 'Logistics', limiter: apiLimiter },
+    { path: '/api/v1/disease', module: './api/routes/disease.routes', name: 'Disease Detection', limiter: apiLimiter },
+    { path: '/api/v1/ecosystem', module: './api/routes/ecosystem.routes', name: 'Ecosystem', limiter: apiLimiter },
   ];
 
   for (const api of apiModules) {
