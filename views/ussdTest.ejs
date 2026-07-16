@@ -1,0 +1,68 @@
+<div class="card" style="max-width:620px;margin:0 auto">
+  <h2 style="font-weight:800;margin-bottom:8px">📱 USSD Simulator</h2>
+  <p style="color:var(--tx2);margin-bottom:20px">Test the AGRICHAIN 360 USSD system (*284#)</p>
+  
+  <div style="background:#0b120b;color:#e4e8e4;padding:20px;border-radius:12px;font-family:monospace;font-size:14px;min-height:280px">
+    <div id="ussdScreen" style="white-space:pre-line;line-height:1.5">
+CON Welcome to AGRICHAIN 360
+1. Register as Farmer
+2. Check My Crops
+3. Book Drying Service
+4. View Quality Passport
+5. Check Payments
+0. Exit
+    </div>
+  </div>
+  
+  <div style="margin-top:16px;display:flex;gap:8px">
+    <input type="text" id="ussdInput" placeholder="Enter option (e.g. 1 or 1*2)" style="flex:1;padding:10px;border-radius:8px">
+    <button class="btn btn-p" onclick="sendUSSD()">Send</button>
+    <button class="btn btn-o" onclick="resetUSSD()">Reset</button>
+  </div>
+  
+  <div style="margin-top:12px;font-size:.75rem;color:var(--tx2)">
+    This simulates a real USSD session. Try: <strong>1 → enter ID → name → district → crop</strong>
+  </div>
+</div>
+
+<script>
+let currentSession = '';
+
+function sendUSSD() {
+  const input = document.getElementById('ussdInput').value.trim();
+  const screen = document.getElementById('ussdScreen');
+  
+  if (!input) return;
+  
+  fetch('/ussd', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId: currentSession || 'demo-' + Date.now(),
+      phoneNumber: '+256774123456',
+      text: input
+    })
+  })
+  .then(res => res.text())
+  .then(data => {
+    screen.innerHTML = data;
+    currentSession = currentSession || 'demo-' + Date.now();
+    document.getElementById('ussdInput').value = '';
+  })
+  .catch(() => {
+    screen.innerHTML = 'END Connection error. Please try again.';
+  });
+}
+
+function resetUSSD() {
+  document.getElementById('ussdScreen').innerHTML = `CON Welcome to AGRICHAIN 360
+1. Register as Farmer
+2. Check My Crops
+3. Book Drying Service
+4. View Quality Passport
+5. Check Payments
+0. Exit`;
+  currentSession = '';
+  document.getElementById('ussdInput').value = '';
+}
+</script>

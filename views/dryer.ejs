@@ -1,0 +1,59 @@
+<div class="grid grid2 mb20">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">☀️ Solar Drying System — Live Dashboard</h3>
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:2.2rem;font-weight:900;color:var(--g)">2</div>
+        <div style="font-size:.75rem;color:var(--tx2)">Active Solar Dryers</div>
+      </div>
+      <div style="text-align:right">
+        <div id="dryerMoisture" style="font-size:2.2rem;font-weight:900">25.0%</div>
+        <div style="font-size:.75rem;color:var(--tx2)">Current Moisture</div>
+      </div>
+    </div>
+    
+    <div class="progress" style="height:14px;margin-bottom:12px"><div id="dryerBar" class="progress-fill g" style="width:0%"></div></div>
+    
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:20px">
+      <div><strong>Start:</strong> 25%</div>
+      <div><strong>Target:</strong> 13%</div>
+    </div>
+    
+    <button class="btn btn-p" onclick="startDryerSim()" style="width:100%">▶ Start Drying Simulation</button>
+    <p style="font-size:.75rem;color:var(--tx2);margin-top:8px;text-align:center">Click to simulate real-time moisture reduction</p>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">💰 Per-Kg Drying Pricing Table</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Crop</th><th>Time</th><th>Rate/kg</th><th>Pre-Dry</th><th>Post-Dry</th><th>Gain</th></tr>
+        </thead>
+        <tbody>
+          <% pricing.forEach(function(p) { %>
+          <tr>
+            <td><strong><%= p.crop %></strong></td>
+            <td><%= p.dryingTime %></td>
+            <td><strong>UGX <%= p.pricePerKg %></strong></td>
+            <td>UGX <%= p.preDryPrice %></td>
+            <td><strong class="text-g">UGX <%= p.postDryPrice %></strong></td>
+            <td><span class="tag tag-g"><%= p.returnRatio %></span></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-weight:800;margin-bottom:16px">📊 Drying Performance Metrics</h3>
+  <div class="grid grid4">
+    <div class="metric"><div class="metric-val">6–14</div><div class="metric-lbl">Hours Avg Dry Time</div></div>
+    <div class="metric"><div class="metric-val">200</div><div class="metric-lbl">UGX/kg (Maize)</div></div>
+    <div class="metric"><div class="metric-val">10:1</div><div class="metric-lbl">Best Return (Coffee)</div></div>
+    <div class="metric"><div class="metric-val">85%</div><div class="metric-lbl">Avg Moisture Drop</div></div>
+  </div>
+</div>

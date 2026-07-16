@@ -1,0 +1,96 @@
+<div class="grid grid2 mb20">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">📡 IoT Smart Solar Dryer — Live</h3>
+    <div style="font-size:.85rem;color:var(--tx2);margin-bottom:16px">Dryer ID: DRY-MYG-001 • Mayuge Hub</div>
+    
+    <div class="grid grid3" style="gap:14px">
+      <div class="metric"><div id="iotTemp" class="metric-val">42.8°C</div><div class="metric-lbl">Temperature</div></div>
+      <div class="metric"><div id="iotHum" class="metric-val">31%</div><div class="metric-lbl">Humidity</div></div>
+      <div class="metric"><div id="iotMoist" class="metric-val">14.2%</div><div class="metric-lbl">Crop Moisture</div></div>
+    </div>
+    
+    <div style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:.85rem">Drying Progress</span>
+        <span id="iotProgress" style="font-weight:700">78%</span>
+      </div>
+      <div class="progress"><div id="iotBar" class="progress-fill g" style="width:78%"></div></div>
+    </div>
+    
+    <div style="margin-top:16px;font-size:.85rem">
+      <div><strong>Fan Status:</strong> <span class="tag tag-g">Running (2/2)</span></div>
+      <div><strong>Solar Power:</strong> 48W (Good)</div>
+      <div><strong>Estimated Completion:</strong> 4h 12m</div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">Live Sensor Feed</h3>
+    <div style="font-size:.8rem">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span>Battery Voltage</span><span id="iotBatt">12.4V</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span>Airflow</span><span id="iotAir">2.8 m/s</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span>Door Status</span><span class="tag tag-g">Closed</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0"><span>Last Update</span><span id="iotTime">just now</span></div>
+    </div>
+    
+    <div style="margin-top:18px">
+      <button class="btn btn-p btn-sm" onclick="simulateIoTUpdate()">🔄 Refresh Sensors</button>
+      <button class="btn btn-o btn-sm" onclick="showToast('Alert sent to field officer', 'success')" style="margin-left:8px">Send Alert</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-weight:800;margin-bottom:12px">Historical Sensor Data (Last 24h)</h3>
+  <div class="chart-wrap"><canvas id="iotChart"></canvas></div>
+</div>
+
+<script>
+function simulateIoTUpdate() {
+  const temp = (38 + Math.random() * 8).toFixed(1);
+  const hum = Math.floor(28 + Math.random() * 10);
+  const moist = (13.5 + Math.random() * 1.5).toFixed(1);
+  
+  document.getElementById('iotTemp').innerText = temp + '°C';
+  document.getElementById('iotHum').innerText = hum + '%';
+  document.getElementById('iotMoist').innerText = moist + '%';
+  document.getElementById('iotBatt').innerText = (11.8 + Math.random() * 0.8).toFixed(1) + 'V';
+  document.getElementById('iotTime').innerText = 'just now';
+  
+  showToast('Sensor data updated from ESP32', 'success');
+}
+
+// Auto-update every 8 seconds
+setInterval(() => {
+  if (document.getElementById('iotTemp')) {
+    const tempEl = document.getElementById('iotTemp');
+    const current = parseFloat(tempEl.innerText);
+    tempEl.innerText = (current + (Math.random() - 0.5) * 0.8).toFixed(1) + '°C';
+  }
+}, 8000);
+
+// Simple chart
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('iotChart');
+  if (canvas && typeof Chart !== 'undefined') {
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: ['00:00','04:00','08:00','12:00','16:00','20:00'],
+        datasets: [{
+          label: 'Temperature (°C)',
+          data: [34, 41, 47, 43, 39, 36],
+          borderColor: '#2E7D32',
+          tension: 0.4
+        }, {
+          label: 'Humidity (%)',
+          data: [52, 38, 29, 31, 35, 41],
+          borderColor: '#FBC02D',
+          tension: 0.4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+});
+</script>

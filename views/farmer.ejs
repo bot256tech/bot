@@ -1,0 +1,56 @@
+<div class="grid grid2 mb20">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">👨‍🌾 Farmer Profiles (5 Pilot Farmers)</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>District</th><th>Crops</th><th>Progress</th><th>Price/kg</th><th>Net Revenue</th></tr>
+        </thead>
+        <tbody>
+          <% farmers.forEach(function(f) { %>
+          <tr>
+            <td><strong><%= f.id %></strong></td>
+            <td><%= f.name %></td>
+            <td><%= f.district %></td>
+            <td><%= f.crops.join(', ') %></td>
+            <td>
+              <div class="progress"><div class="progress-fill g" style="width:<%= f.harvestProgress %>%"></div></div>
+              <span style="font-size:.7rem"><%= f.harvestProgress %>%</span>
+            </td>
+            <td><strong>UGX <%= f.pricePerKg.toLocaleString() %></strong></td>
+            <td><strong class="text-g">UGX <%= f.netAfterCosts.toLocaleString() %></strong></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">📋 Selected Farmer: <%= selectedFarmer.name %></h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:.9rem">
+      <div><strong>Batch ID:</strong> <span class="tag tag-g"><%= selectedFarmer.batchId %></span></div>
+      <div><strong>District:</strong> <%= selectedFarmer.district %></div>
+      <div><strong>Farm Size:</strong> <%= selectedFarmer.farmSize %></div>
+      <div><strong>Moisture:</strong> <%= selectedFarmer.moisture %>%</div>
+      <div><strong>Aflatoxin:</strong> <span class="tag tag-g">PASS</span></div>
+      <div><strong>Drying Rate:</strong> UGX <%= selectedFarmer.dryingRate %>/kg</div>
+      <div><strong>Transport Cost:</strong> UGX <%= selectedFarmer.transportCost.toLocaleString() %></div>
+      <div><strong>Expected Revenue:</strong> <strong class="text-g">UGX <%= selectedFarmer.expectedRevenue.toLocaleString() %></strong></div>
+    </div>
+    <div style="margin-top:20px">
+      <button class="btn btn-p" onclick="showToast('Farmer profile updated. SMS alert sent to <%= selectedFarmer.name %>.', 'success')">📱 Send SMS Alert</button>
+      <button class="btn btn-o" onclick="showToast('Quality report generated for Batch <%= selectedFarmer.batchId %>', 'success')" style="margin-left:8px">📄 Generate Report</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-weight:800;margin-bottom:16px">📈 Farmer Performance Dashboard</h3>
+  <div class="grid grid4">
+    <div class="metric"><div class="metric-val">75%</div><div class="metric-lbl">Avg Harvest Progress</div></div>
+    <div class="metric"><div class="metric-val">12.7%</div><div class="metric-lbl">Avg Moisture Level</div></div>
+    <div class="metric"><div class="metric-val">62%</div><div class="metric-lbl">Women Farmers</div></div>
+    <div class="metric"><div class="metric-val">UGX 3.4M</div><div class="metric-lbl">Avg Net Revenue</div></div>
+  </div>
+</div>

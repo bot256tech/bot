@@ -1,0 +1,76 @@
+<div class="grid grid2">
+  <div class="card">
+    <h3 style="font-weight:800">📡 Real IoT Smart Dryer</h3>
+    <div style="font-size:.8rem;color:#e65100;margin-bottom:12px">Connected to MQTT Gateway</div>
+    
+    <div id="liveData">
+      <div class="grid grid3" style="gap:12px">
+        <div class="metric"><div id="realTemp" class="metric-val">—</div><div class="metric-lbl">Temperature</div></div>
+        <div class="metric"><div id="realHum" class="metric-val">—</div><div class="metric-lbl">Humidity</div></div>
+        <div class="metric"><div id="realMoist" class="metric-val">—</div><div class="metric-lbl">Moisture</div></div>
+      </div>
+    </div>
+    
+    <div style="margin-top:16px">
+      <button onclick="sendFanCommand()" class="btn btn-p">Toggle Fans</button>
+      <button onclick="sendCommand('calibrate')" class="btn btn-o" style="margin-left:8px">Calibrate Sensors</button>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800">Connected Devices</h3>
+    <div id="deviceList" style="font-size:.85rem"></div>
+  </div>
+</div>
+
+<script>
+let socket;
+
+// Connect to MQTT Gateway (simulated via polling for now)
+function updateLiveData() {
+  fetch('/mqtt/devices/DRY-MYG-001')
+    .then(r => r.json())
+    .then(data => {
+      if (data.temperature) {
+        document.getElementById('realTemp').innerText = data.temperature + '°C';
+        document.getElementById('realHum').innerText = data.humidity + '%';
+        document.getElementById('realMoist').innerText = data.moisture + '%';
+      }
+    })
+    .catch(() => {});
+}
+
+function sendFanCommand() {
+  fetch('/mqtt/devices/DRY-MYG-001/command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'toggle_fans' })
+  }).then(() => alert('Command sent via MQTT'));
+}
+
+function sendCommand(cmd) {
+  fetch('/mqtt/devices/DRY-MYG-001/command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: cmd })
+  }).then(() => alert('Command sent: ' + cmd));
+}
+
+// Poll for updates
+setInterval(updateLiveData, 3000);
+
+// Load devices
+function loadDevices() {
+  fetch('/mqtt/devices')
+    .then(r => r.json())
+    .then(devices => {
+      const container = document.getElementById('deviceList');
+      container.innerHTML = devices.map(d => 
+        `<div style="padding:6px 0;border-bottom:1px solid #eee">${d.id} — Last seen: ${new Date(d.lastSeen).toLocaleTimeString()}</div>`
+      ).join('');
+    });
+}
+setInterval(loadDevices, 8000);
+loadDevices();
+updateLiveData();
+</script>

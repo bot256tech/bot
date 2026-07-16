@@ -1,0 +1,21 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+    <span><%= typeof title !== 'undefined' ? title : 'AGRICHAIN 360' %></span>
+  </div>
+  <div class="topbar-right">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search crops, farmers, buyers..." id="globalSearch">
+    </div>
+    
+    <% if (typeof user !== 'undefined' && user) { %>
+      <span style="font-size:0.85rem;color:var(--tx2);margin-right:8px"><%= user.name %></span>
+      <a href="/logout" class="btn btn-o btn-sm">Logout</a>
+    <% } else { %>
+      <a href="/login" class="btn btn-o btn-sm">Login</a>
+    <% } %>
+    
+    <a href="/download/proposal" class="btn btn-sm btn-g">📄 Download Proposal</a>
+  </div>
+</header>

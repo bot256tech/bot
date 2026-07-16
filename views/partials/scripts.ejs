@@ -1,0 +1,191 @@
+<script src="/js/app.js"></script>
+<script>
+  // ══ Dark/Light Mode Toggle ══
+  function toggleTheme() {
+    const h = document.documentElement;
+    h.classList.toggle('dark'); h.classList.toggle('light');
+    localStorage.setItem('theme', h.classList.contains('dark') ? 'dark' : 'light');
+  }
+  (function() {
+    const t = localStorage.getItem('theme') || 'light';
+    document.documentElement.className = t;
+  })();
+
+  // ══ Counter Animation ══
+  function animateCounters() {
+    document.querySelectorAll('.counter').forEach(function(el) {
+      const target = parseInt(el.dataset.target);
+      let current = 0;
+      const increment = target / 60;
+      const timer = setInterval(function() {
+        current += increment;
+        if (current >= target) {
+          el.textContent = target >= 1000000 ? (target/1000000).toFixed(1)+'M' :
+                          target >= 1000 ? Math.floor(target/1000)+'K' :
+                          target.toLocaleString();
+          clearInterval(timer);
+        } else {
+          el.textContent = Math.floor(current).toLocaleString();
+        }
+      }, 25);
+    });
+  }
+
+  // ══ Toast Notifications ══
+  function showToast(msg, type) {
+    type = type || 'success';
+    var t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = '<span>' + (type === 'success' ? '✅' : '⚠️') + '</span> ' + msg;
+    document.body.appendChild(t);
+    setTimeout(function() {
+      t.style.opacity = '0'; t.style.transition = 'opacity .3s';
+      setTimeout(function() { t.remove(); }, 300);
+    }, 3500);
+  }
+
+  // ══ IoT Warehouse Simulation ══
+  var warehouseInterval;
+  function startWarehouseSim() {
+    if (warehouseInterval) clearInterval(warehouseInterval);
+    warehouseInterval = setInterval(function() {
+      var te = document.getElementById('wTemp'), hu = document.getElementById('wHum');
+      if (te) te.textContent = (24 + Math.random() * 2).toFixed(1) + '°C';
+      if (hu) hu.textContent = Math.floor(56 + Math.random() * 6) + '%';
+    }, 3000);
+  }
+
+  // ══ Dryer Simulation ══
+  var dryerInterval;
+  function startDryerSim() {
+    if (dryerInterval) clearInterval(dryerInterval);
+    var moisture = 25;
+    dryerInterval = setInterval(function() {
+      moisture -= 1.5;
+      if (moisture <= 13) moisture = 13;
+      var el = document.getElementById('dryerMoisture');
+      if (el) el.textContent = moisture.toFixed(1) + '%';
+      var bar = document.getElementById('dryerBar');
+      if (bar) bar.style.width = ((25 - moisture) / 12 * 100) + '%';
+      if (moisture <= 13) {
+        clearInterval(dryerInterval);
+        showToast('Drying complete! 13% moisture achieved. Batch ready for aflatoxin testing.', 'success');
+      }
+    }, 800);
+  }
+
+  // ══ Marketplace Purchase ══
+  function simulatePurchase(crop, tons, price, location) {
+    showToast('Purchase confirmed: ' + crop + ' — ' + tons + ' tons at UGX ' + price.toLocaleString() + '/kg from ' + location + '. Farmer paid via mobile money.', 'success');
+  }
+
+  // ══ Marketplace Search ══
+  document.getElementById('marketplaceSearch')?.addEventListener('input', function(e) {
+    window.location.href = '/marketplace?q=' + encodeURIComponent(e.target.value);
+  });
+
+  // ══ AI Chat ══
+  var aiAdvice = <%- JSON.stringify(typeof aiAdvice !== 'undefined' ? aiAdvice : []) %>;
+  function askAI() {
+    var inp = document.getElementById('aiInput');
+    if (!inp || !inp.value.trim()) return;
+    var q = inp.value.trim();
+    var chat = document.getElementById('aiChat');
+    chat.innerHTML += '<div class="chat-msg user"><div class="chat-bub user">' + q + '</div></div>';
+    var match = aiAdvice.find(function(a) {
+      return q.toLowerCase().includes(a.q.split(' ').slice(0,3).join(' ').toLowerCase());
+    }) || aiAdvice[0];
+    setTimeout(function() {
+      chat.innerHTML += '<div class="chat-msg"><div class="chat-bub ai">' + match.a + '</div></div>';
+      chat.scrollTop = chat.scrollHeight;
+    }, 600);
+    inp.value = '';
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function quickAsk(idx) {
+    var a = aiAdvice[idx];
+    var chat = document.getElementById('aiChat');
+    chat.innerHTML += '<div class="chat-msg user"><div class="chat-bub user">' + a.q + '</div></div>';
+    setTimeout(function() {
+      chat.innerHTML += '<div class="chat-msg"><div class="chat-bub ai">' + a.a + '</div></div>';
+      chat.scrollTop = chat.scrollHeight;
+    }, 600);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  // ══ Init ══
+  // Register Service Worker for Offline Support (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('[PWA] ServiceWorker registered successfully');
+      })
+      .catch((error) => {
+        console.log('[PWA] ServiceWorker registration failed:', error);
+      });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    animateCounters();
+
+    // Start simulations based on current page
+    var page = '<%= page %>';
+    if (page === 'warehouse') startWarehouseSim();
+    if (page === 'dryer') startDryerSim();
+
+    // Landing chart
+    var lc = document.getElementById('landingChart');
+    if (lc && typeof Chart !== 'undefined') {
+      new Chart(lc, {
+        type: 'line',
+        data: {
+          labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+          datasets: [
+            { label: 'Farmers Onboarded', data: [50,120,200,280,370,460,540,620,700,750,780,800], borderColor: '#2E7D32', backgroundColor: 'rgba(46,125,50,.1)', fill: true, tension: 0.4 },
+            { label: 'Revenue (UGX M)', data: [2.5,3.8,5.2,5.8,6.5,7.1,7.8,6.0,4.8,3.5,2.8,2.0], borderColor: '#FBC02D', backgroundColor: 'rgba(251,192,45,.1)', fill: true, tension: 0.4 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { grid: { color: '#e0e0e0' } }, x: { grid: { display: false } } } }
+      });
+    }
+
+    // Analytics charts
+    var ac = document.getElementById('analyticsChart');
+    if (ac && typeof Chart !== 'undefined') {
+      new Chart(ac, {
+        type: 'bar',
+        data: {
+          labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+          datasets: [
+            { label: 'Revenue (UGX M)', data: [3.2,4.1,5.8,6.3,7.2,8.1,8.9,6.5,5.2,4.0,3.1,2.2], backgroundColor: '#2E7D32', borderRadius: 8 },
+            { label: 'Farmers', data: [100,180,260,340,420,500,580,640,700,750,780,800], backgroundColor: '#FBC02D', borderRadius: 8 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { grid: { color: '#e0e0e0' } }, x: { grid: { display: false } } } }
+      });
+    }
+
+    var cc = document.getElementById('cropChart');
+    if (cc && typeof Chart !== 'undefined') {
+      new Chart(cc, {
+        type: 'doughnut',
+        data: {
+          labels: ['Maize', 'Groundnuts', 'Sunflower', 'Rice', 'Soybeans'],
+          datasets: [{ data: [45, 25, 15, 10, 5], backgroundColor: ['#2E7D32', '#FBC02D', '#F57F17', '#0277bd', '#6a1b9a'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    // Mobile menu
+    var menuBtn = document.querySelector('.menu-btn');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.toggle('open');
+      });
+    }
+  });
+</script>

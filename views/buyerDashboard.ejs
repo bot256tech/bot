@@ -1,0 +1,36 @@
+<div class="card mb20">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+      <h2 style="font-weight:800">Welcome, <%= typeof user !== 'undefined' ? user.name : 'GrainCorp East Africa' %> 🏢</h2>
+      <div style="color:var(--tx2)">Enterprise Buyer Dashboard</div>
+    </div>
+    <a href="/marketplace" class="btn btn-p">Browse Marketplace</a>
+  </div>
+  
+  <div class="grid grid4">
+    <div class="metric"><div class="metric-val">25</div><div class="metric-lbl">Total Orders</div></div>
+    <div class="metric"><div class="metric-val">UGX 98M</div><div class="metric-lbl">Total Spent</div></div>
+    <div class="metric"><div class="metric-val">12</div><div class="metric-lbl">Active Contracts</div></div>
+    <div class="metric"><div class="metric-val">94%</div><div class="metric-lbl">Repeat Rate</div></div>
+  </div>
+</div>
+
+<div class="grid grid2">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">Recent Orders</h3>
+    <div style="font-size:.9rem">
+      <div style="padding:8px 0;border-bottom:1px solid var(--bd)">ORD-7842 — 15 tons Maize (Delivered)</div>
+      <div style="padding:8px 0;border-bottom:1px solid var(--bd)">ORD-7831 — 8 tons Groundnuts (Delivered)</div>
+      <div style="padding:8px 0">ORD-7825 — 5 tons Coffee (In Transit)</div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">Quick Actions</h3>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a href="/marketplace" class="btn btn-o">🛒 Shop Marketplace</a>
+      <a href="/order-history" class="btn btn-o">🧾 View Order History</a>
+      <a href="/pricing" class="btn btn-o">💰 Manage Subscription</a>
+    </div>
+  </div>
+</div>

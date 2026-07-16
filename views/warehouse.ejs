@@ -1,0 +1,39 @@
+<div class="grid grid2 mb20">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">🏭 IoT Smart Warehouse — Busoga Hub #01</h3>
+    
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px">
+      <div class="metric"><div id="wTemp" class="metric-val">26.4°C</div><div class="metric-lbl">Temperature</div></div>
+      <div class="metric"><div id="wHum" class="metric-val">58%</div><div class="metric-lbl">Humidity</div></div>
+      <div class="metric"><div class="metric-val">85%</div><div class="metric-lbl">Capacity Used</div></div>
+      <div class="metric"><div class="metric-val">42</div><div class="metric-lbl">Active Batches</div></div>
+    </div>
+    
+    <div style="margin-top:24px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:600">CO₂ Level</span><span>420 ppm</span></div>
+      <div class="progress"><div class="progress-fill a" style="width:42%"></div></div>
+    </div>
+    
+    <div style="margin-top:16px;font-size:.85rem">
+      <div style="display:flex;justify-content:space-between"><span>Status:</span> <span class="tag tag-g">All Systems Nominal</span></div>
+      <div style="margin-top:8px">Last sensor sync: <strong>just now</strong></div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">📡 Live Sensor Network (5 Nodes)</h3>
+    <div style="font-size:.85rem">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)"><span>Node 01 — Jinja North</span><span class="tag tag-g">Online</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)"><span>Node 02 — Iganga Central</span><span class="tag tag-g">Online</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)"><span>Node 03 — Kamuli East</span><span class="tag tag-g">Online</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)"><span>Node 04 — Mayuge Hub</span><span class="tag tag-g">Online</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0"><span>Node 05 — Busoga HQ</span><span class="tag tag-a">85% Battery</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-weight:800">🔒 Quality & Traceability</h3>
+  <p style="margin-top:12px;font-size:.9rem">Every batch is tracked via blockchain. Moisture, aflatoxin, temperature, and humidity logged every 15 minutes. Full audit trail available for export buyers.</p>
+  <div style="margin-top:16px"><button class="btn btn-o" onclick="showToast('Blockchain audit report downloaded.', 'success')">📥 Download Full Audit</button></div>
+</div>

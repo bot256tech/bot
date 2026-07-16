@@ -1,0 +1,46 @@
+<div class="card mb20">
+  <h3 style="font-weight:800;margin-bottom:16px">🚛 Transport Hub — Active Routes (Busoga Region)</h3>
+  
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>Route</th><th>Farmers</th><th>Crop</th><th>Volume</th><th>Cost/kg</th><th>Status</th><th>Details</th></tr>
+      </thead>
+      <tbody>
+        <% transport.routes.forEach(function(r) { %>
+        <tr>
+          <td><strong>Route <%= r.id %> — <%= r.name %></strong></td>
+          <td><%= r.farmers %></td>
+          <td><%= r.crop %></td>
+          <td><%= r.totalKg %> kg</td>
+          <td>UGX <%= r.costPerKg %></td>
+          <td><span class="tag <%= r.status === 'Completed' ? 'tag-g' : r.status === 'In Progress' ? 'tag-a' : 'tag-b' %>"><%= r.status %></span></td>
+          <td><%= r.collectionPoints %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid grid2">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">📊 Transport Summary</h3>
+    <div class="grid grid3">
+      <div class="metric"><div class="metric-val"><%= transport.summary.activeRoutes %></div><div class="metric-lbl">Active Routes</div></div>
+      <div class="metric"><div class="metric-val"><%= transport.summary.farmersOnRoutes %></div><div class="metric-lbl">Farmers on Routes</div></div>
+      <div class="metric"><div class="metric-val">UGX <%= transport.summary.avgCostPerKg %></div><div class="metric-lbl">Avg Cost/kg</div></div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">💡 Worked Example (Maize — 5 farmers)</h3>
+    <div style="font-size:.85rem;line-height:1.7">
+      <div><strong>Truck Cost:</strong> UGX <%= transport.workedExample.truckCost.toLocaleString() %></div>
+      <div><strong>Per Farmer (200kg):</strong> UGX <%= transport.workedExample.transportCost.toLocaleString() %> transport + UGX <%= transport.workedExample.dryingCost.toLocaleString() %> drying = <strong>UGX <%= transport.workedExample.totalFarmerCost.toLocaleString() %></strong></div>
+      <div style="margin-top:8px"><strong>Value Before Drying:</strong> UGX <%= transport.workedExample.valueBeforeDrying.toLocaleString() %></div>
+      <div><strong>Value After Drying:</strong> UGX <%= transport.workedExample.valueAfterDrying.toLocaleString() %></div>
+      <div style="margin-top:8px"><strong>Farmer Net Gain:</strong> <span class="text-g">UGX <%= transport.workedExample.farmerNetGain.toLocaleString() %></span> (<%= transport.workedExample.returnRatio %>)</div>
+    </div>
+  </div>
+</div>

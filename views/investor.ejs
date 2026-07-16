@@ -1,0 +1,55 @@
+<div class="grid grid2 mb20">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">💰 Investor Deck — AGRICHAIN 360</h3>
+    
+    <div style="font-size:.9rem;line-height:1.8">
+      <div><strong>Problem:</strong> 35–40% post-harvest losses for smallholder farmers in Busoga due to poor drying & storage.</div>
+      <div style="margin-top:12px"><strong>Solution:</strong> End-to-end B2B platform combining solar drying, IoT storage, transport coordination, and certified marketplace.</div>
+      <div style="margin-top:12px"><strong>Market:</strong> 800 farmers in 4 districts. UGX 350M annual savings projected.</div>
+    </div>
+    
+    <div style="margin-top:20px">
+      <div class="grid grid3">
+        <div><div style="font-size:1.8rem;font-weight:900;color:var(--g)">UGX 35M</div><div style="font-size:.7rem">Catalytic Funding</div></div>
+        <div><div style="font-size:1.8rem;font-weight:900;color:var(--g)">22</div><div style="font-size:.7rem">Break-even Month</div></div>
+        <div><div style="font-size:1.8rem;font-weight:900;color:var(--g)">3.6:1</div><div style="font-size:.7rem">Avg Farmer ROI</div></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">📊 Pricing Economics (Per 50kg Batch)</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Crop</th><th>Drying Cost</th><th>Pre-Dry</th><th>Post-Dry</th><th>Farmer Gain</th></tr>
+        </thead>
+        <tbody>
+          <% pricing.forEach(function(p) { %>
+          <tr>
+            <td><%= p.crop %></td>
+            <td>UGX <%= p.batchCost50kg %></td>
+            <td>UGX <%= p.preDryPrice %></td>
+            <td><strong>UGX <%= p.postDryPrice %></strong></td>
+            <td><span class="tag tag-g"><%= p.returnRatio %></span></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-weight:800;margin-bottom:16px">🎯 Impact &amp; Scalability</h3>
+  <div class="grid grid4">
+    <div class="metric"><div class="metric-val">800</div><div class="metric-lbl">Farmers Y1</div></div>
+    <div class="metric"><div class="metric-val">1,000</div><div class="metric-lbl">Tons Y1</div></div>
+    <div class="metric"><div class="metric-val">35</div><div class="metric-lbl">Youth Jobs</div></div>
+    <div class="metric"><div class="metric-val">350M</div><div class="metric-lbl">Farmer Savings</div></div>
+  </div>
+  
+  <div style="margin-top:24px">
+    <a href="/download/proposal" class="btn btn-g" style="font-size:1rem;padding:14px 32px">📄 Download Full Investor Proposal (PDF)</a>
+  </div>
+</div>

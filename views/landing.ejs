@@ -1,0 +1,56 @@
+<div class="grid grid3 mb20">
+  <div class="metric"><div class="metric-val counter" data-target="<%= stats.farmers %>">0</div><div class="metric-lbl">Farmers Registered (Yr 1)</div><div class="metric-tr up">▲ 200 pilot cohort</div></div>
+  <div class="metric"><div class="metric-val counter" data-target="<%= stats.tonsProcessed %>">0</div><div class="metric-lbl">Tons Processed (Yr 1)</div><div class="metric-tr up">▲ Export-grade certified</div></div>
+  <div class="metric"><div class="metric-val counter" data-target="<%= stats.farmerSavings %>">0</div><div class="metric-lbl">Farmer Savings (UGX)</div><div class="metric-tr up">▲ From reduced losses</div></div>
+  <div class="metric"><div class="metric-val counter" data-target="<%= stats.jobsCreated %>">0</div><div class="metric-lbl">Youth Jobs Created</div><div class="metric-tr up">▲ Across 4 districts</div></div>
+</div>
+
+<div class="grid grid2">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:8px">📡 System Status</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:.85rem">
+      <div style="display:flex;justify-content:space-between"><span>USSD Gateway (*284#)</span><span class="tag tag-g">● Online</span></div>
+      <div style="display:flex;justify-content:space-between"><span>IoT Sensor Network (5 nodes)</span><span class="tag tag-g">● Online</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Solar Dryers (2 units)</span><span class="tag tag-g">● Operational</span></div>
+      <div style="display:flex;justify-content:space-between"><span>AgriTrade Marketplace</span><span class="tag tag-g">● Active — 6 listings</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Storage Facility (Busoga Hub #01)</span><span class="tag tag-a">● 85% Full</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Transport Coordination</span><span class="tag tag-g">● 3 routes — Jinja, Iganga, Kamuli, Mayuge</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:8px">🔔 Live Notifications</h3>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem">
+      <% notifications.forEach(function(n) { %>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)">
+          <span><%= n.icon %></span><span style="flex:1"><%= n.msg %></span>
+          <span style="font-size:.7rem;color:var(--tx2)"><%= n.time %></span>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid2 mt20">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">📊 Platform Growth</h3>
+    <div class="chart-wrap"><canvas id="landingChart"></canvas></div>
+  </div>
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">🎯 AYuTe Africa Challenge — Season 5</h3>
+    <div style="font-size:.85rem;line-height:1.8">
+      <p><strong>Track:</strong> AgriTech (National Competition)</p>
+      <p><strong>Challenge Area:</strong> Post-Harvest Loss Reduction & Value Addition</p>
+      <p><strong>Focus Crops:</strong> Coffee, Cocoa, Maize</p>
+      <p><strong>Target Districts:</strong> Jinja, Iganga, Kamuli, Mayuge</p>
+      <p><strong>Funding:</strong> UGX 35,000,000 catalytic financing</p>
+      <p><strong>Powered by:</strong> Heifer International Uganda</p>
+      <p><strong>Backed by:</strong> Mastercard Foundation</p>
+      <p><strong>Implemented with:</strong> CURAD</p>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="tag tag-g">SDG 1</span><span class="tag tag-a">SDG 2</span>
+        <span class="tag tag-b">SDG 5</span><span class="tag tag-g">SDG 8</span>
+        <span class="tag tag-a">SDG 13</span>
+      </div>
+    </div>
+  </div>
+</div>

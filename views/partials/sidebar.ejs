@@ -1,0 +1,38 @@
+<aside class="sidebar" id="sidebar">
+  <div class="side-brand">🌾 AGRICHAIN <span style="color:var(--a)">360</span><sup style="font-size:.55rem">™</sup></div>
+  <nav class="side-nav">
+    <div class="nav-section">Main</div>
+    <a href="/" class="nav-item <%= page === 'landing' ? 'active' : '' %>"><span>🏠</span> Dashboard Overview</a>
+    <a href="/farmer" class="nav-item <%= page === 'farmer' ? 'active' : '' %>"><span>👨‍🌾</span> Farmer Portal</a>
+    <a href="/my-sales" class="nav-item <%= page === 'my-sales' ? 'active' : '' %>"><span>📈</span> My Sales</a>
+    <a href="/marketplace" class="nav-item <%= page === 'marketplace' ? 'active' : '' %>"><span>🛒</span> AgriTrade Marketplace</a>
+
+    <div class="nav-section">Operations</div>
+    <a href="/ai-advisor" class="nav-item <%= page === 'ai-advisor' ? 'active' : '' %>"><span>🤖</span> AI Crop Advisor</a>
+    <a href="/ai-disease" class="nav-item <%= page === 'ai-disease' ? 'active' : '' %>"><span>🦠</span> AI Disease Detection</a>
+    <a href="/ai-growth" class="nav-item <%= page === 'ai-growth' ? 'active' : '' %>"><span>🌱</span> AI Growth & Yield</a>
+    <a href="/dryer" class="nav-item <%= page === 'dryer' ? 'active' : '' %>"><span>☀️</span> Solar Drying <span class="badge">Live</span></a>
+    <a href="/iot-dryer" class="nav-item <%= page === 'iot-dryer' ? 'active' : '' %>"><span>📡</span> IoT Smart Dryer <span class="badge">MQTT</span></a>
+    <a href="/warehouse" class="nav-item <%= page === 'warehouse' ? 'active' : '' %>"><span>🏭</span> IoT Warehouse <span class="badge">Live</span></a>
+    <a href="/transport" class="nav-item <%= page === 'transport' ? 'active' : '' %>"><span>🚛</span> Transport Hub</a>
+
+    <div class="nav-section">Commerce</div>
+    <a href="/buyer" class="nav-item <%= page === 'buyer' ? 'active' : '' %>"><span>🏢</span> Buyer Portal</a>
+    <a href="/order-history" class="nav-item <%= page === 'order-history' ? 'active' : '' %>"><span>🧾</span> Order History</a>
+    <a href="/finance" class="nav-item <%= page === 'finance' ? 'active' : '' %>"><span>💳</span> Finance & Wallet</a>
+
+    <div class="nav-section">Insights</div>
+    <a href="/analytics" class="nav-item <%= page === 'analytics' ? 'active' : '' %>"><span>📊</span> Analytics Dashboard</a>
+    <a href="/roles" class="nav-item <%= page === 'roles' ? 'active' : '' %>"><span>👥</span> Role Selection</a>
+    <a href="/ussd/ussd-test" class="nav-item <%= page === 'ussd-test' ? 'active' : '' %>"><span>📱</span> USSD Simulator</a>
+    <a href="/investor" class="nav-item <%= page === 'investor' ? 'active' : '' %>"><span>💰</span> Investor Deck</a>
+  </nav>
+  <div style="padding:16px;border-top:1px solid var(--bd);margin-top:auto">
+    <button class="btn btn-o btn-sm" onclick="toggleTheme()" style="width:100%;justify-content:center">
+      <span class="sun-icon">☀️</span><span class="moon-icon">🌙</span> Dark/Light Mode
+    </button>
+    <div style="margin-top:8px;font-size:.68rem;color:var(--tx2);text-align:center">
+      Batesa Ibrahim<br>0746022547<br>batesaibra6@gmail.com
+    </div>
+  </div>
+</aside>

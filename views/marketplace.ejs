@@ -1,0 +1,140 @@
+<div class="card mb20">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+    <h3 style="font-weight:800">🛒 AgriTrade Marketplace — Live Listings</h3>
+    
+    <!-- Filters -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select id="filterCrop" class="btn-o btn-sm" style="padding:6px 12px" onchange="applyFilters()">
+        <option value="">All Crops</option>
+        <option value="Maize">Maize</option>
+        <option value="Groundnuts">Groundnuts</option>
+        <option value="Coffee">Coffee</option>
+        <option value="Cocoa">Cocoa</option>
+      </select>
+      
+      <select id="filterLocation" class="btn-o btn-sm" style="padding:6px 12px" onchange="applyFilters()">
+        <option value="">All Locations</option>
+        <option value="Jinja">Jinja</option>
+        <option value="Iganga">Iganga</option>
+        <option value="Kamuli">Kamuli</option>
+        <option value="Mayuge">Mayuge</option>
+      </select>
+      
+      <select id="filterGrade" class="btn-o btn-sm" style="padding:6px 12px" onchange="applyFilters()">
+        <option value="">All Grades</option>
+        <option value="Grade A">Grade A</option>
+        <option value="Screen 15">Screen 15</option>
+      </select>
+      
+      <input id="marketplaceSearch" type="text" placeholder="Search..." value="<%= query %>" style="width:200px" onkeyup="applyFilters()">
+    </div>
+  </div>
+  
+  <div class="tbl-wrap">
+    <table id="marketplaceTable">
+      <thead>
+        <tr>
+          <th>Crop</th>
+          <th>Grade</th>
+          <th>Price/kg</th>
+          <th>Moisture</th>
+          <th>Tons</th>
+          <th>Location</th>
+          <th>Farmer</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% listings.forEach(function(l, index) { %>
+        <tr data-crop="<%= l.crop %>" data-location="<%= l.location %>" data-grade="<%= l.grade %>">
+          <td><strong><%= l.crop %></strong></td>
+          <td><span class="tag tag-g"><%= l.grade %></span></td>
+          <td><strong>UGX <%= l.price.toLocaleString() %></strong></td>
+          <td><%= l.moisture %></td>
+          <td><%= l.tons %> tons</td>
+          <td><%= l.location %></td>
+          <td><%= l.farmer %></td>
+          <td>
+            <button class="btn btn-p btn-sm" onclick="handleBuy('<%= l.crop %>', <%= l.tons %>, <%= l.price %>, '<%= l.location %>', '<%= encodeURIComponent(l.farmer) %>')">Buy</button>
+            <a href="/passport/B247391" class="btn btn-o btn-sm" style="margin-left:4px">Passport</a>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="grid grid3">
+  <div class="card"><div style="text-align:center"><div style="font-size:2rem">6</div><div style="color:var(--tx2)">Active Listings</div></div></div>
+  <div class="card"><div style="text-align:center"><div style="font-size:2rem">70</div><div style="color:var(--tx2)">Total Tons Available</div></div></div>
+  <div class="card"><div style="text-align:center"><div style="font-size:2rem">4</div><div style="color:var(--tx2)">Export-Ready</div></div></div>
+</div>
+
+<script>
+function applyFilters() {
+  const cropFilter = document.getElementById('filterCrop').value;
+  const locationFilter = document.getElementById('filterLocation').value;
+  const gradeFilter = document.getElementById('filterGrade').value;
+  const searchTerm = document.getElementById('marketplaceSearch').value.toLowerCase();
+  
+  const rows = document.querySelectorAll('#marketplaceTable tbody tr');
+  
+  rows.forEach(row => {
+    const crop = row.getAttribute('data-crop');
+    const location = row.getAttribute('data-location');
+    const grade = row.getAttribute('data-grade');
+    const text = row.textContent.toLowerCase();
+    
+    const matchesCrop = !cropFilter || crop === cropFilter;
+    const matchesLocation = !locationFilter || location === locationFilter;
+    const matchesGrade = !gradeFilter || grade === gradeFilter;
+    const matchesSearch = !searchTerm || text.includes(searchTerm);
+    
+    row.style.display = (matchesCrop && matchesLocation && matchesGrade && matchesSearch) ? '' : 'none';
+  });
+}
+
+function handleBuy(crop, tons, price, location, farmer) {
+  // Check if user is logged in (simple check via session simulation)
+  fetch('/api/check-login')
+    .then(res => res.json())
+    .then(data => {
+      if (data.loggedIn) {
+        window.location.href = `/checkout?crop=${crop}&tons=${tons}&price=${price}&location=${location}&farmer=${farmer}`;
+      } else {
+        showLoginModal(crop, tons, price, location, farmer);
+      }
+    })
+    .catch(() => {
+      // Fallback: show login modal
+      showLoginModal(crop, tons, price, location, farmer);
+    });
+}
+
+function showLoginModal(crop, tons, price, location, farmer) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML = `
+    <div class="card" style="width:420px;max-width:90%">
+      <h3 style="margin-bottom:12px">Login Required</h3>
+      <p style="color:var(--tx2);margin-bottom:20px">You need to be logged in to make a purchase.</p>
+      
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <a href="/login?redirect=/checkout?crop=${crop}&tons=${tons}&price=${price}&location=${location}&farmer=${farmer}" 
+           class="btn btn-p" style="flex:1;text-align:center">Login</a>
+        <a href="/signup" class="btn btn-o" style="flex:1;text-align:center">Sign Up</a>
+      </div>
+      
+      <div style="text-align:center">
+        <button onclick="this.closest('.card').parentElement.remove()" class="btn btn-o btn-sm">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+// Make sure the original search still works
+document.getElementById('marketplaceSearch')?.addEventListener('input', applyFilters);
+</script>

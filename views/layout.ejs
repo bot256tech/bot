@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <%- include('partials/head', { title }) %>
+</head>
+<body>
+  <div class="app">
+    <%- include('partials/sidebar', { page }) %>
+    <main class="main">
+      <%- include('partials/topbar', { page, title }) %>
+      <div class="page active" id="pg-<%= page %>">
+        <%- include(body, data) %>
+      </div>
+    </main>
+  </div>
+  <%- include('partials/scripts') %>
+</body>
+</html>

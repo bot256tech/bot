@@ -1,0 +1,36 @@
+<div class="card mb20">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+      <h2 style="font-weight:800">Welcome back, <%= typeof user !== 'undefined' ? user.name : 'John Mukasa' %> 👋</h2>
+      <div style="color:var(--tx2)">Farmer Dashboard • Mayuge District</div>
+    </div>
+    <a href="/my-listings" class="btn btn-p">+ Add Listing</a>
+  </div>
+  
+  <div class="grid grid4">
+    <div class="metric"><div class="metric-val">4</div><div class="metric-lbl">Active Listings</div></div>
+    <div class="metric"><div class="metric-val">UGX 8.4M</div><div class="metric-lbl">Total Earnings</div></div>
+    <div class="metric"><div class="metric-val">12</div><div class="metric-lbl">Batches Sold</div></div>
+    <div class="metric"><div class="metric-val">91</div><div class="metric-lbl">Quality Score</div></div>
+  </div>
+</div>
+
+<div class="grid grid2">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">Recent Activity</h3>
+    <div style="font-size:.9rem">
+      <div style="padding:10px 0;border-bottom:1px solid var(--bd)">✅ Batch B247 sold to GrainCorp EA</div>
+      <div style="padding:10px 0;border-bottom:1px solid var(--bd)">📡 IoT Dryer completed (Moisture: 13.2%)</div>
+      <div style="padding:10px 0">📱 SMS alert sent for harvest timing</div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">Quick Actions</h3>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a href="/ai-disease" class="btn btn-o">🔍 Run AI Disease Scan</a>
+      <a href="/iot-dryer" class="btn btn-o">📡 Monitor My Dryer</a>
+      <a href="/my-sales" class="btn btn-o">📈 View My Sales</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,46 @@
+<div class="grid grid2 mb20">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">💳 Finance & Wallet — Platform Overview</h3>
+    
+    <div class="grid grid3">
+      <div class="metric"><div class="metric-val">UGX <%= (stats.monthlyRevenue/1000000).toFixed(1) %>M</div><div class="metric-lbl">Monthly Revenue</div></div>
+      <div class="metric"><div class="metric-val">UGX <%= (stats.monthlyCosts/1000000).toFixed(1) %>M</div><div class="metric-lbl">Monthly Costs</div></div>
+      <div class="metric"><div class="metric-val">UGX <%= (stats.netMonthlySurplus/1000000).toFixed(1) %>M</div><div class="metric-lbl">Net Surplus</div></div>
+    </div>
+    
+    <div style="margin-top:20px;font-size:.85rem">
+      <div><strong>Break-even:</strong> Month <%= stats.breakEvenMonth %></div>
+      <div><strong>Target Districts:</strong> <%= stats.targetDistricts.join(', ') %></div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">📋 Recent Transactions (Last 10)</h3>
+    <div class="tbl-wrap" style="max-height:280px;overflow:auto">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Description</th><th>Amount</th></tr>
+        </thead>
+        <tbody>
+          <% transactions.forEach(function(t) { %>
+          <tr>
+            <td><%= t.date %></td>
+            <td style="font-size:.78rem"><%= t.desc %></td>
+            <td style="text-align:right"><span style="color:<%= t.type === 'credit' ? 'var(--g)' : '#c62828' %>"><%= t.type === 'credit' ? '+' : '-' %> UGX <%= t.amount.toLocaleString() %></span></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-weight:800;margin-bottom:16px">📈 Financial Highlights</h3>
+  <div class="grid grid4">
+    <div class="metric"><div class="metric-val">UGX 68.6M</div><div class="metric-lbl">Projected Annual Revenue</div></div>
+    <div class="metric"><div class="metric-val">35</div><div class="metric-lbl">Jobs Created</div></div>
+    <div class="metric"><div class="metric-val">UGX 350M</div><div class="metric-lbl">Farmer Savings Y1</div></div>
+    <div class="metric"><div class="metric-val">22</div><div class="metric-lbl">Break-even Month</div></div>
+  </div>
+</div>

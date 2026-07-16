@@ -1,0 +1,125 @@
+<div class="grid grid2">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">🦠 AI Disease Detection</h3>
+    <p style="font-size:.9rem;margin-bottom:16px">Upload crop photos for instant disease identification and treatment recommendations.</p>
+    
+    <div id="uploadArea" style="border:2px dashed var(--bd);border-radius:16px;padding:40px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="document.getElementById('photoInput').click()">
+      <i class="fas fa-camera" style="font-size:3rem;color:var(--g);margin-bottom:12px"></i>
+      <div style="font-weight:600">Click or drag photo here</div>
+      <div style="font-size:.75rem;color:var(--tx2)">Supports: Maize, Coffee, Cocoa, Beans, Cassava</div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="analyzePhoto(this)">
+    </div>
+    
+    <div style="font-size:.75rem;color:var(--tx2)">Supported diseases: Coffee Berry Disease, Leaf Rust, Fall Armyworm, Black Pod, Cassava Mosaic, Banana Wilt, Rice Blast</div>
+  </div>
+  
+  <div class="card" id="resultCard" style="display:none">
+    <h3 style="font-weight:800;margin-bottom:12px">AI Analysis Result</h3>
+    
+    <div id="analysisResult"></div>
+    
+    <div style="margin-top:20px">
+      <button class="btn btn-p" onclick="generatePassport()">📄 Generate Digital Quality Passport</button>
+      <button class="btn btn-o" onclick="resetAnalysis()" style="margin-left:8px">Analyze Another Photo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function analyzePhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  
+  const resultCard = document.getElementById('resultCard');
+  const analysisDiv = document.getElementById('analysisResult');
+  
+  // Simulate AI processing
+  setTimeout(() => {
+    const mockResults = [
+      {
+        crop: "Maize",
+        disease: "Fall Armyworm",
+        severity: "Moderate",
+        confidence: 94,
+        treatment: "Apply neem-based organic pesticide (5ml/L) or Emamectin benzoate. Scout weekly.",
+        recovery: "85%",
+        stage: "Vegetative"
+      },
+      {
+        crop: "Coffee",
+        disease: "Coffee Leaf Rust",
+        severity: "High",
+        confidence: 89,
+        treatment: "Copper-based fungicide + resistant variety recommendation. Remove infected leaves.",
+        recovery: "72%",
+        stage: "Flowering"
+      },
+      {
+        crop: "Cocoa",
+        disease: "Black Pod Disease",
+        severity: "Low",
+        confidence: 91,
+        treatment: "Improve drainage + Ridomil Gold. Remove infected pods immediately.",
+        recovery: "95%",
+        stage: "Fruiting"
+      }
+    ];
+    
+    const result = mockResults[Math.floor(Math.random() * mockResults.length)];
+    
+    analysisDiv.innerHTML = `
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
+        <div style="flex:1">
+          <div><strong>Crop:</strong> ${result.crop}</div>
+          <div><strong>Disease:</strong> <span style="color:#c62828">${result.disease}</span></div>
+          <div><strong>Severity:</strong> ${result.severity}</div>
+          <div><strong>Confidence:</strong> <span style="color:var(--g);font-weight:700">${result.confidence}%</span></div>
+          <div><strong>Current Stage:</strong> ${result.stage}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="width:90px;height:90px;border-radius:50%;background:conic-gradient(#2E7D32 ${result.confidence}%, #eee 0);display:flex;align-items:center;justify-content:center">
+            <div style="width:68px;height:68px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem">${result.confidence}%</div>
+          </div>
+          <div style="font-size:.7rem;margin-top:4px">AI Confidence</div>
+        </div>
+      </div>
+      
+      <div style="background:#f8f9f8;padding:14px;border-radius:10px;margin-bottom:12px">
+        <strong>Recommended Treatment:</strong><br>
+        ${result.treatment}
+      </div>
+      
+      <div style="display:flex;gap:12px">
+        <div style="flex:1;background:#e8f5e9;padding:10px;border-radius:8px">
+          <div style="font-size:.75rem">Expected Recovery</div>
+          <div style="font-weight:800;color:#2E7D32">${result.recovery}</div>
+        </div>
+        <div style="flex:1;background:#fff3e0;padding:10px;border-radius:8px">
+          <div style="font-size:.75rem">Risk Level</div>
+          <div style="font-weight:800;color:#e65100">${result.severity}</div>
+        </div>
+      </div>
+    `;
+    
+    resultCard.style.display = 'block';
+    window.currentAnalysis = result;
+  }, 1200);
+}
+
+function generatePassport() {
+  const result = window.currentAnalysis;
+  if (!result) return;
+  
+  const batchId = 'B' + Math.floor(100000 + Math.random() * 900000);
+  alert(`Digital Quality Passport generated!\n\nBatch ID: ${batchId}\nCrop: ${result.crop}\nDisease Status: ${result.disease}\n\nQR code and certificate ready for download.`);
+  
+  // Simulate redirect to passport
+  setTimeout(() => {
+    window.location.href = `/passport/${batchId}`;
+  }, 800);
+}
+
+function resetAnalysis() {
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('photoInput').value = '';
+}
+</script>

@@ -1,0 +1,32 @@
+<div class="card mb20">
+  <h3 style="font-weight:800;margin-bottom:16px">📊 Analytics Dashboard — Year 1 Performance</h3>
+  
+  <div class="grid grid2">
+    <div>
+      <h4 style="margin-bottom:8px;font-weight:700">Monthly Revenue & Farmers</h4>
+      <div class="chart-wrap"><canvas id="analyticsChart"></canvas></div>
+    </div>
+    <div>
+      <h4 style="margin-bottom:8px;font-weight:700">Crop Distribution</h4>
+      <div class="chart-wrap"><canvas id="cropChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid3">
+  <div class="card"><div class="metric"><div class="metric-val"><%= analytics.summary.totalFarmers %></div><div class="metric-lbl">Total Farmers</div></div></div>
+  <div class="card"><div class="metric"><div class="metric-val"><%= analytics.summary.tonsProcessed %></div><div class="metric-lbl">Tons Processed</div></div></div>
+  <div class="card"><div class="metric"><div class="metric-val">UGX <%= (analytics.summary.projectedRevenue/1000000).toFixed(1) %>M</div><div class="metric-lbl">Projected Revenue</div></div></div>
+</div>
+
+<div class="card mt20">
+  <h3 style="font-weight:800;margin-bottom:12px">📈 Key Insights</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:.9rem">
+    <div>• Peak revenue: July (UGX 8.9M)</div>
+    <div>• 800 farmers onboarded by Dec</div>
+    <div>• Maize dominates (45% of volume)</div>
+    <div>• 62% women farmers participation</div>
+    <div>• 55% youth farmers (18–35)</div>
+    <div>• 100% aflatoxin pass rate</div>
+  </div>
+</div>

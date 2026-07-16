@@ -1,0 +1,50 @@
+<div class="grid grid2 mb20">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">🏢 Buyer Portal — Active Partners</h3>
+    
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Buyer</th><th>Location</th><th>Rating</th><th>Orders</th><th>MTD Value</th></tr>
+        </thead>
+        <tbody>
+          <% buyers.forEach(function(b) { %>
+          <tr>
+            <td><strong><%= b.name %></strong></td>
+            <td><%= b.location %></td>
+            <td><%= b.rating %> ★</td>
+            <td><%= b.orders %></td>
+            <td><strong><%= b.mtdValue %></strong></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:12px">📋 Selected Buyer: <%= selectedBuyer.name %></h3>
+    <div style="font-size:.9rem;line-height:1.7">
+      <div><strong>Location:</strong> <%= selectedBuyer.location %></div>
+      <div><strong>Rating:</strong> <%= selectedBuyer.rating %> / 5.0</div>
+      <div><strong>MTD Spend:</strong> <%= selectedBuyer.mtdValue %></div>
+      <div><strong>Preferred Crops:</strong> <%= selectedBuyer.preferredCrops.join(', ') %></div>
+      <div><strong>Quality Requirements:</strong> <%= selectedBuyer.qualityRequirements %></div>
+      <div><strong>Member Since:</strong> <%= selectedBuyer.memberSince %></div>
+    </div>
+    
+    <div style="margin-top:20px">
+      <button class="btn btn-p" onclick="showToast('Inquiry sent to GrainCorp East Africa. Response expected within 4 hours.', 'success')">📨 Send RFQ</button>
+      <button class="btn btn-o" onclick="showToast('Blockchain-verified batch list exported.', 'success')" style="margin-left:8px">📤 Export Batches</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-weight:800;margin-bottom:12px">📊 Buyer Insights</h3>
+  <div class="grid grid3">
+    <div class="metric"><div class="metric-val">25</div><div class="metric-lbl">Total Orders YTD</div></div>
+    <div class="metric"><div class="metric-val">UGX 98M</div><div class="metric-lbl">Cumulative Value</div></div>
+    <div class="metric"><div class="metric-val">94%</div><div class="metric-lbl">Repeat Purchase Rate</div></div>
+  </div>
+</div>

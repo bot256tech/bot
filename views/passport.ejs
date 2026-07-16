@@ -1,0 +1,56 @@
+<div class="card" style="max-width:820px;margin:0 auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+      <h2 style="font-weight:800">Digital Quality Passport</h2>
+      <div style="font-size:.9rem;color:var(--tx2)">Batch ID: <strong><%= batchId || 'B247391' %></strong></div>
+    </div>
+    <div style="text-align:right">
+      <div class="tag tag-g" style="font-size:1rem;padding:6px 18px">VERIFIED</div>
+      <div style="font-size:.7rem;margin-top:4px">Valid until Dec 2026</div>
+    </div>
+  </div>
+  
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <h4 style="margin-bottom:8px">Farmer Details</h4>
+      <div style="font-size:.9rem;line-height:1.7">
+        <div><strong>Name:</strong> John Mukasa</div>
+        <div><strong>District:</strong> Mayuge</div>
+        <div><strong>Phone:</strong> +256 774 123 456</div>
+        <div><strong>GPS:</strong> 0.4521, 33.2187</div>
+        <div><strong>Farm Size:</strong> 2.5 ha</div>
+      </div>
+    </div>
+    
+    <div>
+      <h4 style="margin-bottom:8px">Crop & Quality</h4>
+      <div style="font-size:.9rem;line-height:1.7">
+        <div><strong>Crop:</strong> Maize (Grade A)</div>
+        <div><strong>Moisture:</strong> 13.2% <span class="tag tag-g">PASS</span></div>
+        <div><strong>Aflatoxin:</strong> 2.4 ppb <span class="tag tag-g">PASS</span></div>
+        <div><strong>Harvest Date:</strong> 12 Jul 2026</div>
+        <div><strong>Drying Temp Avg:</strong> 41.6°C</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top:24px;border-top:1px solid var(--bd);padding-top:18px">
+    <h4 style="margin-bottom:10px">Traceability Timeline</h4>
+    <div style="font-size:.85rem">
+      <div style="display:flex;gap:12px;margin-bottom:6px"><span style="width:90px">12 Jul</span> <span>Harvest recorded • GPS verified</span></div>
+      <div style="display:flex;gap:12px;margin-bottom:6px"><span style="width:90px">13 Jul</span> <span>AI Disease Scan: Healthy (94%)</span></div>
+      <div style="display:flex;gap:12px;margin-bottom:6px"><span style="width:90px">14 Jul</span> <span>Drying complete • 13.2% moisture</span></div>
+      <div style="display:flex;gap:12px"><span style="width:90px">15 Jul</span> <span>Aflatoxin test: PASS • Certificate issued</span></div>
+    </div>
+  </div>
+  
+  <div style="margin-top:24px;display:flex;gap:12px">
+    <button class="btn btn-p" onclick="showToast('QR Code downloaded', 'success')">📱 Download QR</button>
+    <button class="btn btn-g" onclick="window.print()">🖨️ Print Certificate</button>
+    <a href="/marketplace" class="btn btn-o">View in Marketplace</a>
+  </div>
+  
+  <div style="margin-top:20px;font-size:.75rem;color:var(--tx2);text-align:center">
+    Public verification: <strong>https://agrichain360.com/passport/B247391</strong>
+  </div>
+</div>

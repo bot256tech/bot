@@ -1,0 +1,41 @@
+<div class="card mb20">
+  <h2 style="font-weight:800">🛠️ Admin Dashboard</h2>
+  <div style="color:var(--tx2)">System Overview & Management</div>
+</div>
+
+<div class="grid grid4 mb20">
+  <div class="metric"><div class="metric-val">847</div><div class="metric-lbl">Total Farmers</div></div>
+  <div class="metric"><div class="metric-val">142</div><div class="metric-lbl">Active Buyers</div></div>
+  <div class="metric"><div class="metric-val">UGX 15.6M</div><div class="metric-lbl">Monthly Revenue</div></div>
+  <div class="metric"><div class="metric-val">94</div><div class="metric-lbl">IoT Devices Online</div></div>
+</div>
+
+<div class="grid grid2">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">Revenue Streams</h3>
+    <div style="font-size:.9rem">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+        <span>Enterprise Buyer Accounts</span> <strong>UGX 5.0M</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+        <span>Market Intelligence</span> <strong>UGX 2.4M</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+        <span>Sponsored Advertising</span> <strong>UGX 2.5M</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0">
+        <span>Other Streams</span> <strong>UGX 5.7M</strong>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">Quick Actions</h3>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a href="/analytics" class="btn btn-o">📊 View Full Analytics</a>
+      <a href="/pricing" class="btn btn-o">💰 Manage Pricing Tiers</a>
+      <a href="/roles" class="btn btn-o">👥 Manage User Roles</a>
+      <button class="btn btn-o" onclick="showToast('System backup initiated', 'success')">🗄️ Backup Database</button>
+    </div>
+  </div>
+</div>
