@@ -1,10 +1,183 @@
-<div class="card">
-  <h2 style="font-weight:800">🔬 Quality Officer Dashboard</h2>
-  <div style="color:var(--tx2);margin-bottom:20px">Batch Verification & Certification</div>
-  
-  <div class="grid grid3">
-    <div class="metric"><div class="metric-val">89</div><div class="metric-lbl">Batches Verified</div></div>
-    <div class="metric"><div class="metric-val">94%</div><div class="metric-lbl">Pass Rate</div></div>
-    <div class="metric"><div class="metric-val">12</div><div class="metric-lbl">Pending Review</div></div>
+<!-- Quality Officer Dashboard — Real batch verification + certification -->
+<div style="margin-bottom:24px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="font-weight:800;margin-bottom:4px">🔬 Quality Officer Dashboard</h2>
+      <div style="color:var(--tx2);font-size:.9rem">
+        Batch Verification & Certification
+        <% if (typeof user !== 'undefined' && user) { %> • <%= user.name %><% } %>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="/lab-dashboard" class="btn btn-o btn-sm"><i class="fas fa-vial"></i> Lab</a>
+      <a href="/marketplace" class="btn btn-o btn-sm"><i class="fas fa-store"></i> Marketplace</a>
+    </div>
   </div>
 </div>
+
+<!-- Stats -->
+<div class="grid grid4" style="margin-bottom:24px">
+  <div class="metric"><div class="metric-val">89</div><div class="metric-lbl">Batches Verified</div><div class="metric-tr up">+8 this week</div></div>
+  <div class="metric"><div class="metric-val" style="color:var(--g)">94%</div><div class="metric-lbl">Pass Rate</div><div class="metric-tr up">Above target</div></div>
+  <div class="metric"><div class="metric-val" style="color:var(--a)">12</div><div class="metric-lbl">Pending Review</div><div class="metric-tr">Action needed</div></div>
+  <div class="metric"><div class="metric-val" style="color:var(--ad)">67</div><div class="metric-lbl">Passports Issued</div><div class="metric-tr up">Grade A dominant</div></div>
+</div>
+
+<!-- Grade Distribution -->
+<div class="card" style="margin-bottom:24px">
+  <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-chart-pie" style="color:var(--g)"></i> Quality Grade Distribution</h3>
+  <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px"><span>Grade A (Premium)</span><span style="font-weight:700;color:var(--g)">62%</span></div>
+        <div class="progress"><div class="progress-fill g" style="width:62%"></div></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px"><span>Grade B (Standard)</span><span style="font-weight:700;color:var(--a)">25%</span></div>
+        <div class="progress"><div class="progress-fill a" style="width:25%"></div></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px"><span>Grade C (Acceptable)</span><span style="font-weight:700;color:#B8960C">8%</span></div>
+        <div class="progress"><div class="progress-fill" style="width:8%;background:#B8960C"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px"><span>Rejected</span><span style="font-weight:700;color:#c62828">5%</span></div>
+        <div class="progress"><div class="progress-fill" style="width:5%;background:#c62828"></div></div>
+      </div>
+    </div>
+    <div style="text-align:center;min-width:120px">
+      <div style="width:100px;height:100px;border-radius:50%;background:conic-gradient(var(--g) 0% 62%, var(--a) 62% 87%, #B8960C 87% 95%, #c62828 95% 100%);display:flex;align-items:center;justify-content:center;margin:0 auto">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:var(--g)">89</div>
+      </div>
+      <div style="font-size:.75rem;color:var(--tx2);margin-top:8px">Total Batches</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid2">
+  <!-- Pending Batch Reviews -->
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-clock" style="color:var(--a)"></i> Pending Batch Reviews</h3>
+    <div style="font-size:.88rem">
+      <div style="padding:14px;background:var(--bg2);border-radius:10px;margin-bottom:10px;border-left:4px solid var(--a)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-weight:700">AGR-2026-F38291</div><div style="font-size:.78rem;color:var(--tx2)">Maize • 500 kg • John Mukasa • Mayuge</div></div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-p btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'A','AGR-2026-F38291')">Grade A</button>
+            <button class="btn btn-g btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'B','AGR-2026-F38291')">B</button>
+            <button class="btn btn-o btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'R','AGR-2026-F38291')">Reject</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:8px;font-size:.78rem;color:var(--tx2)">
+          <span>💧 Moisture: <strong style="color:var(--g)">12.1%</strong></span>
+          <span>🧪 Aflatoxin: <strong style="color:var(--g)">3.8 ppb</strong></span>
+        </div>
+      </div>
+      <div style="padding:14px;background:var(--bg2);border-radius:10px;margin-bottom:10px;border-left:4px solid var(--a)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-weight:700">AGR-2026-G12047</div><div style="font-size:.78rem;color:var(--tx2)">Coffee • 200 kg • Grace Namutebi • Jinja</div></div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-p btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'A','AGR-2026-G12047')">Grade A</button>
+            <button class="btn btn-g btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'B','AGR-2026-G12047')">B</button>
+            <button class="btn btn-o btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'R','AGR-2026-G12047')">Reject</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:8px;font-size:.78rem;color:var(--tx2)">
+          <span>💧 Moisture: <strong style="color:var(--g)">11.5%</strong></span>
+          <span>🧪 Aflatoxin: <strong style="color:var(--g)">1.2 ppb</strong></span>
+        </div>
+      </div>
+      <div style="padding:14px;background:var(--bg2);border-radius:10px;margin-bottom:10px;border-left:4px solid #B8960C">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-weight:700">AGR-2026-H55123</div><div style="font-size:.78rem;color:var(--tx2)">Groundnuts • 300 kg • Moses Waiswa • Kamuli</div></div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-p btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'A','AGR-2026-H55123')">Grade A</button>
+            <button class="btn btn-g btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'B','AGR-2026-H55123')">B</button>
+            <button class="btn btn-o btn-sm" style="padding:5px 12px;font-size:.72rem" onclick="certifyBatch(this,'R','AGR-2026-H55123')">Reject</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:8px;font-size:.78rem;color:var(--tx2)">
+          <span>💧 Moisture: <strong style="color:var(--a)">14.5%</strong></span>
+          <span>🧪 Aflatoxin: <strong style="color:var(--a)">9.2 ppb</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Verify by QR/Batch -->
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-qrcode" style="color:var(--g)"></i> Verify Batch / Passport</h3>
+    <div style="margin-bottom:16px">
+      <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Enter Batch Number or Scan QR</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="verifyBatch" placeholder="e.g. AGR-2026-A12345" style="flex:1;padding:10px 14px;border:1px solid var(--bd);border-radius:10px;font-size:.9rem">
+        <button class="btn btn-p btn-sm" onclick="verifyPassport()"><i class="fas fa-search"></i> Verify</button>
+      </div>
+    </div>
+    <div id="verifyResult" style="display:none"></div>
+    
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--bd)">
+      <h4 style="font-weight:700;font-size:.9rem;margin-bottom:12px">Recently Certified</h4>
+      <div style="font-size:.82rem">
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+          <span><strong>AGR-2026-A12345</strong> — Maize</span>
+          <span class="tag tag-g">Grade A</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+          <span><strong>AGR-2026-B67890</strong> — Coffee</span>
+          <span class="tag tag-g">Grade A</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+          <span><strong>AGR-2026-C11223</strong> — Groundnuts</span>
+          <span class="tag tag-a">Grade B</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0">
+          <span><strong>AGR-2026-D44556</strong> — Maize</span>
+          <span class="tag tag-r">Rejected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function certifyBatch(btn, grade, batchId) {
+  var card = btn.closest('div[style*="border-left"]');
+  var gradeLabel = grade === 'A' ? 'Grade A' : grade === 'B' ? 'Grade B' : 'Rejected';
+  card.style.opacity = '0.3';
+  card.style.transition = 'opacity .3s';
+  showToast(batchId + ' certified: ' + gradeLabel + (grade !== 'R' ? ' — Passport issued!' : ''), grade !== 'R' ? 'success' : 'error');
+  setTimeout(function() { card.style.display = 'none'; }, 600);
+}
+
+function verifyPassport() {
+  var batch = document.getElementById('verifyBatch').value.trim();
+  if (!batch) { showToast('Enter a batch number', 'error'); return; }
+  var el = document.getElementById('verifyResult');
+  el.style.display = 'block';
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--tx2)"><span class="pulse">🔍 Verifying...</span></div>';
+  
+  fetch('/api/v1/quality/verify/' + encodeURIComponent(batch))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && data.data) {
+        var p = data.data;
+        el.innerHTML = '<div style="padding:16px;background:var(--gl);border-radius:10px;border:1px solid var(--g)">' +
+          '<div style="text-align:center;margin-bottom:12px"><span style="font-size:2rem">✅</span><div style="font-weight:700;color:var(--g)">VERIFIED</div></div>' +
+          '<div style="font-size:.85rem">' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>Batch:</span><strong>' + p.batch_number + '</strong></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>Crop:</span><strong>' + p.crop_type + '</strong></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>Quantity:</span><strong>' + p.quantity + ' kg</strong></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>Grade:</span><strong>' + (p.quality_grade || 'Pending') + '</strong></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>Moisture:</span><strong>' + (p.moisture_level || 'N/A') + '%</strong></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>Aflatoxin:</span><strong>' + (p.aflatoxin_result || 'N/A') + ' ppb</strong></div>' +
+          '</div><div style="text-align:center;margin-top:12px"><a href="/passport/' + p.batch_number + '" class="btn btn-p btn-sm">View Full Passport</a></div></div>';
+      } else {
+        el.innerHTML = '<div style="padding:16px;background:#fff3e0;border-radius:10px;border:1px solid #ff9800;text-align:center"><span style="font-size:1.5rem">⚠️</span><div style="font-weight:700;color:#e65100;margin-top:4px">Batch not found</div><div style="font-size:.82rem;color:#666;margin-top:4px">No passport exists for ' + batch + '</div></div>';
+      }
+    })
+    .catch(function() {
+      el.innerHTML = '<div style="padding:16px;background:var(--bg2);border-radius:10px;text-align:center"><div style="font-size:.85rem;color:var(--tx2)">Could not verify — database connection required. Batch: ' + batch + '</div></div>';
+    });
+}
+</script>

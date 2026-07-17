@@ -1,55 +1,98 @@
+<!-- Investor Deck — Matches the UGX 35M investment prospectus -->
 <div class="grid grid2 mb20">
   <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px">💰 Investor Deck — AGRICHAIN 360</h3>
-    
+    <h3 style="font-weight:800;margin-bottom:16px">💰 Investment Opportunity — AGRICHAIN 360™</h3>
     <div style="font-size:.9rem;line-height:1.8">
-      <div><strong>Problem:</strong> 35–40% post-harvest losses for smallholder farmers in Busoga due to poor drying & storage.</div>
-      <div style="margin-top:12px"><strong>Solution:</strong> End-to-end B2B platform combining solar drying, IoT storage, transport coordination, and certified marketplace.</div>
-      <div style="margin-top:12px"><strong>Market:</strong> 800 farmers in 4 districts. UGX 350M annual savings projected.</div>
+      <div><strong>Problem:</strong> 30–40% post-harvest losses for smallholder farmers in Uganda due to poor drying, aflatoxin contamination, and no traceability.</div>
+      <div style="margin-top:12px"><strong>Solution:</strong> Complete smart post-harvest platform — IoT solar drying, AI crop intelligence, Digital Quality Passport, B2B marketplace with Mobile Money payments.</div>
+      <div style="margin-top:12px"><strong>Market:</strong> $4B annual post-harvest loss across Africa. 12M+ smallholder farmers in East Africa. Export markets demand certified quality.</div>
     </div>
-    
     <div style="margin-top:20px">
       <div class="grid grid3">
-        <div><div style="font-size:1.8rem;font-weight:900;color:var(--g)">UGX 35M</div><div style="font-size:.7rem">Catalytic Funding</div></div>
-        <div><div style="font-size:1.8rem;font-weight:900;color:var(--g)">22</div><div style="font-size:.7rem">Break-even Month</div></div>
-        <div><div style="font-size:1.8rem;font-weight:900;color:var(--g)">3.6:1</div><div style="font-size:.7rem">Avg Farmer ROI</div></div>
+        <div><div style="font-size:1.8rem;font-weight:900;color:var(--g)">UGX 35M</div><div style="font-size:.7rem">Investment Ask</div></div>
+        <div><div style="font-size:1.8rem;font-weight:900;color:var(--a)">Month 6</div><div style="font-size:.7rem">Break-even</div></div>
+        <div><div style="font-size:1.8rem;font-weight:900;color:var(--g2)">280%</div><div style="font-size:.7rem">2-Year ROI</div></div>
+      </div>
+    </div>
+    <div style="margin-top:20px;padding:16px;background:var(--bg2);border-radius:12px;border-left:4px solid var(--a)">
+      <div style="font-weight:700;margin-bottom:8px;font-size:.9rem">📊 Revenue at Steady State</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.82rem">
+        <div>Monthly Revenue: <strong>UGX 14M</strong></div>
+        <div>Monthly Costs: <strong>UGX 4.2M</strong></div>
+        <div>Monthly Profit: <strong style="color:var(--g)">UGX 9.8M</strong></div>
+        <div>Year 1 Revenue: <strong>UGX 112.5M</strong></div>
       </div>
     </div>
   </div>
   
   <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px">📊 Pricing Economics (Per 50kg Batch)</h3>
+    <h3 style="font-weight:800;margin-bottom:16px">📋 Investment Breakdown (UGX 35M)</h3>
     <div class="tbl-wrap">
       <table>
-        <thead>
-          <tr><th>Crop</th><th>Drying Cost</th><th>Pre-Dry</th><th>Post-Dry</th><th>Farmer Gain</th></tr>
-        </thead>
+        <thead><tr><th>Category</th><th>Amount (UGX)</th><th>%</th></tr></thead>
         <tbody>
-          <% pricing.forEach(function(p) { %>
-          <tr>
-            <td><%= p.crop %></td>
-            <td>UGX <%= p.batchCost50kg %></td>
-            <td>UGX <%= p.preDryPrice %></td>
-            <td><strong>UGX <%= p.postDryPrice %></strong></td>
-            <td><span class="tag tag-g"><%= p.returnRatio %></span></td>
-          </tr>
-          <% }) %>
+          <tr><td>☀️ Solar Dryer Unit (Mayuge)</td><td><strong>10,000,000</strong></td><td>29%</td></tr>
+          <tr><td>🧪 Quality Testing Equipment</td><td><strong>5,000,000</strong></td><td>14%</td></tr>
+          <tr><td>💻 Technology & Platform</td><td><strong>5,000,000</strong></td><td>14%</td></tr>
+          <tr><td>🤝 Village Agent Network (20 agents)</td><td><strong>4,500,000</strong></td><td>13%</td></tr>
+          <tr><td>📢 Marketing & Farmer Onboarding</td><td><strong>3,500,000</strong></td><td>10%</td></tr>
+          <tr><td>👥 Operations & Staffing (3 months)</td><td><strong>5,000,000</strong></td><td>14%</td></tr>
+          <tr><td>🏦 Working Capital</td><td><strong>2,000,000</strong></td><td>6%</td></tr>
+          <tr style="background:var(--gl);font-weight:700"><td>TOTAL</td><td>UGX 35,000,000</td><td>100%</td></tr>
         </tbody>
       </table>
+    </div>
+    <div style="margin-top:16px">
+      <h4 style="font-weight:700;font-size:.85rem;margin-bottom:8px">8 Revenue Streams</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <span class="tag tag-g">Solar Drying Fees</span>
+        <span class="tag tag-g">Quality Testing</span>
+        <span class="tag tag-g">Enterprise Subscriptions</span>
+        <span class="tag tag-g">Marketplace Premium</span>
+        <span class="tag tag-a">Quality Passport Fees</span>
+        <span class="tag tag-a">Transport Booking</span>
+        <span class="tag tag-a">Sponsored Campaigns</span>
+        <span class="tag tag-a">Training Programs</span>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="card">
-  <h3 style="font-weight:800;margin-bottom:16px">🎯 Impact &amp; Scalability</h3>
-  <div class="grid grid4">
-    <div class="metric"><div class="metric-val">800</div><div class="metric-lbl">Farmers Y1</div></div>
-    <div class="metric"><div class="metric-val">1,000</div><div class="metric-lbl">Tons Y1</div></div>
-    <div class="metric"><div class="metric-val">35</div><div class="metric-lbl">Youth Jobs</div></div>
-    <div class="metric"><div class="metric-val">350M</div><div class="metric-lbl">Farmer Savings</div></div>
+<!-- Impact & Milestones -->
+<div class="grid grid2">
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">🎯 Impact Targets (2 Years)</h3>
+    <div class="grid grid4">
+      <div class="metric"><div class="metric-val">10K</div><div class="metric-lbl">Farmers Reached</div></div>
+      <div class="metric"><div class="metric-val" style="color:var(--a)">62%</div><div class="metric-lbl">Women Farmers</div></div>
+      <div class="metric"><div class="metric-val" style="color:var(--g2)">50%</div><div class="metric-lbl">Loss Reduction</div></div>
+      <div class="metric"><div class="metric-val" style="color:var(--ad)">100+</div><div class="metric-lbl">Agent Jobs</div></div>
+    </div>
+    <div style="margin-top:16px;font-size:.82rem;color:var(--tx2)">
+      <strong>UN SDGs:</strong> No Poverty • Zero Hunger • Gender Equality • Decent Work • Innovation • Responsible Consumption • Climate Action
+    </div>
   </div>
-  
-  <div style="margin-top:24px">
-    <a href="/download/proposal" class="btn btn-g" style="font-size:1rem;padding:14px 32px">📄 Download Full Investor Proposal (PDF)</a>
+  <div class="card">
+    <h3 style="font-weight:800;margin-bottom:16px">📅 Milestones</h3>
+    <div style="font-size:.85rem">
+      <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)"><div style="font-weight:700;min-width:70px;color:var(--g)">Month 1-2</div><div>Solar dryer built, 500 farmers registered, 20 agents recruited</div></div>
+      <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)"><div style="font-weight:700;min-width:70px;color:var(--g)">Month 3-4</div><div>Lab operational, 1,000 farmers, first Mobile Money payouts</div></div>
+      <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)"><div style="font-weight:700;min-width:70px;color:var(--a)">Month 5-6</div><div><strong>Break-even achieved</strong>, 2,000 farmers, 10 enterprise buyers</div></div>
+      <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)"><div style="font-weight:700;min-width:70px;color:var(--g2)">Month 7-12</div><div>5,000 farmers, USSD *284# live, 2nd dryer from retained earnings</div></div>
+      <div style="display:flex;gap:12px;padding:10px 0"><div style="font-weight:700;min-width:70px;color:var(--ad)">Year 2</div><div>10,000 farmers, 8 districts, regional expansion planning</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Download + Contact -->
+<div class="card" style="margin-top:24px;text-align:center">
+  <h3 style="font-weight:800;margin-bottom:12px">📄 Full Investment Documents</h3>
+  <p style="color:var(--tx2);margin-bottom:20px;font-size:.9rem">Download the complete 12-page prospectus and 15-slide pitch deck</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="/download/proposal" class="btn btn-p" style="padding:14px 28px"><i class="fas fa-file-pdf"></i> Download Prospectus (PDF)</a>
+    <a href="mailto:batesaibra6@gmail.com?subject=AGRICHAIN 360 Investment Inquiry" class="btn btn-g" style="padding:14px 28px"><i class="fas fa-envelope"></i> Contact Founder</a>
+  </div>
+  <div style="margin-top:16px;font-size:.82rem;color:var(--tx2)">
+    Batesa Ibrahim • +256 746022547 • batesaibra6@gmail.com • agrichain360.onrender.com
   </div>
 </div>

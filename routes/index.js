@@ -173,11 +173,51 @@ router.get('/investor', (req, res) => {
   res.render('layout', {
     title: 'Investor Deck — AGRICHAIN 360',
     page: 'investor',
-    data: {
-      stats: dataService.getPlatformStats(),
-      pricing: dataService.getPricingTable(),
-    },
+    data: { user: req.session.user },
     body: 'investor',
+  });
+});
+
+// Pricing / Subscription Plans
+router.get('/pricing', (req, res) => {
+  res.render('layout', {
+    title: 'Pricing & Plans — AGRICHAIN 360',
+    page: 'pricing',
+    data: {
+      pricing: dataService.getPricingTable(),
+      user: req.session.user,
+    },
+    body: 'pricing',
+  });
+});
+
+// Lab Dashboard
+router.get('/lab-dashboard', (req, res) => {
+  res.render('layout', {
+    title: 'Laboratory Dashboard — AGRICHAIN 360',
+    page: 'lab-dashboard',
+    data: { user: req.session.user },
+    body: 'labDashboard',
+  });
+});
+
+// Field Officer Dashboard
+router.get('/field-officer', (req, res) => {
+  res.render('layout', {
+    title: 'Field Officer Dashboard — AGRICHAIN 360',
+    page: 'field-officer',
+    data: { user: req.session.user },
+    body: 'fieldOfficer',
+  });
+});
+
+// Quality Officer Dashboard
+router.get('/quality-officer', (req, res) => {
+  res.render('layout', {
+    title: 'Quality Officer Dashboard — AGRICHAIN 360',
+    page: 'quality-officer',
+    data: { user: req.session.user },
+    body: 'qualityOfficer',
   });
 });
 
