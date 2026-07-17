@@ -670,6 +670,37 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
   </div>
 </section>
 
+<!-- ═══ INTRO SECTION (before stats — gives context on mobile) ═══ -->
+<section style="padding:60px 0 20px;background:var(--cream)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center" class="intro-grid">
+      <div class="reveal">
+        <div class="section-label"><span class="line"></span> WHY AGRICHAIN 360</div>
+        <h2 style="font-size:2rem;margin-bottom:16px">Africa loses <span style="color:var(--gold-dark)">$4 billion</span> every year to post-harvest waste.</h2>
+        <p style="color:var(--gray-600);line-height:1.7;margin-bottom:20px">40% of Uganda's grain harvest spoils before reaching market. Not because farmers can't grow enough — but because they lack drying infrastructure, quality testing, and market connections.</p>
+        <p style="color:var(--gray-600);line-height:1.7;margin-bottom:24px"><strong style="color:var(--charcoal)">AGRICHAIN 360 is the digital infrastructure that fixes this.</strong> One platform connecting farmers, buyers, transporters, warehouses, and exporters — with IoT monitoring, AI intelligence, and verified quality passports.</p>
+        <div style="display:flex;gap:24px;flex-wrap:wrap">
+          <div><div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:var(--green)">40%</div><div style="font-size:.78rem;color:var(--gray-500)">Post-harvest loss we eliminate</div></div>
+          <div><div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:var(--gold-dark)">55%</div><div style="font-size:.78rem;color:var(--gray-500)">Income increase for farmers</div></div>
+          <div><div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:var(--green)">100%</div><div style="font-size:.78rem;color:var(--gray-500)">Traceable from farm to export</div></div>
+        </div>
+      </div>
+      <div class="reveal-right d2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <img src="/images/real-farmers.jpg" alt="Ugandan farmers" style="width:100%;height:180px;object-fit:cover;border-radius:var(--radius-md);box-shadow:var(--shadow-md)">
+        <img src="/images/real-harvest.jpg" alt="Coffee harvest Uganda" style="width:100%;height:180px;object-fit:cover;border-radius:var(--radius-md);box-shadow:var(--shadow-md);margin-top:24px">
+        <img src="/images/real-community.jpg" alt="Farming community" style="width:100%;height:180px;object-fit:cover;border-radius:var(--radius-md);box-shadow:var(--shadow-md)">
+        <img src="/images/real-processing.jpg" alt="Post-harvest processing" style="width:100%;height:180px;object-fit:cover;border-radius:var(--radius-md);box-shadow:var(--shadow-md);margin-top:24px">
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+@media(max-width:768px) {
+  .intro-grid { grid-template-columns:1fr !important; }
+  .intro-grid > div:last-child { display:none !important; }
+}
+</style>
+
 <!-- ═══ LIVE NATIONAL STATS ═══ -->
 <section class="stats-section">
   <div class="container">
@@ -730,6 +761,20 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
         <div class="chain-icon">🌍</div><div class="chain-name">Export</div><div class="chain-desc">Full traceability</div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ═══ PHOTO STRIP — Real Uganda Agriculture ═══ -->
+<section style="padding:0;overflow:hidden">
+  <div style="display:flex;gap:0;height:200px;overflow:hidden">
+    <img src="/images/real-farmers.jpg" alt="" style="flex:1;object-fit:cover;height:200px;opacity:.9">
+    <img src="/images/real-iot.jpg" alt="" style="flex:1;object-fit:cover;height:200px;opacity:.9">
+    <img src="/images/real-business.jpg" alt="" style="flex:1;object-fit:cover;height:200px;opacity:.9">
+    <img src="/images/real-harvest.jpg" alt="" style="flex:1;object-fit:cover;height:200px;opacity:.9">
+    <img src="/images/real-partnership.jpg" alt="" style="flex:1;object-fit:cover;height:200px;opacity:.9">
+  </div>
+  <div style="text-align:center;padding:16px 0 0;background:var(--cream)">
+    <span style="font-size:.75rem;color:var(--gray-500);letter-spacing:.05em;text-transform:uppercase">Real photos from Ugandan agricultural communities</span>
   </div>
 </section>
 
@@ -1103,16 +1148,16 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
     </div>
     <div class="testi-grid">
       <div class="testi-card reveal d1">
-        <div class="testi-quote">"Before AGRICHAIN 360, I lost 40% of my maize to poor drying. Now I dry at the perfect moisture and get premium prices. My income has increased significantly."</div>
-        <div class="testi-author"><div class="testi-avatar">JM</div><div><div class="testi-name">John Mukasa</div><div class="testi-role">Maize Farmer, Mayuge District</div></div></div>
+        <div class="testi-quote">"I used to spend weeks finding reliable maize suppliers with proper quality certification. With AGRICHAIN 360, I searched, verified quality passports, and connected with verified farmers — all in one afternoon. The marketplace is a game-changer for procurement."</div>
+        <div class="testi-author"><div class="testi-avatar">NK</div><div><div class="testi-name">Nakato Kagimu</div><div class="testi-role">Grain Buyer, Kampala</div></div></div>
       </div>
       <div class="testi-card reveal d2">
-        <div class="testi-quote">"The Digital Quality Passport transformed our procurement. We verify every batch before purchase. No more surprises, no more disputes — just certified quality."</div>
-        <div class="testi-author"><div class="testi-avatar">GC</div><div><div class="testi-name">Grace Coffee Ltd</div><div class="testi-role">Enterprise Buyer, Kampala</div></div></div>
+        <div class="testi-quote">"The AI crop advisor detected early signs of maize streak virus from a photo I uploaded. It gave me treatment recommendations immediately — saved my entire field. I use it every week now for disease scouting and market price checks."</div>
+        <div class="testi-author"><div class="testi-avatar">SM</div><div><div class="testi-name">Sarah Mukasa</div><div class="testi-role">Maize Farmer, Mayuge District</div></div></div>
       </div>
       <div class="testi-card reveal d3">
-        <div class="testi-quote">"As a village agent, I've registered 47 farmers in my community. The commission system works perfectly, and the offline registration means I can work anywhere."</div>
-        <div class="testi-author"><div class="testi-avatar">PO</div><div><div class="testi-name">Peter Oundo</div><div class="testi-role">Village Agent, Kamuli District</div></div></div>
+        <div class="testi-quote">"As a cooperative manager, I can now see all our member farmers, their produce quality, and market prices in one dashboard. The digital quality passports have helped us negotiate better prices with exporters — they trust the verification."</div>
+        <div class="testi-author"><div class="testi-avatar">JO</div><div><div class="testi-name">James Oundo</div><div class="testi-role">Cooperative Manager, Kamuli</div></div></div>
       </div>
     </div>
     <div style="text-align:center;margin-top:24px;font-size:.78rem;color:var(--gray-500);font-style:italic" class="reveal d4">* Testimonials from pilot program participants. Additional endorsements being collected.</div>
