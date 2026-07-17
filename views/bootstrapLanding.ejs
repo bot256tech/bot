@@ -577,6 +577,48 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
 </head>
 <body>
 
+<!-- Install App Prompt -->
+<div id="installPrompt" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:999;background:white;border-radius:16px;padding:16px 24px;box-shadow:0 8px 32px rgba(0,0,0,.15);border:1px solid #e8e8e8;max-width:420px;width:90%;animation:slideUp .4s ease">
+  <div style="display:flex;align-items:center;gap:14px">
+    <img src="/images/icon-192.png" alt="" style="width:44px;height:44px;border-radius:12px">
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:.9rem;color:#333">Install AGRICHAIN 360</div>
+      <div style="font-size:.75rem;color:#888;margin-top:2px">Add to home screen for the full app experience</div>
+    </div>
+    <button onclick="installApp()" style="padding:8px 18px;border-radius:10px;border:none;background:#1B5E20;color:white;font-weight:600;font-size:.82rem;cursor:pointer;white-space:nowrap">Install</button>
+    <button onclick="dismissInstall()" style="background:none;border:none;font-size:1.2rem;color:#ccc;cursor:pointer;padding:4px">&times;</button>
+  </div>
+</div>
+<style>
+@keyframes slideUp { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+</style>
+<script>
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    document.getElementById('installPrompt').style.display = 'block';
+  }, 3000);
+});
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((result) => {
+      deferredPrompt = null;
+      document.getElementById('installPrompt').style.display = 'none';
+    });
+  }
+}
+function dismissInstall() {
+  document.getElementById('installPrompt').style.display = 'none';
+}
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installPrompt').style.display = 'none';
+  deferredPrompt = null;
+});
+</script>
+
 <!-- ═══ NAVBAR ═══ -->
 <nav class="nav" id="nav">
   <div class="nav-inner">
