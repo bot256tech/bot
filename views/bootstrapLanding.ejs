@@ -256,19 +256,35 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
 .section-sm { padding:60px 0; }
 .container { max-width:1280px; margin:0 auto; padding:0 32px; }
 .section-label {
-  display:inline-flex; align-items:center; gap:8px; font-size:.75rem; font-weight:700;
-  text-transform:uppercase; letter-spacing:.1em; color:var(--gold-dark); margin-bottom:12px;
+  display:inline-flex; align-items:center; gap:10px; font-family:'Inter',sans-serif;
+  font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.15em;
+  color:var(--gold-dark); margin-bottom:14px;
 }
-.section-label .line { width:32px; height:2px; background:var(--gold); border-radius:2px; }
+.section-label .line { width:40px; height:2px; background:var(--gold); border-radius:2px; }
 .section-title { font-size:2.4rem; font-weight:800; margin-bottom:16px; color:var(--charcoal); }
+.section-title em { font-style:italic; color:var(--green); font-weight:500; }
 .section-sub { font-size:1.05rem; color:var(--gray-600); line-height:1.7; max-width:640px; margin-bottom:48px; }
 .section-center { text-align:center; }
 .section-center .section-sub { margin-left:auto; margin-right:auto; }
+.section-center .section-label { justify-content:center; }
+
+/* Editorial Elements (from v4) */
+.gold-rule { width:60px; height:2px; background:var(--gold); margin:0 auto 24px; border-radius:2px; }
+.gold-rule-left { width:60px; height:2px; background:var(--gold); margin-bottom:20px; border-radius:2px; }
+.pull-quote {
+  font-family:'Playfair Display',Georgia,serif; font-size:1.3rem; font-style:italic;
+  color:var(--green); line-height:1.4; border-left:3px solid var(--gold);
+  padding-left:20px; margin:28px 0;
+}
+.eyebrow-center { display:flex; align-items:center; gap:10px; justify-content:center; font-family:'Inter',sans-serif; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.15em; color:var(--gold-dark); margin-bottom:14px; }
+.eyebrow-center::before,.eyebrow-center::after { content:''; width:24px; height:1px; background:var(--gold); }
+
 @media(max-width:768px) {
   .section { padding:60px 0; }
   .section-title { font-size:1.6rem; }
   .section-sub { font-size:.95rem; margin-bottom:32px; }
   .container { padding:0 20px; }
+  .pull-quote { font-size:1.1rem; }
 }
 
 /* ═══════════════ LIVE STATS SECTION ═══════════════ */
@@ -671,18 +687,20 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
 </section>
 
 <!-- ═══ INTRO SECTION (before stats — gives context on mobile) ═══ -->
-<section style="padding:60px 0 20px;background:var(--cream)">
+<section style="padding:80px 0 20px;background:var(--cream)">
   <div class="container">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center" class="intro-grid">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center" class="intro-grid">
       <div class="reveal">
-        <div class="section-label"><span class="line"></span> WHY AGRICHAIN 360</div>
-        <h2 style="font-size:2rem;margin-bottom:16px">Africa loses <span style="color:var(--gold-dark)">$4 billion</span> every year to post-harvest waste.</h2>
-        <p style="color:var(--gray-600);line-height:1.7;margin-bottom:20px">40% of Uganda's grain harvest spoils before reaching market. Not because farmers can't grow enough — but because they lack drying infrastructure, quality testing, and market connections.</p>
-        <p style="color:var(--gray-600);line-height:1.7;margin-bottom:24px"><strong style="color:var(--charcoal)">AGRICHAIN 360 is the digital infrastructure that fixes this.</strong> One platform connecting farmers, buyers, transporters, warehouses, and exporters — with IoT monitoring, AI intelligence, and verified quality passports.</p>
-        <div style="display:flex;gap:24px;flex-wrap:wrap">
-          <div><div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:var(--green)">40%</div><div style="font-size:.78rem;color:var(--gray-500)">Post-harvest loss we eliminate</div></div>
-          <div><div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:var(--gold-dark)">55%</div><div style="font-size:.78rem;color:var(--gray-500)">Income increase for farmers</div></div>
-          <div><div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:var(--green)">100%</div><div style="font-size:.78rem;color:var(--gray-500)">Traceable from farm to export</div></div>
+        <div class="section-label"><span class="line"></span> THE CRISIS</div>
+        <h2 style="font-size:2.2rem;margin-bottom:16px">Africa loses <em style="font-style:italic;color:var(--gold-dark)">$4 billion</em> every year to post-harvest waste.</h2>
+        <div class="gold-rule-left"></div>
+        <p style="color:var(--gray-600);line-height:1.8;margin-bottom:16px">40% of Uganda's grain harvest spoils before reaching market. Not because farmers can't grow enough — but because they lack drying infrastructure, quality testing, and market connections.</p>
+        <p style="color:var(--gray-600);line-height:1.8;margin-bottom:20px"><strong style="color:var(--charcoal)">AGRICHAIN 360 is the digital infrastructure that fixes this.</strong> One platform connecting farmers, buyers, transporters, warehouses, and exporters — with IoT monitoring, AI intelligence, and verified quality passports.</p>
+        <div class="pull-quote">"Farmers earn UGX 800/kg for untested maize versus UGX 1,800/kg for certified Grade A — a 55% income gap caused entirely by post-harvest failures."</div>
+        <div style="display:flex;gap:28px;flex-wrap:wrap;margin-top:24px">
+          <div><div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:800;color:var(--green)">40%</div><div style="font-size:.75rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Loss Eliminated</div></div>
+          <div><div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:800;color:var(--gold-dark)">55%</div><div style="font-size:.75rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Income Increase</div></div>
+          <div><div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:800;color:var(--green)">100%</div><div style="font-size:.75rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em">Traceable</div></div>
         </div>
       </div>
       <div class="reveal-right d2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -719,8 +737,9 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
 <section class="section chain-section" id="platform">
   <div class="container">
     <div class="section-center">
-      <div class="section-label reveal"><span class="line"></span> THE AGRICULTURAL VALUE CHAIN</div>
-      <h2 class="section-title reveal d1">From Seed to Consumer — Fully Digital</h2>
+      <div class="section-label reveal"><span class="line"></span> THE VALUE CHAIN</div>
+      <h2 class="section-title reveal d1">From Seed to Consumer — <em>Fully Digital</em></h2>
+      <div class="gold-rule reveal d1"></div>
       <p class="section-sub reveal d2">Every stage of the agricultural journey is tracked, verified, and connected through AGRICHAIN 360. Click any stage to learn more.</p>
     </div>
     <div class="chain-scroll" id="chainScroll">
@@ -783,7 +802,8 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
   <div class="container">
     <div class="section-center">
       <div class="section-label reveal"><span class="line"></span> STAKEHOLDER ECOSYSTEM</div>
-      <h2 class="section-title reveal d1">One Platform. Every Stakeholder.</h2>
+      <h2 class="section-title reveal d1">One Platform. <em>Every Stakeholder.</em></h2>
+      <div class="gold-rule reveal d1"></div>
       <p class="section-sub reveal d2">AGRICHAIN 360 serves the entire agricultural value chain — from smallholder farmers to government ministries. Each stakeholder gets purpose-built tools.</p>
     </div>
     <div class="stake-grid">
@@ -807,7 +827,7 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
     <div class="ai-grid">
       <div>
         <div class="section-label reveal"><span class="line"></span> AI CROP INTELLIGENCE</div>
-        <h2 class="section-title reveal d1">Your Personal Agronomist — Available 24/7</h2>
+        <h2 class="section-title reveal d1">Your Personal Agronomist — <em>Available 24/7</em></h2>
         <p class="section-sub reveal d2">AgriIntel AI answers farming questions, detects diseases from photos, predicts yields, and provides market intelligence — in English and Luganda.</p>
         <ul style="list-style:none;padding:0" class="reveal d3">
           <li style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.9rem"><i class="fas fa-check-circle" style="color:var(--green)"></i> Disease detection from phone photos</li>
@@ -841,7 +861,7 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
     <div class="iot-grid">
       <div>
         <div class="section-label reveal"><span class="line"></span> IOT INFRASTRUCTURE</div>
-        <h2 class="section-title reveal d1">Smart Solar Dryers — Real-Time Monitoring</h2>
+        <h2 class="section-title reveal d1">Smart Solar Dryers — <em>Real-Time Monitoring</em></h2><div class="gold-rule-left reveal d1"></div>
         <p class="section-sub reveal d2">ESP32 sensors publish temperature, humidity, and moisture data every 30 seconds via MQTT. Farmers see live dashboards. The platform triggers automated alerts when thresholds are crossed.</p>
         <div style="margin-top:24px" class="reveal d3">
           <div class="iot-status-row"><span><i class="fas fa-wifi" style="color:var(--green);width:20px"></i> Connection</span><span class="iot-status-badge online">Online</span></div>
@@ -916,7 +936,7 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
 <section class="section compare-section">
   <div class="container">
     <div class="section-center">
-      <div class="section-label reveal"><span class="line"></span> THE AGRICHAIN 360 DIFFERENCE</div>
+      <div class="section-label reveal"><span class="line"></span> THE DIFFERENCE</div>
       <h2 class="section-title reveal d1">Traditional Agriculture vs. Digital Infrastructure</h2>
     </div>
     <div class="compare-grid reveal d2">
@@ -1007,7 +1027,7 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
   <div class="container">
     <div class="section-center">
       <div class="section-label reveal"><span class="line"></span> INVESTMENT OPPORTUNITY</div>
-      <h2 class="section-title reveal d1" style="color:white">Built for Scale. Ready for Partners.</h2>
+      <h2 class="section-title reveal d1" style="color:white">Built for Scale. <em style="color:var(--gold)">Ready for Partners.</em></h2>
       <p class="section-sub reveal d2" style="color:rgba(255,255,255,.7)">AGRICHAIN 360 is designed to be the agricultural operating system for East Africa — scalable, revenue-generating, and impact-driven.</p>
     </div>
     <div class="inv-grid">
@@ -1069,7 +1089,7 @@ h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing
     <div class="expansion-grid">
       <div>
         <div class="section-label reveal"><span class="line"></span> EXPANSION ROADMAP</div>
-        <h2 class="section-title reveal d1">From Uganda to East Africa</h2>
+        <h2 class="section-title reveal d1">From Uganda to <em>East Africa</em></h2><div class="gold-rule-left reveal d1"></div>
         <p class="section-sub reveal d2">Starting in Uganda's Busoga region, AGRICHAIN 360 is designed to scale across East Africa — adapting to local crops, languages, and mobile money systems.</p>
         <div class="expansion-list reveal d3">
           <div class="expansion-item">
