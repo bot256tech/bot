@@ -3,669 +3,1308 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AGRICHAIN 360™ — Uganda's Complete Post-Harvest Platform</title>
-<meta name="description" content="AGRICHAIN 360 connects farmers, buyers, and service providers with verified quality, real-time IoT monitoring, and digital traceability.">
+<title>AGRICHAIN 360™ — The Digital Infrastructure Powering Agriculture Across Africa</title>
+<meta name="description" content="AGRICHAIN 360 connects farmers, cooperatives, buyers, transporters, warehouses, exporters, financial institutions, NGOs, and governments through one intelligent digital ecosystem.">
 <meta name="theme-color" content="#1B5E20">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{
-  /* 3-COLOR PALETTE: Deep Green + Gold + Charcoal */
-  --g:#1B5E20;--g2:#2E7D32;--gd:#0d3b0f;--gl:rgba(27,94,32,.08);
-  --a:#D4AF37;--ad:#B8960C;
-  --bg:#FAFAF5;--bg2:#F2F0E8;
-  --card:#fff;--tx:#333333;--tx2:#666;--tx3:#999;
-  --bd:rgba(27,94,32,.12);
-  --sh:0 4px 20px rgba(27,94,32,.06);
-  --shl:0 12px 40px rgba(27,94,32,.12);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased}
-h1,h2,h3,h4{font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-.02em;line-height:1.15}
-a{color:var(--g);text-decoration:none;transition:color .2s}
-a:hover{color:var(--gd)}
-img{max-width:100%;height:auto;display:block}
-.container{max-width:1200px;margin:0 auto;padding:0 20px}
+/* ═══════════════════════════════════════════════════════════
+   AGRICHAIN 360™ — NATIONAL INFRASTRUCTURE DESIGN SYSTEM
+   Inspired by: Stripe, Linear, Palantir, Notion + Agricultural Warmth
+   ═══════════════════════════════════════════════════════════ */
 
-/* ─── PAGE LOADER ─── */
-.page-loader{position:fixed;top:0;left:0;right:0;bottom:0;background:white;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity .6s,visibility .6s}
-.page-loader.done{opacity:0;visibility:hidden;pointer-events:none}
-.loader-spinner{width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--g);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ─── ANIMATIONS ─── */
-.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.25,.8,.25,1),transform .8s cubic-bezier(.25,.8,.25,1)}
-.reveal.visible{opacity:1;transform:translateY(0)}
-.reveal-left{opacity:0;transform:translateX(-40px);transition:opacity .8s ease,transform .8s ease}
-.reveal-left.visible{opacity:1;transform:translateX(0)}
-.reveal-right{opacity:0;transform:translateX(40px);transition:opacity .8s ease,transform .8s ease}
-.reveal-right.visible{opacity:1;transform:translateX(0)}
-.reveal-scale{opacity:0;transform:scale(.92);transition:opacity .7s ease,transform .7s ease}
-.reveal-scale.visible{opacity:1;transform:scale(1)}
-.d1{transition-delay:.1s!important}.d2{transition-delay:.2s!important}.d3{transition-delay:.3s!important}.d4{transition-delay:.4s!important}.d5{transition-delay:.5s!important}.d6{transition-delay:.6s!important}
-
-/* ─── NAVBAR ─── */
-.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.06);transition:all .3s}
-.navbar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.08)}
-.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1200px;margin:0 auto;padding:0 20px;gap:12px}
-.nav-brand{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.15rem;color:var(--g);display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
-.nav-brand sup{font-size:.45rem}
-.nav-brand .brand-360{color:var(--a)}
-.nav-links{display:flex;align-items:center;gap:6px}
-.nav-link{padding:8px 14px;border-radius:50px;font-weight:500;font-size:.82rem;color:var(--tx2);transition:all .2s}
-.nav-link:hover{color:var(--g);background:var(--gl)}
-.nav-cta{padding:8px 20px;border-radius:50px;font-weight:700;font-size:.82rem;border:none;cursor:pointer;transition:all .3s;display:inline-block}
-.nav-cta-o{background:transparent;border:2px solid var(--bd);color:var(--tx)}
-.nav-cta-o:hover{border-color:var(--g);color:var(--g)}
-.nav-cta-f{background:var(--g);color:white;box-shadow:0 4px 16px rgba(27,94,32,.25)}
-.nav-cta-f:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(27,94,32,.35);color:white}
-.nav-mob{display:none;background:none;border:none;font-size:1.4rem;color:var(--tx);cursor:pointer;flex-shrink:0}
-@media(max-width:900px){
-  .nav-links .nav-link{display:none}
-  .nav-mob{display:block}
-  .nav-cta{padding:6px 14px!important;font-size:.75rem!important}
-}
-@media(max-width:480px){
-  .brand-360,.nav-brand sup{display:none}
-  .nav-brand{font-size:1rem}
-  .nav-inner{gap:8px}
-  .nav-cta-o{display:none!important}
+:root {
+  --green: #1B5E20;
+  --green-mid: #2E7D32;
+  --green-light: #4CAF50;
+  --green-pale: #E8F5E9;
+  --gold: #D4AF37;
+  --gold-light: #F5E6A3;
+  --gold-dark: #B8960C;
+  --cream: #FAFAF5;
+  --white: #FFFFFF;
+  --gray-50: #F8F9FA;
+  --gray-100: #F1F3F5;
+  --gray-200: #E9ECEF;
+  --gray-300: #DEE2E6;
+  --gray-400: #CED4DA;
+  --gray-500: #ADB5BD;
+  --gray-600: #6C757D;
+  --gray-700: #495057;
+  --gray-800: #343A40;
+  --charcoal: #333333;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.1);
+  --shadow-xl: 0 24px 60px rgba(0,0,0,.12);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
 }
 
-/* Mobile Nav */
-.mob-nav{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:white;z-index:2000;box-shadow:-4px 0 30px rgba(0,0,0,.15);transition:right .35s;padding:24px;display:flex;flex-direction:column;gap:6px}
-.mob-nav.open{right:0}
-.mob-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1999;opacity:0;visibility:hidden;transition:all .3s}
-.mob-overlay.open{opacity:1;visibility:visible}
-.mob-close{align-self:flex-end;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--tx2);margin-bottom:12px}
-.mob-nav a{display:block;padding:14px 16px;border-radius:12px;font-weight:600;color:var(--tx);transition:background .2s}
-.mob-nav a:hover{background:var(--gl);color:var(--g)}
-
-/* ─── HERO ─── */
-.hero{position:relative;background:linear-gradient(160deg,#0a2e0a 0%,#0d3b0d 20%,#1B5E20 50%,#2E7D32 80%,#1B5E20 100%);color:white;padding:120px 0 100px;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cdefs%3E%3Cpattern id='grain' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='25' cy='25' r='1' fill='white' opacity='.03'/%3E%3Ccircle cx='75' cy='75' r='.8' fill='white' opacity='.02'/%3E%3Ccircle cx='50' cy='10' r='.6' fill='white' opacity='.025'/%3E%3Ccircle cx='10' cy='60' r='.7' fill='white' opacity='.02'/%3E%3Ccircle cx='90' cy='40' r='.5' fill='%23D4AF37' opacity='.03'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grain)'/%3E%3C/svg%3E")}
-.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,rgba(250,250,245,.04),transparent)}
-.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;z-index:2}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);padding:6px 16px;border-radius:50px;font-size:.78rem;margin-bottom:20px;backdrop-filter:blur(8px)}
-.hero-title{font-size:3rem;font-weight:900;line-height:1.08;margin-bottom:20px}
-.hero-title span{color:var(--a)}
-.hero-sub{font-size:1.05rem;opacity:.85;max-width:500px;line-height:1.7;margin-bottom:28px}
-.hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px}
-.hero-btn{padding:14px 28px;border-radius:50px;font-weight:700;font-size:.95rem;border:none;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
-.hero-btn-gold{background:var(--a);color:#3e2723;box-shadow:0 4px 20px rgba(212,175,55,.35)}
-.hero-btn-gold:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(212,175,55,.45);color:#3e2723}
-.hero-btn-glass{background:rgba(255,255,255,.12);color:white;border:2px solid rgba(255,255,255,.25);backdrop-filter:blur(8px)}
-.hero-btn-glass:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4);color:white}
-
-/* Hero Stats — BOLD & CLEAR */
-.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px;background:rgba(255,255,255,.1);border-radius:16px;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px)}
-.hero-stat{text-align:center}
-.hero-stat-val{font-size:1.8rem;font-weight:900;font-family:'Space Grotesk',sans-serif;display:block;line-height:1}
-.hero-stat-lbl{font-size:.72rem;opacity:.75;margin-top:6px;display:block;text-transform:uppercase;letter-spacing:.05em}
-.hero-stat:nth-child(1) .hero-stat-val{color:#fff}
-.hero-stat:nth-child(2) .hero-stat-val{color:var(--a)}
-.hero-stat:nth-child(3) .hero-stat-val{color:#2E7D32}
-.hero-stat:nth-child(4) .hero-stat-val{color:#D4AF37}
-
-/* Hero Image */
-.hero-img{position:relative}
-.hero-img img{border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;height:420px;object-fit:cover}
-.hero-img::after{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:var(--a);border-radius:50%;opacity:.15;animation:float 4s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
-
-@media(max-width:900px){
-  .hero{padding:100px 0 60px}
-  .hero-grid{grid-template-columns:1fr;text-align:center}
-  .hero-title{font-size:2rem}
-  .hero-sub{margin:0 auto 24px;font-size:.95rem}
-  .hero-btns{justify-content:center}
-  .hero-stats{grid-template-columns:repeat(2,1fr);gap:12px;padding:16px}
-  .hero-stat-val{font-size:1.4rem}
-  .hero-img{display:none}
-}
-@media(max-width:480px){
-  .hero-title{font-size:1.6rem}
-  .hero-btn{padding:12px 20px;font-size:.85rem}
-  .hero-stats{grid-template-columns:repeat(2,1fr)}
-  .hero-stat-val{font-size:1.2rem}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  overflow-x: hidden;
+  line-height: 1.6;
 }
 
-/* ─── SECTIONS ─── */
-.section{padding:80px 0;position:relative}
-.section-sm{padding:50px 0}
-.section-title{font-weight:800;font-size:2rem;text-align:center;margin-bottom:12px}
-.section-sub{text-align:center;color:var(--tx2);margin-bottom:48px;font-size:1rem;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.7}
-.section-accent{background:var(--bg2);position:relative}
-.section-accent::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1' fill='%231B5E20' opacity='.03'/%3E%3C/svg%3E");pointer-events:none}
+/* Typography */
+h1,h2,h3,h4,h5 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -.02em; line-height: 1.15; }
+.serif { font-family: 'Playfair Display', Georgia, serif; }
+.sans { font-family: 'Inter', system-ui, sans-serif; }
 
-/* Section Dividers — diagonal cuts between sections */
-.divider-wave{position:relative;height:60px;margin-top:-60px;z-index:5;pointer-events:none}
-.divider-wave svg{position:absolute;bottom:0;width:100%;height:60px}
+/* Scroll Animations */
+.reveal { opacity:0; transform:translateY(40px); transition: opacity .8s cubic-bezier(.25,.8,.25,1), transform .8s cubic-bezier(.25,.8,.25,1); }
+.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal-left { opacity:0; transform:translateX(-40px); transition: opacity .8s ease, transform .8s ease; }
+.reveal-left.visible { opacity:1; transform:translateX(0); }
+.reveal-right { opacity:0; transform:translateX(40px); transition: opacity .8s ease, transform .8s ease; }
+.reveal-right.visible { opacity:1; transform:translateX(0); }
+.reveal-scale { opacity:0; transform:scale(.92); transition: opacity .7s ease, transform .7s ease; }
+.reveal-scale.visible { opacity:1; transform:scale(1); }
+.d1{transition-delay:.1s!important} .d2{transition-delay:.2s!important} .d3{transition-delay:.3s!important}
+.d4{transition-delay:.4s!important} .d5{transition-delay:.5s!important} .d6{transition-delay:.6s!important}
+.d7{transition-delay:.7s!important} .d8{transition-delay:.8s!important}
 
-/* Gold accent line */
-.section-line{width:60px;height:3px;background:linear-gradient(90deg,var(--a),transparent);margin:0 auto 16px;border-radius:2px}
-.section-line-left{width:60px;height:3px;background:linear-gradient(90deg,var(--a),transparent);margin-bottom:16px;border-radius:2px}
-
-@media(max-width:768px){.section{padding:50px 0}.section-title{font-size:1.4rem}.section-sub{font-size:.9rem;margin-bottom:32px}.divider-wave{height:30px;margin-top:-30px}}
-
-/* ─── PROBLEM SECTION ─── */
-.problem{background:linear-gradient(135deg,#1a1a1a 0%,#2C2C2C 50%,#333333 100%);color:white;padding:80px 0;position:relative;overflow:hidden}
-.problem::before{content:'';position:absolute;top:0;right:0;width:50%;height:100%;background:url('/images/post-harvest-problem.jpg') center/cover;opacity:.12}
-.problem::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23D4AF37' fill-opacity='0.03'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2l2 3.5-2 3z'/%3E%3C/g%3E%3C/svg%3E")}
-.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;z-index:2}
-.problem h2{font-size:2rem;font-weight:800;margin-bottom:16px;color:white}
-.problem h2 span{color:#D4AF37}
-.problem p{opacity:.85;line-height:1.7;margin-bottom:16px;font-size:.95rem}
-.problem-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
-.problem-stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;text-align:center}
-.problem-stat-val{font-size:1.6rem;font-weight:900;color:#D4AF37;font-family:'Space Grotesk',sans-serif}
-.problem-stat-lbl{font-size:.75rem;opacity:.7;margin-top:4px}
-.problem-img{border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-.problem-img img{width:100%;height:350px;object-fit:cover}
-@media(max-width:768px){
-  .problem-grid{grid-template-columns:1fr}
-  .problem h2{font-size:1.5rem}
-  .problem-stats{grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .problem-stat{padding:14px}
-  .problem-stat-val{font-size:1.2rem}
-  .problem-img img{height:220px}
+/* ═══════════════ NAVBAR ═══════════════ */
+.nav {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  background: rgba(250,250,245,.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(27,94,32,.08);
+  transition: all .3s ease;
+}
+.nav.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,.06); }
+.nav-inner {
+  display:flex; align-items:center; justify-content:space-between;
+  max-width:1280px; margin:0 auto; padding:0 32px; height:72px;
+}
+.nav-brand {
+  font-family:'Playfair Display',serif; font-weight:800; font-size:1.2rem;
+  color:var(--green); text-decoration:none; display:flex; align-items:center; gap:8px;
+}
+.nav-brand .logo-dot { width:10px; height:10px; background:var(--gold); border-radius:50%; display:inline-block; }
+.nav-links { display:flex; align-items:center; gap:4px; }
+.nav-links a {
+  padding:8px 16px; border-radius:8px; font-size:.875rem; font-weight:500;
+  color:var(--gray-600); text-decoration:none; transition:all .2s;
+}
+.nav-links a:hover { color:var(--green); background:var(--green-pale); }
+.nav-cta {
+  padding:10px 24px !important; border-radius:10px !important;
+  background:var(--green) !important; color:white !important; font-weight:600 !important;
+  box-shadow: 0 2px 8px rgba(27,94,32,.2);
+}
+.nav-cta:hover { background:var(--green-mid) !important; transform:translateY(-1px); box-shadow: 0 4px 16px rgba(27,94,32,.3); }
+.nav-mob { display:none; background:none; border:none; font-size:1.3rem; color:var(--charcoal); cursor:pointer; }
+@media(max-width:900px) {
+  .nav-links a:not(.nav-cta) { display:none; }
+  .nav-mob { display:block; }
+  .nav-inner { padding:0 20px; }
 }
 
-/* ─── STEPS ─── */
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
-.steps::before{content:'';position:absolute;top:36px;left:12%;right:12%;height:3px;background:linear-gradient(90deg,var(--g),var(--a),var(--g2),var(--ad));border-radius:3px;z-index:0}
-.step{text-align:center;position:relative;z-index:1}
-.step-n{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;margin:0 auto 14px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
-.step-ico{font-size:2rem;margin-bottom:8px}
-.step-t{font-weight:700;font-size:.9rem;margin-bottom:4px}
-.step-d{font-size:.78rem;color:var(--tx2);line-height:1.5}
-@media(max-width:768px){.steps{grid-template-columns:repeat(2,1fr)}.steps::before{display:none}}
-@media(max-width:480px){.steps{grid-template-columns:1fr}}
+/* Mobile Drawer */
+.mob-drawer {
+  position:fixed; top:0; right:-100%; width:300px; height:100vh;
+  background:white; z-index:2000; box-shadow:-4px 0 30px rgba(0,0,0,.15);
+  transition:right .35s cubic-bezier(.25,.8,.25,1); padding:24px;
+  display:flex; flex-direction:column; gap:4px;
+}
+.mob-drawer.open { right:0; }
+.mob-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1999; opacity:0; visibility:hidden; transition:all .3s; }
+.mob-overlay.open { opacity:1; visibility:visible; }
+.mob-close { align-self:flex-end; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--gray-500); margin-bottom:16px; }
+.mob-drawer a { display:block; padding:14px 16px; border-radius:12px; font-weight:600; color:var(--charcoal); text-decoration:none; transition:background .2s; }
+.mob-drawer a:hover { background:var(--green-pale); color:var(--green); }
 
-/* ─── FEATURES ─── */
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.feat{background:white;border-radius:20px;padding:32px;border:1px solid var(--bd);text-align:center;transition:all .35s cubic-bezier(.25,.8,.25,1);position:relative;overflow:hidden}
-.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--g),var(--a));transform:scaleX(0);transition:transform .35s ease;transform-origin:left}
-.feat:hover::before{transform:scaleX(1)}
-.feat:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(27,94,32,.1);border-color:var(--g)}
-.feat-ico{font-size:2.5rem;margin-bottom:14px}
-.feat h4{font-weight:700;margin-bottom:8px;font-size:1rem}
-.feat p{font-size:.85rem;color:var(--tx2);line-height:1.6;margin-bottom:16px}
-.feat-link{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.82rem;padding:8px 20px;border-radius:50px;transition:all .3s}
-.feat-link-g{background:var(--gl);color:var(--g)}.feat-link-g:hover{background:var(--g);color:white}
-.feat-link-p{background:rgba(156,39,176,.1);color:#7B1FA2}.feat-link-p:hover{background:#7B1FA2;color:white}
-@media(max-width:900px){.feat-grid{grid-template-columns:1fr}}
+/* ═══════════════ HERO SECTION ═══════════════ */
+.hero {
+  padding: 140px 0 80px;
+  background: var(--cream);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content:''; position:absolute; top:-200px; right:-200px;
+  width:600px; height:600px; border-radius:50%;
+  background: radial-gradient(circle, rgba(212,175,55,.06), transparent 70%);
+  pointer-events:none;
+}
+.hero::after {
+  content:''; position:absolute; bottom:-100px; left:-100px;
+  width:400px; height:400px; border-radius:50%;
+  background: radial-gradient(circle, rgba(27,94,32,.04), transparent 70%);
+  pointer-events:none;
+}
+.hero-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center;
+  max-width:1280px; margin:0 auto; padding:0 32px; position:relative; z-index:2;
+}
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 16px; border-radius:50px; font-size:.8rem; font-weight:600;
+  background:var(--green-pale); color:var(--green); margin-bottom:24px;
+  border: 1px solid rgba(27,94,32,.12);
+}
+.hero-badge .dot { width:6px; height:6px; background:var(--green-light); border-radius:50%; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.hero h1 {
+  font-size:3.2rem; font-weight:800; color:var(--charcoal); margin-bottom:20px; line-height:1.1;
+}
+.hero h1 .gold { color:var(--gold-dark); }
+.hero-sub {
+  font-size:1.1rem; color:var(--gray-600); line-height:1.7; margin-bottom:32px; max-width:520px;
+}
+.hero-btns { display:flex; gap:12px; flex-wrap:wrap; }
+.btn-hero {
+  padding:14px 28px; border-radius:12px; font-weight:600; font-size:.95rem;
+  border:none; cursor:pointer; transition:all .3s; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+}
+.btn-primary { background:var(--green); color:white; box-shadow:0 4px 16px rgba(27,94,32,.2); }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(27,94,32,.3); color:white; }
+.btn-gold { background:var(--gold); color:#3e2723; box-shadow:0 4px 16px rgba(212,175,55,.25); }
+.btn-gold:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(212,175,55,.35); color:#3e2723; }
+.btn-outline { background:transparent; color:var(--charcoal); border:2px solid var(--gray-300); }
+.btn-outline:hover { border-color:var(--green); color:var(--green); }
 
-/* ─── SPLIT ─── */
-.split{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-.split-rev{direction:rtl}.split-rev>*{direction:ltr}
-.split-img{border-radius:20px;overflow:hidden;box-shadow:var(--shl);position:relative}
-.split-img::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--a),var(--g));z-index:2;border-radius:4px 0 0 4px}
-.split-img img{width:100%;height:340px;object-fit:cover;transition:transform .5s}
-.split-img:hover img{transform:scale(1.05)}
-.split-c h3{font-weight:800;font-size:1.5rem;margin-bottom:14px}
-.split-c p{color:var(--tx2);line-height:1.7;margin-bottom:16px;font-size:.92rem}
-.split-list{list-style:none;padding:0}
-.split-list li{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.88rem}
-.split-list li i{color:var(--g);margin-top:3px;flex-shrink:0}
-@media(max-width:768px){.split{grid-template-columns:1fr;gap:24px}.split-rev{direction:ltr}.split-img img{height:220px}.split-c h3{font-size:1.2rem}}
+/* Animated Dashboard Mockup */
+.hero-visual { position:relative; }
+.dash-mockup {
+  background:white; border-radius:var(--radius-lg); padding:24px;
+  box-shadow:var(--shadow-xl); border:1px solid var(--gray-200);
+  position:relative; overflow:hidden;
+}
+.dash-mockup::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, var(--green), var(--gold), var(--green-light));
+}
+.dash-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.dash-title { font-family:'Inter',sans-serif; font-weight:700; font-size:.9rem; color:var(--charcoal); }
+.dash-live { display:flex; align-items:center; gap:6px; font-size:.75rem; color:var(--green); font-weight:600; }
+.dash-live .dot { width:6px; height:6px; background:var(--green-light); border-radius:50%; animation:pulse 2s infinite; }
+.dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+.dash-stat {
+  background:var(--gray-50); border-radius:var(--radius-sm); padding:14px; text-align:center;
+  border:1px solid var(--gray-100);
+}
+.dash-stat-val { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:800; color:var(--green); }
+.dash-stat-lbl { font-size:.7rem; color:var(--gray-500); margin-top:2px; text-transform:uppercase; letter-spacing:.05em; }
+.dash-chart {
+  background:var(--gray-50); border-radius:var(--radius-sm); padding:16px; height:100px;
+  border:1px solid var(--gray-100); position:relative; overflow:hidden;
+}
+.dash-chart-bars {
+  display:flex; align-items:flex-end; gap:6px; height:60px; padding-top:8px;
+}
+.dash-bar {
+  flex:1; background:var(--green-pale); border-radius:4px 4px 0 0; transition:height .8s ease;
+  position:relative;
+}
+.dash-bar.gold { background:var(--gold-light); }
+.dash-bar.active { background:var(--green); }
+.dash-feed { margin-top:12px; }
+.dash-feed-item {
+  display:flex; align-items:center; gap:10px; padding:8px 0;
+  border-bottom:1px solid var(--gray-100); font-size:.78rem; color:var(--gray-600);
+  animation: feedSlide .5s ease-out;
+}
+@keyframes feedSlide { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+.dash-feed-icon { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:.7rem; flex-shrink:0; }
+.dash-feed-icon.green { background:var(--green-pale); color:var(--green); }
+.dash-feed-icon.gold { background:var(--gold-light); color:var(--gold-dark); }
+.dash-feed-icon.blue { background:#E3F2FD; color:#1565C0; }
 
-/* ─── INVESTOR SECTION ─── */
-.investor{background:linear-gradient(160deg,#0d3b0d 0%,#1B5E20 40%,#0d3b0d 100%);color:white;padding:80px 0;position:relative;overflow:hidden}
-.investor::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23D4AF37' stroke-opacity='0.06' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3Ccircle cx='30' cy='30' r='10'/%3E%3C/g%3E%3C/svg%3E")}
-.investor::after{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(212,175,55,.08),transparent 70%);border-radius:50%}
-.investor h2{color:white}
-.investor .section-sub{color:rgba(255,255,255,.7)}
-.inv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.inv-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px;backdrop-filter:blur(8px);transition:all .3s;position:relative;overflow:hidden}
-.inv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--a),transparent);opacity:0;transition:opacity .3s}
-.inv-card:hover{background:rgba(255,255,255,.12);transform:translateY(-4px)}
-.inv-card:hover::before{opacity:1}
-.inv-card-ico{font-size:2rem;margin-bottom:12px}
-.inv-card h4{font-weight:700;margin-bottom:8px;font-size:1rem}
-.inv-card p{font-size:.82rem;opacity:.8;line-height:1.6}
-.inv-card .inv-metric{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)}
-.inv-card .inv-metric-val{font-size:1.3rem;font-weight:900;font-family:'Space Grotesk',sans-serif;color:var(--a)}
-.inv-card .inv-metric-lbl{font-size:.72rem;opacity:.6}
-@media(max-width:768px){.inv-grid{grid-template-columns:1fr}}
+/* Floating notification cards */
+.float-card {
+  position:absolute; background:white; border-radius:var(--radius-md); padding:12px 16px;
+  box-shadow:var(--shadow-lg); border:1px solid var(--gray-200); font-size:.78rem;
+  display:flex; align-items:center; gap:10px; animation:floatCard 3s ease-in-out infinite;
+  z-index:3;
+}
+@keyframes floatCard { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.float-card.fc1 { top:-20px; right:-30px; animation-delay:0s; }
+.float-card.fc2 { bottom:40px; left:-40px; animation-delay:1.5s; }
+.float-card .fc-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+.float-card .fc-icon.green { background:var(--green-pale); color:var(--green); }
+.float-card .fc-icon.gold { background:var(--gold-light); color:var(--gold-dark); }
 
-/* ─── NGO SECTION ─── */
-.ngo{background:linear-gradient(160deg,#3E2723 0%,#2C1810 30%,#1a2e1a 70%,#1B5E20 100%);color:white;padding:80px 0;position:relative;overflow:hidden}
-.ngo::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23D4AF37' fill-opacity='0.04'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2V0zm0 4l4-4h2l-6 6V4zm0 4l8-8h2L40 10V8zm0 4L52 0h2L40 14v-2zm0 4L56 0h2L40 18v-2zm0 4L60 0h2L40 22v-2zm0 4L64 0h2L40 26v-2zm0 4L68 0h2L40 30v-2zm0 4L72 0h2L40 34v-2zm0 4L76 0h2L40 38v-2zm0 4L80 0v2L42 40h-2zm4 0L80 4v2L46 40h-2zm4 0L80 8v2L50 40h-2zm4 0l28-28v2L54 40h-2zm4 0l24-24v2L58 40h-2zm4 0l20-20v2L62 40h-2zm4 0l16-16v2L66 40h-2zm4 0l12-12v2L70 40h-2zm4 0l8-8v2l-6 6h-2zm4 0l4-4v2l-2 2h-2z'/%3E%3C/g%3E%3C/svg%3E")}
-.ngo::after{content:'';position:absolute;bottom:-30%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(212,175,55,.06),transparent 70%);border-radius:50%}
-.ngo h2{color:white}
-.ngo .section-sub{color:rgba(255,255,255,.7)}
-.ngo-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;z-index:2}
-.ngo-img{border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.ngo-img img{width:100%;height:380px;object-fit:cover}
-.ngo-items{display:flex;flex-direction:column;gap:16px}
-.ngo-item{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px;transition:all .3s}
-.ngo-item:hover{background:rgba(255,255,255,.12)}
-.ngo-item-ico{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
-.ngo-item h4{font-weight:700;font-size:.92rem;margin-bottom:4px}
-.ngo-item p{font-size:.8rem;opacity:.8;line-height:1.5}
-@media(max-width:768px){.ngo-grid{grid-template-columns:1fr}.ngo-img img{height:220px}}
+@media(max-width:900px) {
+  .hero { padding:110px 0 60px; }
+  .hero-grid { grid-template-columns:1fr; gap:40px; }
+  .hero h1 { font-size:2.2rem; }
+  .hero-sub { font-size:1rem; }
+  .float-card { display:none; }
+  .hero-visual { order:-1; }
+}
+@media(max-width:480px) {
+  .hero h1 { font-size:1.8rem; }
+  .hero-btns { flex-direction:column; }
+  .btn-hero { width:100%; justify-content:center; }
+  .dash-stats { grid-template-columns:1fr; }
+}
 
-/* ─── STATS ─── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
-.stat{background:white;border-radius:16px;padding:24px;text-align:center;border:1px solid var(--bd);transition:all .3s}
-.stat:hover{transform:translateY(-4px);box-shadow:var(--shl)}
-.stat-ico{font-size:1.5rem;margin-bottom:8px}
-.stat-val{font-size:2rem;font-weight:900;font-family:'Space Grotesk',sans-serif}
-.stat-lbl{font-size:.82rem;color:var(--tx2);margin-top:4px}
-@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.stat-val{font-size:1.5rem}}
+/* ═══════════════ SECTION SHARED ═══════════════ */
+.section { padding:100px 0; position:relative; }
+.section-sm { padding:60px 0; }
+.container { max-width:1280px; margin:0 auto; padding:0 32px; }
+.section-label {
+  display:inline-flex; align-items:center; gap:8px; font-size:.75rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--gold-dark); margin-bottom:12px;
+}
+.section-label .line { width:32px; height:2px; background:var(--gold); border-radius:2px; }
+.section-title { font-size:2.4rem; font-weight:800; margin-bottom:16px; color:var(--charcoal); }
+.section-sub { font-size:1.05rem; color:var(--gray-600); line-height:1.7; max-width:640px; margin-bottom:48px; }
+.section-center { text-align:center; }
+.section-center .section-sub { margin-left:auto; margin-right:auto; }
+@media(max-width:768px) {
+  .section { padding:60px 0; }
+  .section-title { font-size:1.6rem; }
+  .section-sub { font-size:.95rem; margin-bottom:32px; }
+  .container { padding:0 20px; }
+}
 
-/* ─── CROPS ─── */
-.crops-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
-.crop{display:flex;flex-direction:column;align-items:center;background:white;border:1px solid var(--bd);border-radius:14px;padding:18px 22px;width:120px;transition:all .3s}
-.crop:hover{transform:translateY(-6px);box-shadow:var(--shl);border-color:var(--g)}
-.crop-e{font-size:2rem;margin-bottom:6px}
-.crop-n{font-weight:700;font-size:.85rem}
-.crop-s{font-size:.68rem;color:var(--tx3);margin-top:2px}
+/* ═══════════════ LIVE STATS SECTION ═══════════════ */
+.stats-section { background:var(--green); color:white; padding:80px 0; position:relative; overflow:hidden; }
+.stats-section::before {
+  content:''; position:absolute; inset:0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='white' opacity='.06'/%3E%3C/svg%3E");
+}
+.stats-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:24px; position:relative; z-index:2;
+}
+.stat-item { text-align:center; }
+.stat-number {
+  font-family:'Playfair Display',serif; font-size:2.8rem; font-weight:900; line-height:1;
+  display:block; margin-bottom:8px;
+}
+.stat-number.gold { color:var(--gold); }
+.stat-label { font-size:.8rem; opacity:.7; text-transform:uppercase; letter-spacing:.08em; }
+.stats-note { text-align:center; margin-top:32px; font-size:.8rem; opacity:.5; position:relative; z-index:2; }
+@media(max-width:900px) { .stats-grid { grid-template-columns:repeat(3,1fr); gap:20px; } .stat-number { font-size:2rem; } }
+@media(max-width:480px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .stat-number { font-size:1.6rem; } }
 
-/* ─── CTA ─── */
-.cta{background:linear-gradient(160deg,#1B5E20 0%,#0d3b0d 50%,#1B5E20 100%);color:white;padding:80px 0;text-align:center;position:relative;overflow:hidden}
-.cta::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%23D4AF37' stroke-opacity='.04' stroke-width='.5'/%3E%3Ccircle cx='50' cy='50' r='15' fill='none' stroke='%23D4AF37' stroke-opacity='.03' stroke-width='.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23p)'/%3E%3C/svg%3E")}
-.cta h2{font-size:2rem;font-weight:800;margin-bottom:12px;position:relative}
-.cta p{opacity:.9;font-size:1rem;margin-bottom:32px;position:relative}
-.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative}
-@media(max-width:768px){.cta h2{font-size:1.4rem}.cta p{font-size:.9rem}}
+/* ═══════════════ SUPPLY CHAIN JOURNEY ═══════════════ */
+.chain-section { background:white; }
+.chain-scroll {
+  display:flex; gap:0; overflow-x:auto; padding:20px 0 40px;
+  scrollbar-width:thin; scrollbar-color:var(--green-pale) transparent;
+}
+.chain-scroll::-webkit-scrollbar { height:6px; }
+.chain-scroll::-webkit-scrollbar-thumb { background:var(--green-pale); border-radius:3px; }
+.chain-step {
+  flex:0 0 160px; text-align:center; position:relative; padding:20px 10px;
+  cursor:pointer; transition:all .3s;
+}
+.chain-step:hover { transform:translateY(-4px); }
+.chain-step::after {
+  content:'→'; position:absolute; right:-8px; top:50%; transform:translateY(-50%);
+  color:var(--gray-300); font-size:1.2rem; font-weight:300;
+}
+.chain-step:last-child::after { display:none; }
+.chain-icon {
+  width:56px; height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+  margin:0 auto 12px; font-size:1.4rem; transition:all .3s;
+  background:var(--gray-50); border:2px solid var(--gray-200);
+}
+.chain-step:hover .chain-icon { background:var(--green-pale); border-color:var(--green); transform:scale(1.1); }
+.chain-step.active .chain-icon { background:var(--green); border-color:var(--green); color:white; }
+.chain-name { font-weight:600; font-size:.82rem; color:var(--charcoal); }
+.chain-desc { font-size:.7rem; color:var(--gray-500); margin-top:4px; }
 
-/* ─── FOOTER ─── */
-.footer{background:#0a0f0a;color:#ccc;padding:60px 0 24px}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
-.footer h5{color:white;font-weight:700;margin-bottom:14px;font-size:.9rem}
-.footer p,.footer a{font-size:.82rem;line-height:1.7;opacity:.7}
-.footer a{color:#aaa;transition:color .2s}.footer a:hover{color:var(--a);opacity:1}
-.footer-links{list-style:none;padding:0}.footer-links li{margin-bottom:6px}
-.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:#666;flex-wrap:wrap;gap:12px}
-@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;gap:20px}}
-@media(max-width:480px){.footer-grid{grid-template-columns:1fr}}
+/* Chain info card (appears on click) */
+.chain-info {
+  display:none; position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+  background:white; border-radius:var(--radius-md); padding:16px; width:240px;
+  box-shadow:var(--shadow-lg); border:1px solid var(--gray-200); z-index:10;
+  font-size:.8rem; text-align:left;
+}
+.chain-info.show { display:block; animation:fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+/* ═══════════════ STAKEHOLDER ECOSYSTEM ═══════════════ */
+.stake-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:16px;
+}
+.stake-card {
+  background:white; border-radius:var(--radius-md); padding:24px 16px; text-align:center;
+  border:1px solid var(--gray-200); transition:all .35s cubic-bezier(.25,.8,.25,1);
+  cursor:pointer; position:relative; overflow:hidden;
+}
+.stake-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:var(--green); transform:scaleX(0); transition:transform .3s; transform-origin:left;
+}
+.stake-card:hover { transform:translateY(-6px); box-shadow:var(--shadow-lg); border-color:var(--green); }
+.stake-card:hover::before { transform:scaleX(1); }
+.stake-emoji { font-size:2rem; margin-bottom:10px; display:block; }
+.stake-name { font-weight:700; font-size:.88rem; margin-bottom:4px; }
+.stake-desc { font-size:.72rem; color:var(--gray-500); line-height:1.4; }
+.stake-services {
+  display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--gray-100);
+  font-size:.72rem; color:var(--gray-600); text-align:left;
+}
+.stake-card:hover .stake-services { display:block; }
+@media(max-width:900px) { .stake-grid { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:600px) { .stake-grid { grid-template-columns:repeat(2,1fr); } }
+
+/* ═══════════════ AI PREVIEW ═══════════════ */
+.ai-section { background:var(--gray-50); }
+.ai-grid { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+.ai-chat-mock {
+  background:white; border-radius:var(--radius-lg); padding:24px;
+  box-shadow:var(--shadow-md); border:1px solid var(--gray-200);
+}
+.ai-chat-header {
+  display:flex; align-items:center; gap:12px; padding-bottom:16px;
+  border-bottom:1px solid var(--gray-100); margin-bottom:16px;
+}
+.ai-avatar {
+  width:40px; height:40px; border-radius:12px; background:var(--green);
+  display:flex; align-items:center; justify-content:center; color:white; font-size:1rem;
+}
+.ai-name { font-weight:700; font-size:.9rem; }
+.ai-status { font-size:.72rem; color:var(--green); display:flex; align-items:center; gap:4px; }
+.ai-status .dot { width:5px; height:5px; background:var(--green-light); border-radius:50%; }
+.ai-msg { display:flex; gap:10px; margin-bottom:14px; animation:msgAppear .5s ease; }
+@keyframes msgAppear { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.ai-msg.user { flex-direction:row-reverse; }
+.ai-bubble {
+  padding:12px 16px; border-radius:14px; max-width:80%; font-size:.85rem; line-height:1.5;
+}
+.ai-bubble.bot { background:var(--gray-50); border:1px solid var(--gray-200); border-bottom-left-radius:4px; }
+.ai-bubble.human { background:var(--green); color:white; border-bottom-right-radius:4px; }
+.ai-typing { display:flex; gap:4px; padding:12px 16px; }
+.ai-typing span { width:6px; height:6px; background:var(--gray-400); border-radius:50%; animation:typingDot 1.4s infinite; }
+.ai-typing span:nth-child(2) { animation-delay:.2s; }
+.ai-typing span:nth-child(3) { animation-delay:.4s; }
+@keyframes typingDot { 0%,100%{opacity:.3;transform:translateY(0)} 50%{opacity:1;transform:translateY(-4px)} }
+@media(max-width:768px) { .ai-grid { grid-template-columns:1fr; gap:32px; } }
+
+/* ═══════════════ IOT DRYER VISUALIZATION ═══════════════ */
+.iot-section { background:white; }
+.iot-grid { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+.iot-visual {
+  background:var(--gray-50); border-radius:var(--radius-lg); padding:32px;
+  border:1px solid var(--gray-200); position:relative;
+}
+.iot-dryer-svg { width:100%; max-width:300px; margin:0 auto 24px; display:block; }
+.iot-gauges { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.iot-gauge {
+  background:white; border-radius:var(--radius-sm); padding:16px; text-align:center;
+  border:1px solid var(--gray-200);
+}
+.iot-gauge-val { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:800; }
+.iot-gauge-val.green { color:var(--green); }
+.iot-gauge-val.gold { color:var(--gold-dark); }
+.iot-gauge-val.blue { color:#1565C0; }
+.iot-gauge-lbl { font-size:.68rem; color:var(--gray-500); text-transform:uppercase; letter-spacing:.05em; margin-top:4px; }
+.iot-gauge-bar { height:4px; background:var(--gray-200); border-radius:2px; margin-top:8px; overflow:hidden; }
+.iot-gauge-fill { height:100%; border-radius:2px; transition:width 1.5s ease; }
+.iot-gauge-fill.green { background:var(--green); }
+.iot-gauge-fill.gold { background:var(--gold); }
+.iot-gauge-fill.blue { background:#1565C0; }
+.iot-status-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid var(--gray-100); font-size:.82rem;
+}
+.iot-status-row:last-child { border:none; }
+.iot-status-badge {
+  padding:3px 10px; border-radius:50px; font-size:.7rem; font-weight:600;
+}
+.iot-status-badge.online { background:var(--green-pale); color:var(--green); }
+.iot-status-badge.charging { background:var(--gold-light); color:var(--gold-dark); }
+@media(max-width:768px) { .iot-grid { grid-template-columns:1fr; gap:32px; } .iot-gauges { grid-template-columns:repeat(2,1fr); } }
+
+/* ═══════════════ COMPARISON ═══════════════ */
+.compare-section { background:var(--gray-50); }
+.compare-grid { display:grid; grid-template-columns:1fr auto 1fr; gap:32px; align-items:start; }
+.compare-col { background:white; border-radius:var(--radius-lg); padding:32px; border:1px solid var(--gray-200); }
+.compare-col.old { opacity:.7; }
+.compare-col.new { border-color:var(--green); box-shadow:0 0 0 1px var(--green); }
+.compare-header { font-weight:800; font-size:1.1rem; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.compare-header .badge { padding:4px 12px; border-radius:50px; font-size:.7rem; font-weight:700; }
+.compare-header .badge.old { background:var(--gray-100); color:var(--gray-600); }
+.compare-header .badge.new { background:var(--green-pale); color:var(--green); }
+.compare-item {
+  display:flex; align-items:center; gap:10px; padding:12px 0;
+  border-bottom:1px solid var(--gray-100); font-size:.88rem;
+}
+.compare-item:last-child { border:none; }
+.compare-item i { font-size:.8rem; width:20px; text-align:center; }
+.compare-item i.fa-xmark { color:#c62828; }
+.compare-item i.fa-check { color:var(--green); }
+.compare-vs {
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:800; color:var(--gray-300);
+  padding-top:80px;
+}
+@media(max-width:768px) {
+  .compare-grid { grid-template-columns:1fr; }
+  .compare-vs { padding:16px 0; font-size:1.2rem; }
+}
+
+/* ═══════════════ IMPACT ═══════════════ */
+.impact-section { background:white; }
+.impact-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.impact-card {
+  background:var(--cream); border-radius:var(--radius-md); padding:28px;
+  border:1px solid var(--gray-200); transition:all .3s;
+}
+.impact-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); }
+.impact-icon {
+  width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; margin-bottom:16px;
+}
+.impact-icon.green { background:var(--green-pale); color:var(--green); }
+.impact-icon.gold { background:var(--gold-light); color:var(--gold-dark); }
+.impact-icon.blue { background:#E3F2FD; color:#1565C0; }
+.impact-title { font-weight:700; font-size:1rem; margin-bottom:6px; font-family:'Inter',sans-serif; }
+.impact-desc { font-size:.85rem; color:var(--gray-600); line-height:1.5; }
+.impact-metric { font-family:'Playfair Display',serif; font-weight:800; font-size:1.3rem; color:var(--green); margin-top:12px; }
+.impact-note { font-size:.7rem; color:var(--gray-500); margin-top:4px; font-style:italic; }
+@media(max-width:768px) { .impact-grid { grid-template-columns:1fr; } }
+
+/* ═══════════════ INVESTOR SNAPSHOT ═══════════════ */
+.investor-section { background:var(--green); color:white; padding:100px 0; position:relative; overflow:hidden; }
+.investor-section::before {
+  content:''; position:absolute; inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='20' fill='none' stroke='%23D4AF37' stroke-opacity='.06' stroke-width='.5'/%3E%3C/svg%3E");
+}
+.investor-section .section-label { color:var(--gold); }
+.investor-section .section-label .line { background:var(--gold); }
+.investor-section .section-title { color:white; }
+.investor-section .section-sub { color:rgba(255,255,255,.7); }
+.inv-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; position:relative; z-index:2; }
+.inv-card {
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--radius-md); padding:24px; backdrop-filter:blur(8px);
+  transition:all .3s;
+}
+.inv-card:hover { background:rgba(255,255,255,.12); transform:translateY(-4px); }
+.inv-card-icon { font-size:1.5rem; margin-bottom:12px; }
+.inv-card-title { font-weight:700; font-size:.9rem; margin-bottom:6px; font-family:'Inter',sans-serif; }
+.inv-card-desc { font-size:.78rem; opacity:.7; line-height:1.5; }
+.inv-card-metric { margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.1); }
+.inv-card-metric-val { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:900; color:var(--gold); }
+.inv-card-metric-lbl { font-size:.68rem; opacity:.5; }
+@media(max-width:900px) { .inv-grid { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:480px) { .inv-grid { grid-template-columns:1fr; } }
+
+/* ═══════════════ EXPANSION MAP ═══════════════ */
+.expansion-section { background:var(--cream); }
+.expansion-grid { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+.expansion-map {
+  background:white; border-radius:var(--radius-lg); padding:32px;
+  border:1px solid var(--gray-200); box-shadow:var(--shadow-sm);
+}
+.expansion-list { }
+.expansion-item {
+  display:flex; align-items:center; gap:16px; padding:16px 0;
+  border-bottom:1px solid var(--gray-100);
+}
+.expansion-item:last-child { border:none; }
+.expansion-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+.expansion-dot.live { background:var(--green); box-shadow:0 0 0 4px var(--green-pale); }
+.expansion-dot.planned { background:var(--gold); box-shadow:0 0 0 4px var(--gold-light); }
+.expansion-dot.future { background:var(--gray-300); }
+.expansion-country { font-weight:700; font-size:.95rem; }
+.expansion-status { font-size:.78rem; color:var(--gray-500); }
+.expansion-badge {
+  margin-left:auto; padding:4px 12px; border-radius:50px; font-size:.7rem; font-weight:600;
+}
+.expansion-badge.live { background:var(--green-pale); color:var(--green); }
+.expansion-badge.planned { background:var(--gold-light); color:var(--gold-dark); }
+.expansion-badge.future { background:var(--gray-100); color:var(--gray-500); }
+@media(max-width:768px) { .expansion-grid { grid-template-columns:1fr; } }
+
+/* ═══════════════ TESTIMONIALS ═══════════════ */
+.testi-section { background:white; }
+.testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.testi-card {
+  background:var(--cream); border-radius:var(--radius-md); padding:28px;
+  border:1px solid var(--gray-200); transition:all .3s;
+}
+.testi-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); }
+.testi-quote { font-size:.9rem; line-height:1.6; color:var(--gray-700); margin-bottom:20px; font-style:italic; }
+.testi-author { display:flex; align-items:center; gap:12px; }
+.testi-avatar {
+  width:40px; height:40px; border-radius:50%; background:var(--green-pale);
+  display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--green); font-size:.85rem;
+}
+.testi-name { font-weight:700; font-size:.85rem; }
+.testi-role { font-size:.72rem; color:var(--gray-500); }
+@media(max-width:768px) { .testi-grid { grid-template-columns:1fr; } }
+
+/* ═══════════════ CTA SECTION ═══════════════ */
+.cta-section {
+  background:var(--charcoal); color:white; padding:100px 0; text-align:center; position:relative; overflow:hidden;
+}
+.cta-section::before {
+  content:''; position:absolute; top:-50%; left:50%; transform:translateX(-50%);
+  width:800px; height:800px; border-radius:50%;
+  background:radial-gradient(circle, rgba(27,94,32,.15), transparent 60%);
+}
+.cta-section h2 { color:white; font-size:2.4rem; margin-bottom:16px; position:relative; }
+.cta-section p { color:rgba(255,255,255,.7); font-size:1.05rem; margin-bottom:40px; position:relative; }
+.cta-btns { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; position:relative; }
+@media(max-width:768px) { .cta-section h2 { font-size:1.6rem; } }
+
+/* ═══════════════ FOOTER ═══════════════ */
+.footer { background:#0a0f0a; color:#ccc; padding:80px 0 32px; }
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:40px; margin-bottom:48px; }
+.footer-brand { font-family:'Playfair Display',serif; font-weight:800; font-size:1.1rem; color:white; margin-bottom:12px; }
+.footer-desc { font-size:.82rem; opacity:.6; line-height:1.6; margin-bottom:16px; }
+.footer h5 { color:white; font-family:'Inter',sans-serif; font-weight:700; font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px; }
+.footer-links { list-style:none; }
+.footer-links li { margin-bottom:8px; }
+.footer-links a { color:#aaa; font-size:.82rem; text-decoration:none; transition:color .2s; }
+.footer-links a:hover { color:var(--gold); }
+.footer-bottom {
+  border-top:1px solid rgba(255,255,255,.08); padding-top:24px;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  font-size:.78rem; color:#666;
+}
+.footer-social { display:flex; gap:16px; }
+.footer-social a { color:#888; font-size:1rem; transition:color .2s; }
+.footer-social a:hover { color:var(--gold); }
+@media(max-width:900px) { .footer-grid { grid-template-columns:1fr 1fr; } }
+@media(max-width:480px) { .footer-grid { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 
-<!-- Page Loader -->
-<div class="page-loader" id="pageLoader"><div class="loader-spinner"></div></div>
-
-<!-- Mobile Nav -->
-<div class="mob-overlay" id="mobOverlay" onclick="closeMob()"></div>
-<div class="mob-nav" id="mobNav">
-  <button class="mob-close" onclick="closeMob()"><i class="fas fa-times"></i></button>
-  <a href="/marketplace"><i class="fas fa-store" style="width:24px"></i> Marketplace</a>
-  <a href="/ai-advisor"><i class="fas fa-brain" style="width:24px"></i> AI Advisor</a>
-  <a href="/iot-dryer"><i class="fas fa-solar-panel" style="width:24px"></i> IoT Monitoring</a>
-  <a href="/roles"><i class="fas fa-users" style="width:24px"></i> Get Started</a>
-  <a href="/login"><i class="fas fa-sign-in-alt" style="width:24px"></i> Login</a>
-  <a href="/signup" style="background:var(--g);color:white;text-align:center;border-radius:12px;margin-top:8px"><i class="fas fa-user-plus" style="width:24px"></i> Create Account</a>
-</div>
-
-<!-- Navbar -->
-<nav class="navbar" id="navbar">
+<!-- ═══ NAVBAR ═══ -->
+<nav class="nav" id="nav">
   <div class="nav-inner">
-    <a class="nav-brand" href="/">🌾 AGRICHAIN <span class="brand-360">360</span><sup>™</sup></a>
+    <a href="/" class="nav-brand"><span class="logo-dot"></span> AGRICHAIN 360</a>
     <div class="nav-links">
-      <a href="/marketplace" class="nav-link">Marketplace</a>
-      <a href="/ai-advisor" class="nav-link">AI Advisor</a>
-      <a href="/iot-dryer" class="nav-link">IoT</a>
-      <a href="#investors" class="nav-link">Investors</a>
-      <a href="#ngos" class="nav-link">NGOs</a>
-      <a href="/login" class="nav-cta nav-cta-o">Login</a>
-      <a href="/signup" class="nav-cta nav-cta-f">Sign Up Free</a>
+      <a href="#platform">Platform</a>
+      <a href="#ecosystem">Ecosystem</a>
+      <a href="#impact">Impact</a>
+      <a href="#investors">Investors</a>
+      <a href="/login">Login</a>
+      <a href="/signup" class="nav-cta">Get Started</a>
     </div>
-    <button class="nav-mob" onclick="openMob()"><i class="fas fa-bars"></i></button>
+    <button class="nav-mob" onclick="openDrawer()"><i class="fas fa-bars"></i></button>
   </div>
 </nav>
 
-<!-- ═══════════ HERO ═══════════ -->
+<!-- Mobile Drawer -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
+<div class="mob-drawer" id="mobDrawer">
+  <button class="mob-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
+  <a href="#platform" onclick="closeDrawer()">Platform</a>
+  <a href="#ecosystem" onclick="closeDrawer()">Ecosystem</a>
+  <a href="#impact" onclick="closeDrawer()">Impact</a>
+  <a href="#investors" onclick="closeDrawer()">Investors</a>
+  <a href="/marketplace" onclick="closeDrawer()">Marketplace</a>
+  <a href="/ai-advisor" onclick="closeDrawer()">AI Advisor</a>
+  <a href="/login" onclick="closeDrawer()">Login</a>
+  <a href="/signup" style="background:var(--green);color:white;text-align:center;border-radius:12px;margin-top:8px" onclick="closeDrawer()">Get Started</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
 <section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-badge reveal"><span class="dot"></span> Now Operational in 4 Districts</div>
+      <h1 class="reveal d1">The Digital Infrastructure <span class="gold">Powering Agriculture</span> Across Africa</h1>
+      <p class="hero-sub reveal d2">AGRICHAIN 360 connects farmers, cooperatives, buyers, transporters, warehouses, exporters, financial institutions, NGOs, and governments through one intelligent digital ecosystem.</p>
+      <div class="hero-btns reveal d3">
+        <a href="#platform" class="btn-hero btn-primary"><i class="fas fa-arrow-right"></i> Explore Platform</a>
+        <a href="/signup" class="btn-hero btn-gold"><i class="fas fa-rocket"></i> Request Demo</a>
+        <a href="#investors" class="btn-hero btn-outline"><i class="fas fa-file-alt"></i> Investment Prospectus</a>
+      </div>
+    </div>
+    <div class="hero-visual reveal-right d2">
+      <!-- Animated Dashboard Mockup -->
+      <div class="dash-mockup">
+        <div class="dash-header">
+          <div class="dash-title">🌾 AGRICHAIN 360 — Live Dashboard</div>
+          <div class="dash-live"><span class="dot"></span> Live</div>
+        </div>
+        <div class="dash-stats">
+          <div class="dash-stat"><div class="dash-stat-val" id="heroFarmers">847</div><div class="dash-stat-lbl">Farmers</div></div>
+          <div class="dash-stat"><div class="dash-stat-val" style="color:var(--gold-dark)" id="heroTons">42.8T</div><div class="dash-stat-lbl">Dried</div></div>
+          <div class="dash-stat"><div class="dash-stat-val" style="color:#1565C0" id="heroPassports">156</div><div class="dash-stat-lbl">Passports</div></div>
+        </div>
+        <div class="dash-chart">
+          <div style="font-size:.7rem;color:var(--gray-500);margin-bottom:8px;font-weight:600">WEEKLY THROUGHPUT</div>
+          <div class="dash-chart-bars" id="heroChartBars">
+            <div class="dash-bar" style="height:40%"></div>
+            <div class="dash-bar" style="height:55%"></div>
+            <div class="dash-bar gold" style="height:35%"></div>
+            <div class="dash-bar" style="height:70%"></div>
+            <div class="dash-bar active" style="height:85%"></div>
+            <div class="dash-bar" style="height:60%"></div>
+            <div class="dash-bar gold" style="height:45%"></div>
+            <div class="dash-bar" style="height:75%"></div>
+            <div class="dash-bar active" style="height:90%"></div>
+            <div class="dash-bar" style="height:50%"></div>
+          </div>
+        </div>
+        <div class="dash-feed" id="heroFeed">
+          <div class="dash-feed-item"><div class="dash-feed-icon green"><i class="fas fa-user-plus"></i></div><div><strong>New farmer registered</strong> — Sarah B., Mayuge</div></div>
+          <div class="dash-feed-item"><div class="dash-feed-icon gold"><i class="fas fa-certificate"></i></div><div><strong>Quality Passport issued</strong> — AGR-2026-A92F31</div></div>
+          <div class="dash-feed-item"><div class="dash-feed-icon blue"><i class="fas fa-truck"></i></div><div><strong>Transport booked</strong> — 2T maize to Jinja</div></div>
+        </div>
+      </div>
+      <!-- Floating Cards -->
+      <div class="float-card fc1">
+        <div class="fc-icon green"><i class="fas fa-solar-panel"></i></div>
+        <div><div style="font-weight:700;font-size:.8rem">Dryer Online</div><div style="color:var(--gray-500);font-size:.7rem">Moisture: 14.2% → 13%</div></div>
+      </div>
+      <div class="float-card fc2">
+        <div class="fc-icon gold"><i class="fas fa-mobile-alt"></i></div>
+        <div><div style="font-weight:700;font-size:.8rem">Payment Sent</div><div style="color:var(--gray-500);font-size:.7rem">UGX 2.4M via MTN MoMo</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LIVE NATIONAL STATS ═══ -->
+<section class="stats-section">
   <div class="container">
-    <div class="hero-grid">
+    <div class="stats-grid">
+      <div class="stat-item reveal d1"><span class="stat-number" data-target="847">0</span><div class="stat-label">Registered Farmers</div></div>
+      <div class="stat-item reveal d2"><span class="stat-number gold" data-target="4">0</span><div class="stat-label">Districts Covered</div></div>
+      <div class="stat-item reveal d3"><span class="stat-number" data-target="20">0</span><div class="stat-label">Village Agents</div></div>
+      <div class="stat-item reveal d4"><span class="stat-number gold" data-target="156">0</span><div class="stat-label">Quality Passports</div></div>
+      <div class="stat-item reveal d5"><span class="stat-number" data-target="42">0</span><div class="stat-label">Tons Processed</div></div>
+    </div>
+    <div class="stats-note reveal d6">* Figures represent pilot program data. Projections available in the investment prospectus.</div>
+  </div>
+</section>
+
+<!-- ═══ INTERACTIVE SUPPLY CHAIN ═══ -->
+<section class="section chain-section" id="platform">
+  <div class="container">
+    <div class="section-center">
+      <div class="section-label reveal"><span class="line"></span> THE AGRICULTURAL VALUE CHAIN</div>
+      <h2 class="section-title reveal d1">From Seed to Consumer — Fully Digital</h2>
+      <p class="section-sub reveal d2">Every stage of the agricultural journey is tracked, verified, and connected through AGRICHAIN 360. Click any stage to learn more.</p>
+    </div>
+    <div class="chain-scroll" id="chainScroll">
+      <div class="chain-step" onclick="showChainInfo(this,'GPS farm mapping with area calculation and soil classification')">
+        <div class="chain-icon">🌱</div><div class="chain-name">Seed</div><div class="chain-desc">Certified inputs</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'Farmer registration with National ID, GPS location, and crop history')">
+        <div class="chain-icon">👨‍🌾</div><div class="chain-name">Farmer</div><div class="chain-desc">Digital identity</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'Satellite and GPS boundary mapping with automated area and input calculations')">
+        <div class="chain-icon">📍</div><div class="chain-name">GPS Mapping</div><div class="chain-desc">Farm boundaries</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'AI-powered harvest timing predictions based on moisture, weather, and crop stage')">
+        <div class="chain-icon">🌾</div><div class="chain-name">Harvest</div><div class="chain-desc">AI-timed</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'IoT solar dryers with ESP32 sensors monitoring temperature, humidity, and moisture in real-time')">
+        <div class="chain-icon">☀️</div><div class="chain-name">Solar Drying</div><div class="chain-desc">IoT monitored</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'On-site laboratory testing for moisture content, aflatoxin levels, and quality grading')">
+        <div class="chain-icon">🔬</div><div class="chain-name">Quality Testing</div><div class="chain-desc">Lab verified</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'QR-coded Digital Quality Passport with SHA-256 traceability hash chain')">
+        <div class="chain-icon">📜</div><div class="chain-name">Certification</div><div class="chain-desc">Digital passport</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'Warehouse receipt system with QR tracking, insurance status, and storage duration monitoring')">
+        <div class="chain-icon">🏭</div><div class="chain-name">Warehouse</div><div class="chain-desc">Receipt system</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'Transport marketplace with GPS tracking, route optimization, and delivery proof')">
+        <div class="chain-icon">🚛</div><div class="chain-name">Transport</div><div class="chain-desc">GPS tracked</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'B2B marketplace with escrow payments, bidding, and verified quality listings')">
+        <div class="chain-icon">🛒</div><div class="chain-name">Marketplace</div><div class="chain-desc">Escrow secured</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'Instant payment via MTN Mobile Money or Airtel Money with SMS confirmation')">
+        <div class="chain-icon">💳</div><div class="chain-name">Payment</div><div class="chain-desc">Mobile money</div>
+      </div>
+      <div class="chain-step" onclick="showChainInfo(this,'Full export compliance documentation, EU standards, and container tracking')">
+        <div class="chain-icon">🌍</div><div class="chain-name">Export</div><div class="chain-desc">Full traceability</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STAKEHOLDER ECOSYSTEM ═══ -->
+<section class="section" id="ecosystem" style="background:var(--gray-50)">
+  <div class="container">
+    <div class="section-center">
+      <div class="section-label reveal"><span class="line"></span> STAKEHOLDER ECOSYSTEM</div>
+      <h2 class="section-title reveal d1">One Platform. Every Stakeholder.</h2>
+      <p class="section-sub reveal d2">AGRICHAIN 360 serves the entire agricultural value chain — from smallholder farmers to government ministries. Each stakeholder gets purpose-built tools.</p>
+    </div>
+    <div class="stake-grid">
+      <div class="stake-card reveal d1"><span class="stake-emoji">👨‍🌾</span><div class="stake-name">Farmers</div><div class="stake-desc">Smallholder producers</div><div class="stake-services">• USSD registration<br>• Solar drying booking<br>• Market prices<br>• AI crop advice<br>• Mobile Money payouts</div></div>
+      <div class="stake-card reveal d2"><span class="stake-emoji">🤝</span><div class="stake-name">Village Agents</div><div class="stake-desc">Last-mile network</div><div class="stake-services">• Offline registration<br>• GPS farm mapping<br>• Commission tracking<br>• Bulk collection</div></div>
+      <div class="stake-card reveal d3"><span class="stake-emoji">👥</span><div class="stake-name">Cooperatives</div><div class="stake-desc">Member organizations</div><div class="stake-services">• Member management<br>• Savings & loans<br>• Produce aggregation<br>• Dividend tracking</div></div>
+      <div class="stake-card reveal d4"><span class="stake-emoji">🚛</span><div class="stake-name">Transporters</div><div class="stake-desc">Logistics providers</div><div class="stake-services">• Load matching<br>• Route optimization<br>• GPS tracking<br>• Delivery proof</div></div>
+      <div class="stake-card reveal d5"><span class="stake-emoji">🏭</span><div class="stake-name">Warehouses</div><div class="stake-desc">Storage operators</div><div class="stake-services">• Receipt system<br>• Inventory tracking<br>• QR/barcode<br>• Insurance status</div></div>
+      <div class="stake-card reveal d6"><span class="stake-emoji">🏢</span><div class="stake-name">Buyers</div><div class="stake-desc">Enterprise purchasers</div><div class="stake-services">• Supplier search<br>• Quality analytics<br>• Escrow payments<br>• Contract management</div></div>
+      <div class="stake-card reveal d7"><span class="stake-emoji">⚙️</span><div class="stake-name">Processors</div><div class="stake-desc">Value-add factories</div><div class="stake-services">• Factory intake<br>• Batch management<br>• Supplier ratings<br>• Production reports</div></div>
+      <div class="stake-card reveal d8"><span class="stake-emoji">🏦</span><div class="stake-name">Banks</div><div class="stake-desc">Financial institutions</div><div class="stake-services">• Credit scoring<br>• Loan eligibility<br>• Risk analytics<br>• Repayment tracking</div></div>
+      <div class="stake-card reveal d1"><span class="stake-emoji">🌍</span><div class="stake-name">NGOs</div><div class="stake-desc">Development partners</div><div class="stake-services">• Impact tracking<br>• Beneficiary data<br>• KPI reports<br>• Training modules</div></div>
+      <div class="stake-card reveal d2"><span class="stake-emoji">🏛️</span><div class="stake-name">Government</div><div class="stake-desc">Agricultural ministries</div><div class="stake-services">• Production data<br>• Disease alerts<br>• Food security<br>• District analytics</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ AI ASSISTANT PREVIEW ═══ -->
+<section class="section ai-section">
+  <div class="container">
+    <div class="ai-grid">
       <div>
-        <div class="hero-badge reveal"><i class="fas fa-award"></i> Uganda's Leading Post-Harvest Platform</div>
-        <h1 class="hero-title reveal d1">The Complete<br>Post-Harvest <span>Platform</span><br>for Uganda</h1>
-        <p class="hero-sub reveal d2">Connect <strong>farmers</strong>, <strong>buyers</strong>, cooperatives and service providers with <strong style="color:var(--a)">verified quality</strong>, real-time <strong style="color:var(--a)">IoT monitoring</strong>, and <strong style="color:var(--a)">digital traceability</strong>.</p>
-        <div class="hero-btns reveal d3">
-          <a href="/marketplace" class="hero-btn hero-btn-gold"><i class="fas fa-store"></i> Browse Marketplace</a>
-          <a href="/roles" class="hero-btn hero-btn-glass"><i class="fas fa-rocket"></i> Get Started Free</a>
-        </div>
-        <!-- STATS — Bold, clear, always visible -->
-        <div class="hero-stats reveal d4">
-          <div class="hero-stat">
-            <span class="hero-stat-val">847</span>
-            <span class="hero-stat-lbl">Active Farmers</span>
-          </div>
-          <div class="hero-stat">
-            <span class="hero-stat-val">42.8T</span>
-            <span class="hero-stat-lbl">Tons Dried</span>
-          </div>
-          <div class="hero-stat">
-            <span class="hero-stat-val">15.6M</span>
-            <span class="hero-stat-lbl">UGX Traded</span>
-          </div>
-          <div class="hero-stat">
-            <span class="hero-stat-val">38%</span>
-            <span class="hero-stat-lbl">Loss Reduced</span>
-          </div>
-        </div>
+        <div class="section-label reveal"><span class="line"></span> AI CROP INTELLIGENCE</div>
+        <h2 class="section-title reveal d1">Your Personal Agronomist — Available 24/7</h2>
+        <p class="section-sub reveal d2">AgriIntel AI answers farming questions, detects diseases from photos, predicts yields, and provides market intelligence — in English and Luganda.</p>
+        <ul style="list-style:none;padding:0" class="reveal d3">
+          <li style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.9rem"><i class="fas fa-check-circle" style="color:var(--green)"></i> Disease detection from phone photos</li>
+          <li style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.9rem"><i class="fas fa-check-circle" style="color:var(--green)"></i> Real-time market price intelligence</li>
+          <li style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.9rem"><i class="fas fa-check-circle" style="color:var(--green)"></i> Harvest timing & drying cost predictions</li>
+          <li style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.9rem"><i class="fas fa-check-circle" style="color:var(--green)"></i> Voice output in English & Luganda</li>
+          <li style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.9rem"><i class="fas fa-check-circle" style="color:var(--green)"></i> Smart input recommendations by farm size</li>
+        </ul>
+        <a href="/ai-advisor" class="btn-hero btn-primary reveal d4" style="margin-top:16px"><i class="fas fa-arrow-right"></i> Try AI Advisor</a>
       </div>
-      <div class="hero-img reveal-right d2">
-        <img src="/images/hero-farmers.jpg" alt="Ugandan farmers in maize field" loading="eager">
+      <div class="reveal-right d2">
+        <div class="ai-chat-mock">
+          <div class="ai-chat-header">
+            <div class="ai-avatar"><i class="fas fa-brain"></i></div>
+            <div><div class="ai-name">AgriIntel AI</div><div class="ai-status"><span class="dot"></span> Online</div></div>
+          </div>
+          <div class="ai-msg user"><div class="ai-bubble human">My maize moisture is still high. What should I do?</div></div>
+          <div class="ai-msg"><div class="ai-bubble bot">Current moisture reading from your dryer (DRY-MYG-001) is <strong>16.8%</strong>. Target is ≤13% for Grade A certification.<br><br>📊 Recommendation: Continue drying for approximately <strong>3 more hours</strong>. Current solar irradiance is good (850 W/m²).<br><br>I'll send you an SMS alert when moisture reaches 13%. 🔔</div></div>
+          <div class="ai-msg user"><div class="ai-bubble human">What's the best market price right now?</div></div>
+          <div class="ai-msg"><div class="ai-bubble bot">📈 <strong>Current maize prices:</strong><br>• Kampala: UGX 1,800/kg<br>• Jinja: UGX 1,650/kg<br>• Export (Grade A): UGX 2,200/kg<br><br>💡 Tip: Prices are projected to <strong>increase 12%</strong> in the next 3 weeks. Consider holding inventory if storage is available.</div></div>
+          <div class="ai-typing"><span></span><span></span><span></span></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ THE PROBLEM WE'RE SOLVING ═══════════ -->
-<section class="problem">
+<!-- ═══ IOT SOLAR DRYER ═══ -->
+<section class="section iot-section">
   <div class="container">
-    <div class="problem-grid">
+    <div class="iot-grid">
       <div>
-        <h2 class="reveal">The <span>Post-Harvest Crisis</span> We're Solving</h2>
-        <p class="reveal d1">Every year, Uganda loses <strong style="color:#D4AF37">up to 40%</strong> of its grain harvest to poor drying, inadequate storage, and aflatoxin contamination. Smallholder farmers lose income. Buyers receive substandard produce. The entire value chain suffers.</p>
-        <p class="reveal d2"><strong>AGRICHAIN 360™</strong> is the complete solution — from IoT-powered solar drying to blockchain-style traceability, we connect every stakeholder in one platform.</p>
-        <div class="problem-stats reveal d3">
-          <div class="problem-stat"><div class="problem-stat-val">40%</div><div class="problem-stat-lbl">Post-Harvest Loss</div></div>
-          <div class="problem-stat"><div class="problem-stat-val">$4B</div><div class="problem-stat-lbl">Annual Loss (Africa)</div></div>
-          <div class="problem-stat"><div class="problem-stat-val">12M+</div><div class="problem-stat-lbl">Farmers Affected</div></div>
+        <div class="section-label reveal"><span class="line"></span> IOT INFRASTRUCTURE</div>
+        <h2 class="section-title reveal d1">Smart Solar Dryers — Real-Time Monitoring</h2>
+        <p class="section-sub reveal d2">ESP32 sensors publish temperature, humidity, and moisture data every 30 seconds via MQTT. Farmers see live dashboards. The platform triggers automated alerts when thresholds are crossed.</p>
+        <div style="margin-top:24px" class="reveal d3">
+          <div class="iot-status-row"><span><i class="fas fa-wifi" style="color:var(--green);width:20px"></i> Connection</span><span class="iot-status-badge online">Online</span></div>
+          <div class="iot-status-row"><span><i class="fas fa-fan" style="color:var(--green);width:20px"></i> Fan Status</span><span class="iot-status-badge online">Running (2/2)</span></div>
+          <div class="iot-status-row"><span><i class="fas fa-sun" style="color:var(--gold-dark);width:20px"></i> Solar Power</span><span style="font-weight:600">48W</span></div>
+          <div class="iot-status-row"><span><i class="fas fa-battery-three-quarters" style="color:var(--green);width:20px"></i> Battery</span><span class="iot-status-badge charging">12.4V — Charging</span></div>
+          <div class="iot-status-row"><span><i class="fas fa-door-closed" style="color:var(--green);width:20px"></i> Door Status</span><span class="iot-status-badge online">Closed</span></div>
         </div>
       </div>
-      <div class="problem-img reveal-right d2">
-        <img src="/images/post-harvest-problem.jpg" alt="Post-harvest grain loss in Africa" loading="lazy">
+      <div class="reveal-right d2">
+        <div class="iot-visual">
+          <!-- SVG Solar Dryer Illustration -->
+          <svg class="iot-dryer-svg" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Base structure -->
+            <rect x="30" y="80" width="240" height="100" rx="8" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+            <!-- Roof (angled for solar) -->
+            <path d="M20 80 L150 30 L280 80" fill="none" stroke="#D4AF37" stroke-width="3" stroke-linecap="round"/>
+            <rect x="40" y="40" width="220" height="40" rx="4" fill="rgba(212,175,55,.15)" stroke="#D4AF37" stroke-width="1.5" stroke-dasharray="4 2"/>
+            <!-- Solar panel on roof -->
+            <rect x="100" y="35" width="100" height="30" rx="4" fill="#1B5E20" opacity=".3"/>
+            <text x="150" y="54" text-anchor="middle" fill="white" font-size="10" font-weight="700">SOLAR PANEL</text>
+            <!-- Drying racks inside -->
+            <line x1="50" y1="110" x2="250" y2="110" stroke="#4CAF50" stroke-width="2"/>
+            <line x1="50" y1="135" x2="250" y2="135" stroke="#4CAF50" stroke-width="2"/>
+            <line x1="50" y1="160" x2="250" y2="160" stroke="#4CAF50" stroke-width="2"/>
+            <!-- Grain on racks -->
+            <circle cx="80" cy="107" r="4" fill="#D4AF37"/><circle cx="100" cy="107" r="4" fill="#D4AF37"/><circle cx="120" cy="107" r="4" fill="#D4AF37"/><circle cx="140" cy="107" r="4" fill="#D4AF37"/><circle cx="160" cy="107" r="4" fill="#D4AF37"/><circle cx="180" cy="107" r="4" fill="#D4AF37"/><circle cx="200" cy="107" r="4" fill="#D4AF37"/><circle cx="220" cy="107" r="4" fill="#D4AF37"/>
+            <circle cx="80" cy="132" r="4" fill="#D4AF37"/><circle cx="100" cy="132" r="4" fill="#D4AF37"/><circle cx="120" cy="132" r="4" fill="#D4AF37"/><circle cx="140" cy="132" r="4" fill="#D4AF37"/><circle cx="160" cy="132" r="4" fill="#D4AF37"/><circle cx="180" cy="132" r="4" fill="#D4AF37"/><circle cx="200" cy="132" r="4" fill="#D4AF37"/><circle cx="220" cy="132" r="4" fill="#D4AF37"/>
+            <!-- Air flow arrows -->
+            <path d="M150 190 L150 175" stroke="#4CAF50" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <path d="M150 95 L150 82" stroke="#c62828" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+            <text x="170" y="195" fill="#4CAF50" font-size="8">Cool air in</text>
+            <text x="165" y="78" fill="#c62828" font-size="8">Hot air out</text>
+            <!-- ESP32 sensor box -->
+            <rect x="245" y="88" width="22" height="16" rx="3" fill="#333" stroke="#666" stroke-width="1"/>
+            <text x="256" y="99" text-anchor="middle" fill="#4CAF50" font-size="6" font-weight="700">ESP32</text>
+            <!-- Sensor dots -->
+            <circle cx="250" cy="115" r="3" fill="#4CAF50"><animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/></circle>
+            <circle cx="258" cy="115" r="3" fill="#D4AF37"><animate attributeName="opacity" values="1;.3;1" dur="2.5s" repeatCount="indefinite"/></circle>
+            <circle cx="254" cy="140" r="3" fill="#1565C0"><animate attributeName="opacity" values="1;.3;1" dur="1.8s" repeatCount="indefinite"/></circle>
+            <!-- Arrow markers -->
+            <defs>
+              <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#4CAF50"/></marker>
+              <marker id="arrowRed" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#c62828"/></marker>
+            </defs>
+          </svg>
+          <!-- Live Gauges -->
+          <div class="iot-gauges">
+            <div class="iot-gauge">
+              <div class="iot-gauge-val green" id="iotTemp">42.8°C</div>
+              <div class="iot-gauge-lbl">Temperature</div>
+              <div class="iot-gauge-bar"><div class="iot-gauge-fill green" style="width:72%"></div></div>
+            </div>
+            <div class="iot-gauge">
+              <div class="iot-gauge-val gold" id="iotHum">31%</div>
+              <div class="iot-gauge-lbl">Humidity</div>
+              <div class="iot-gauge-bar"><div class="iot-gauge-fill gold" style="width:31%"></div></div>
+            </div>
+            <div class="iot-gauge">
+              <div class="iot-gauge-val blue" id="iotMoist">14.2%</div>
+              <div class="iot-gauge-lbl">Moisture</div>
+              <div class="iot-gauge-bar"><div class="iot-gauge-fill blue" style="width:55%"></div></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ HOW IT WORKS ═══════════ -->
-<section class="section">
+<!-- ═══ COMPARISON ═══ -->
+<section class="section compare-section">
   <div class="container">
-    <h2 class="section-title reveal">How AGRICHAIN 360 Works</h2>
-    <div class="section-line reveal d1"></div>
-    <p class="section-sub reveal d1">Simple 4-step process from farm to market — powered by IoT, AI, and blockchain-style traceability</p>
-    <div class="steps">
-      <div class="step reveal d1"><div class="step-n" style="background:var(--g)">1</div><div class="step-ico">👨‍🌾</div><div class="step-t">Farmer Registration</div><div class="step-d">Register via USSD (*284#) or web. GPS-mapped farms. Instant verification.</div></div>
-      <div class="step reveal d2"><div class="step-n" style="background:var(--a);color:#3e2723">2</div><div class="step-ico">☀️</div><div class="step-t">Quality Processing</div><div class="step-d">IoT solar drying with real-time monitoring. Moisture & aflatoxin testing.</div></div>
-      <div class="step reveal d3"><div class="step-n" style="background:var(--g2)">3</div><div class="step-ico">📜</div><div class="step-t">Digital Passport</div><div class="step-d">QR-verified quality certificate. SHA-256 tamper-proof traceability.</div></div>
-      <div class="step reveal d4"><div class="step-n" style="background:var(--ad)">4</div><div class="step-ico">💳</div><div class="step-t">Trade & Payment</div><div class="step-d">Buyers purchase verified produce. Farmers paid via Mobile Money.</div></div>
+    <div class="section-center">
+      <div class="section-label reveal"><span class="line"></span> THE AGRICHAIN 360 DIFFERENCE</div>
+      <h2 class="section-title reveal d1">Traditional Agriculture vs. Digital Infrastructure</h2>
     </div>
-  </div>
-</section>
-
-<!-- ═══════════ FEATURES ═══════════ -->
-<section class="section" style="background:var(--bg2)">
-  <div class="container">
-    <h2 class="section-title reveal">Platform Features</h2>
-    <div class="section-line reveal d1"></div>
-    <p class="section-sub reveal d1">Everything you need to transform post-harvest agriculture</p>
-    <div class="feat-grid">
-      <div class="feat reveal d1"><div class="feat-ico">🤖</div><h4>AI Crop Advisor</h4><p>Disease detection, growth prediction, and yield forecasting using AI. Voice-enabled in English and Luganda.</p><a href="/ai-advisor" class="feat-link feat-link-g">Try AI Advisor <i class="fas fa-arrow-right"></i></a></div>
-      <div class="feat reveal d2"><div class="feat-ico">📡</div><h4>IoT Smart Dryers</h4><p>Real-time temperature, humidity, and moisture monitoring via MQTT. Automated alerts. ESP32-powered.</p><a href="/iot-dryer" class="feat-link feat-link-g">View Live Data <i class="fas fa-arrow-right"></i></a></div>
-      <div class="feat reveal d3"><div class="feat-ico">🔐</div><h4>Digital Quality Passport</h4><p>Blockchain-style traceability with SHA-256 verification and QR codes. Tamper-proof certificates. PDF export.</p><a href="/passport/B247391" class="feat-link feat-link-p">Verify Passport <i class="fas fa-arrow-right"></i></a></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ SOLAR DRYING ═══════════ -->
-<section class="section">
-  <div class="container">
-    <div class="split">
-      <div class="split-img reveal-left"><img src="/images/solar-dryer.jpg" alt="IoT Solar Dryer in Uganda" loading="lazy"></div>
-      <div class="split-c reveal-right">
-        <h3>IoT-Powered Solar Drying</h3>
-        <p>Smart solar dryers with ESP32 sensors and MQTT connectivity reduce drying time by 40% while ensuring consistent quality.</p>
-        <ul class="split-list">
-          <li><i class="fas fa-check-circle"></i> Real-time temperature & humidity monitoring</li>
-          <li><i class="fas fa-check-circle"></i> Automated aflatoxin risk alerts</li>
-          <li><i class="fas fa-check-circle"></i> Achieve target moisture (≤13%) consistently</li>
-          <li><i class="fas fa-check-circle"></i> Solar-powered — zero fuel costs</li>
-          <li><i class="fas fa-check-circle"></i> Live dashboard with 48-hour moisture curves</li>
-        </ul>
+    <div class="compare-grid reveal d2">
+      <div class="compare-col old">
+        <div class="compare-header"><span class="badge old">Traditional</span> How It Works Today</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i> Paper records — easily lost or forged</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i> Manual tracking — no real-time visibility</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i> Unknown quality — buyers can't verify</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i> Cash payments — no records, high risk</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i> No traceability — rejected by exporters</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i> No analytics — decisions based on guesswork</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i> Sun drying — weather dependent, inconsistent</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i> No credit history — can't access loans</div>
+      </div>
+      <div class="compare-vs">VS</div>
+      <div class="compare-col new">
+        <div class="compare-header"><span class="badge new">AGRICHAIN 360</span> Digital Infrastructure</div>
+        <div class="compare-item"><i class="fas fa-check"></i> Digital records — tamper-proof, SHA-256 verified</div>
+        <div class="compare-item"><i class="fas fa-check"></i> Live tracking — IoT sensors every 30 seconds</div>
+        <div class="compare-item"><i class="fas fa-check"></i> Digital Quality Passport — QR scannable</div>
+        <div class="compare-item"><i class="fas fa-check"></i> Mobile Money — MTN & Airtel, instant & recorded</div>
+        <div class="compare-item"><i class="fas fa-check"></i> Full traceability — seed to consumer</div>
+        <div class="compare-item"><i class="fas fa-check"></i> AI analytics — predictive insights & forecasts</div>
+        <div class="compare-item"><i class="fas fa-check"></i> IoT solar drying — consistent, monitored, zero fuel</div>
+        <div class="compare-item"><i class="fas fa-check"></i> Digital credit score — automated loan eligibility</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ MOBILE MONEY ═══════════ -->
-<section class="section" style="background:var(--bg2)">
+<!-- ═══ IMPACT ═══ -->
+<section class="section impact-section" id="impact">
   <div class="container">
-    <div class="split split-rev">
-      <div class="split-img reveal-right"><img src="/images/mobile-money.jpg" alt="Mobile money payment in East Africa" loading="lazy"></div>
-      <div class="split-c reveal-left">
-        <h3>Mobile Money Integration</h3>
-        <p>Farmers receive payments directly to their MTN MoMo or Airtel Money wallets. No middlemen, no delays, no disputes.</p>
-        <ul class="split-list">
-          <li><i class="fas fa-check-circle"></i> MTN Mobile Money instant payouts</li>
-          <li><i class="fas fa-check-circle"></i> Airtel Money integration</li>
-          <li><i class="fas fa-check-circle"></i> Escrow-secured buyer payments</li>
-          <li><i class="fas fa-check-circle"></i> SMS payment confirmations</li>
-          <li><i class="fas fa-check-circle"></i> Full transaction history & receipts</li>
-        </ul>
+    <div class="section-center">
+      <div class="section-label reveal"><span class="line"></span> MEASURABLE IMPACT</div>
+      <h2 class="section-title reveal d1">Outcomes That Matter</h2>
+      <p class="section-sub reveal d2">Every feature is designed to create measurable, verifiable impact for farmers, buyers, and the agricultural economy.</p>
+    </div>
+    <div class="impact-grid">
+      <div class="impact-card reveal d1">
+        <div class="impact-icon green"><i class="fas fa-chart-line"></i></div>
+        <div class="impact-title">Reduced Post-Harvest Losses</div>
+        <div class="impact-desc">IoT solar drying reduces moisture-related spoilage from 40% to under 5%.</div>
+        <div class="impact-metric">38% reduction</div>
+        <div class="impact-note">Pilot program measurement</div>
+      </div>
+      <div class="impact-card reveal d2">
+        <div class="impact-icon gold"><i class="fas fa-hand-holding-usd"></i></div>
+        <div class="impact-title">Farmer Income Growth</div>
+        <div class="impact-desc">Certified Grade A produce commands 55% higher prices in export markets.</div>
+        <div class="impact-metric">25–55% increase</div>
+        <div class="impact-note">Projected range based on market data</div>
+      </div>
+      <div class="impact-card reveal d3">
+        <div class="impact-icon blue"><i class="fas fa-globe-africa"></i></div>
+        <div class="impact-title">Export Readiness</div>
+        <div class="impact-desc">Digital Quality Passports meet EU and Asian import documentation requirements.</div>
+        <div class="impact-metric">100% traceable</div>
+        <div class="impact-note">SHA-256 verified batches</div>
+      </div>
+      <div class="impact-card reveal d4">
+        <div class="impact-icon green"><i class="fas fa-female"></i></div>
+        <div class="impact-title">Women Farmer Inclusion</div>
+        <div class="impact-desc">USSD access ensures women farmers without smartphones can participate fully.</div>
+        <div class="impact-metric">62% women</div>
+        <div class="impact-note">Current pilot demographics</div>
+      </div>
+      <div class="impact-card reveal d5">
+        <div class="impact-icon gold"><i class="fas fa-briefcase"></i></div>
+        <div class="impact-title">Rural Job Creation</div>
+        <div class="impact-desc">Village agent network creates commission-based employment in rural communities.</div>
+        <div class="impact-metric">20 agents active</div>
+        <div class="impact-note">Targeting 100 by Year 2</div>
+      </div>
+      <div class="impact-card reveal d6">
+        <div class="impact-icon blue"><i class="fas fa-leaf"></i></div>
+        <div class="impact-title">Zero Carbon Drying</div>
+        <div class="impact-desc">Solar-powered dryers eliminate fossil fuel use in post-harvest processing.</div>
+        <div class="impact-metric">0 emissions</div>
+        <div class="impact-note">Per batch processed</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ VILLAGE AGENTS ═══════════ -->
-<section class="section">
+<!-- ═══ INVESTOR SNAPSHOT ═══ -->
+<section class="investor-section" id="investors">
   <div class="container">
-    <div class="split">
-      <div class="split-img reveal-left"><img src="/images/village-agent.jpg" alt="Village agent using technology on farm" loading="lazy"></div>
-      <div class="split-c reveal-right">
-        <h3>Village Agent Network</h3>
-        <p>Commission-based agents bridge the digital divide — registering farmers, mapping GPS boundaries, and connecting communities to the platform.</p>
-        <ul class="split-list">
-          <li><i class="fas fa-check-circle"></i> Offline-first registration on any device</li>
-          <li><i class="fas fa-check-circle"></i> GPS garden mapping with area calculation</li>
-          <li><i class="fas fa-check-circle"></i> Automatic seed & fertilizer calculations</li>
-          <li><i class="fas fa-check-circle"></i> Commission tracking & mobile money payouts</li>
-          <li><i class="fas fa-check-circle"></i> Auto-sync when internet becomes available</li>
-        </ul>
-      </div>
+    <div class="section-center">
+      <div class="section-label reveal"><span class="line"></span> INVESTMENT OPPORTUNITY</div>
+      <h2 class="section-title reveal d1" style="color:white">Built for Scale. Ready for Partners.</h2>
+      <p class="section-sub reveal d2" style="color:rgba(255,255,255,.7)">AGRICHAIN 360 is designed to be the agricultural operating system for East Africa — scalable, revenue-generating, and impact-driven.</p>
     </div>
-  </div>
-</section>
-
-<!-- ═══════════ B2B MARKETPLACE ═══════════ -->
-<section class="section" style="background:var(--bg2)">
-  <div class="container">
-    <div class="split split-rev">
-      <div class="split-img reveal-right"><img src="/images/marketplace.jpg" alt="African grain marketplace trading" loading="lazy"></div>
-      <div class="split-c reveal-left">
-        <h3>B2B AgriTrade Marketplace</h3>
-        <p>Connect directly with verified buyers — exporters, processors, and cooperatives. Escrow-secured payments, bidding system, and bulk procurement tools.</p>
-        <ul class="split-list">
-          <li><i class="fas fa-check-circle"></i> Verified produce with quality grades</li>
-          <li><i class="fas fa-check-circle"></i> Instant bidding & negotiation drawer</li>
-          <li><i class="fas fa-check-circle"></i> Escrow-secured transactions</li>
-          <li><i class="fas fa-check-circle"></i> MTN MoMo & Airtel Money payments</li>
-          <li><i class="fas fa-check-circle"></i> Bulk cost & freight calculator</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ FOR INVESTORS ═══════════ -->
-<section class="investor" id="investors">
-  <div class="container">
-    <h2 class="section-title reveal">Why Invest in AGRICHAIN 360</h2>
-    <div class="section-line reveal d1"></div>
-    <p class="section-sub reveal d1">A scalable, revenue-generating platform addressing a $4 billion problem in African agriculture</p>
     <div class="inv-grid">
       <div class="inv-card reveal d1">
-        <div class="inv-card-ico">💰</div>
-        <h4>Multiple Revenue Streams</h4>
-        <p>Enterprise subscriptions (UGX 250K–2M/month), quality certification fees, marketplace commissions, sponsored campaigns, and API access.</p>
-        <div class="inv-metric"><div class="inv-metric-val">UGX 2M+</div><div class="inv-metric-lbl">Monthly per enterprise client</div></div>
+        <div class="inv-card-icon">💰</div>
+        <div class="inv-card-title">Revenue Model</div>
+        <div class="inv-card-desc">8 revenue streams: drying fees, quality testing, subscriptions, marketplace, passports, transport, campaigns, training</div>
+        <div class="inv-card-metric"><div class="inv-card-metric-val">UGX 14M</div><div class="inv-card-metric-lbl">Monthly at scale</div></div>
       </div>
       <div class="inv-card reveal d2">
-        <div class="inv-card-ico">📈</div>
-        <h4>Massive Market Opportunity</h4>
-        <p>12 million+ smallholder farmers in East Africa alone. $4B annual post-harvest losses. Growing demand for traceability from export markets.</p>
-        <div class="inv-metric"><div class="inv-metric-val">$4B</div><div class="inv-metric-lbl">Annual addressable market</div></div>
+        <div class="inv-card-icon">📈</div>
+        <div class="inv-card-title">Market Opportunity</div>
+        <div class="inv-card-desc">$4B annual post-harvest losses in Sub-Saharan Africa. 12M+ smallholder farmers in East Africa alone.</div>
+        <div class="inv-card-metric"><div class="inv-card-metric-val">$4B</div><div class="inv-card-metric-lbl">Addressable market</div></div>
       </div>
       <div class="inv-card reveal d3">
-        <div class="inv-card-ico">🌍</div>
-        <h4>Scalable Architecture</h4>
-        <p>Cloud-native platform on PostgreSQL + Express.js + WebSocket. Ready to scale from 800 to 100,000+ farmers. Village agent model for last-mile reach.</p>
-        <div class="inv-metric"><div class="inv-metric-val">100K+</div><div class="inv-metric-lbl">Scalable farmer capacity</div></div>
+        <div class="inv-card-icon">🔧</div>
+        <div class="inv-card-title">Technology Stack</div>
+        <div class="inv-card-desc">Node.js, PostgreSQL, MQTT, WebSocket, TensorFlow.js, ESP32 IoT — cloud-native and scalable</div>
+        <div class="inv-card-metric"><div class="inv-card-metric-val">100K+</div><div class="inv-card-metric-lbl">Farmer capacity</div></div>
       </div>
       <div class="inv-card reveal d4">
-        <div class="inv-card-ico">🔗</div>
-        <h4>End-to-End Traceability</h4>
-        <p>SHA-256 blockchain-style hash chain from seed to export. QR codes for instant buyer verification. Meets EU & Asian export compliance standards.</p>
-        <div class="inv-metric"><div class="inv-metric-val">100%</div><div class="inv-metric-lbl">Batch traceability coverage</div></div>
+        <div class="inv-card-icon">🌍</div>
+        <div class="inv-card-title">Expansion Plan</div>
+        <div class="inv-card-desc">Uganda pilot → Kenya, Tanzania, Rwanda, South Sudan, DR Congo within 5 years</div>
+        <div class="inv-card-metric"><div class="inv-card-metric-val">6 countries</div><div class="inv-card-metric-lbl">5-year roadmap</div></div>
       </div>
       <div class="inv-card reveal d5">
-        <div class="inv-card-ico">🤖</div>
-        <h4>AI & IoT Moat</h4>
-        <p>Proprietary AI for disease detection and yield prediction. IoT sensor network across drying hubs. Data advantage that grows with every user.</p>
-        <div class="inv-metric"><div class="inv-metric-val">6+</div><div class="inv-metric-lbl">AI-powered modules</div></div>
+        <div class="inv-card-icon">🤝</div>
+        <div class="inv-card-title">Social Impact</div>
+        <div class="inv-card-desc">7 UN SDGs aligned. 62% women farmers. Zero carbon drying. 100+ rural jobs targeted.</div>
+        <div class="inv-card-metric"><div class="inv-card-metric-val">7 SDGs</div><div class="inv-card-metric-lbl">Aligned goals</div></div>
       </div>
       <div class="inv-card reveal d6">
-        <div class="inv-card-ico">📱</div>
-        <h4>Inclusive by Design</h4>
-        <p>USSD (*284#) for feature phones, web app for smartphones, village agent network for offline farmers. No farmer left behind — maximum market penetration.</p>
-        <div class="inv-metric"><div class="inv-metric-val">3</div><div class="inv-metric-lbl">Access channels (Web, USSD, Agent)</div></div>
+        <div class="inv-card-icon">⚡</div>
+        <div class="inv-card-title">Current Stage</div>
+        <div class="inv-card-desc">Platform built and operational. 847 farmers registered. 4 districts active. Pilot data validated.</div>
+        <div class="inv-card-metric"><div class="inv-card-metric-val">Live</div><div class="inv-card-metric-lbl">Platform status</div></div>
+      </div>
+      <div class="inv-card reveal d7">
+        <div class="inv-card-icon">🏗️</div>
+        <div class="inv-card-title">Investment Ask</div>
+        <div class="inv-card-desc">UGX 35M catalytic funding for solar dryer, lab equipment, technology, village agents, and operations.</div>
+        <div class="inv-card-metric"><div class="inv-card-metric-val">UGX 35M</div><div class="inv-card-metric-lbl">~$9,500 USD</div></div>
+      </div>
+      <div class="inv-card reveal d8">
+        <div class="inv-card-icon">📊</div>
+        <div class="inv-card-title">Projected Returns</div>
+        <div class="inv-card-desc">Break-even Month 6. Steady-state profit UGX 9.8M/month. 280% ROI over 2 years.</div>
+        <div class="inv-card-metric"><div class="inv-card-metric-val">280%</div><div class="inv-card-metric-lbl">2-year ROI</div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ FOR NGOs & DEVELOPMENT PARTNERS ═══════════ -->
-<section class="ngo" id="ngos">
+<!-- ═══ EAST AFRICA EXPANSION ═══ -->
+<section class="section expansion-section">
   <div class="container">
-    <h2 class="section-title reveal">For NGOs & Development Partners</h2>
-    <p class="section-sub reveal d1">AGRICHAIN 360 provides the data, tools, and infrastructure to maximize your agricultural development impact</p>
-    <div class="ngo-grid">
-      <div class="ngo-img reveal-left">
-        <img src="/images/ngo-impact.jpg" alt="NGO agricultural development program in Uganda" loading="lazy">
+    <div class="expansion-grid">
+      <div>
+        <div class="section-label reveal"><span class="line"></span> EXPANSION ROADMAP</div>
+        <h2 class="section-title reveal d1">From Uganda to East Africa</h2>
+        <p class="section-sub reveal d2">Starting in Uganda's Busoga region, AGRICHAIN 360 is designed to scale across East Africa — adapting to local crops, languages, and mobile money systems.</p>
+        <div class="expansion-list reveal d3">
+          <div class="expansion-item">
+            <div class="expansion-dot live"></div>
+            <div><div class="expansion-country">🇺🇬 Uganda</div><div class="expansion-status">Active — Mayuge, Jinja, Iganga, Kamuli</div></div>
+            <span class="expansion-badge live">Live</span>
+          </div>
+          <div class="expansion-item">
+            <div class="expansion-dot planned"></div>
+            <div><div class="expansion-country">🇰🇪 Kenya</div><div class="expansion-status">Planned — Year 2 (M-Pesa integration)</div></div>
+            <span class="expansion-badge planned">Year 2</span>
+          </div>
+          <div class="expansion-item">
+            <div class="expansion-dot planned"></div>
+            <div><div class="expansion-country">🇹🇿 Tanzania</div><div class="expansion-status">Planned — Year 2-3</div></div>
+            <span class="expansion-badge planned">Year 2-3</span>
+          </div>
+          <div class="expansion-item">
+            <div class="expansion-dot future"></div>
+            <div><div class="expansion-country">🇷🇼 Rwanda</div><div class="expansion-status">Future — Year 3-4</div></div>
+            <span class="expansion-badge future">Year 3-4</span>
+          </div>
+          <div class="expansion-item">
+            <div class="expansion-dot future"></div>
+            <div><div class="expansion-country">🇸🇸 South Sudan</div><div class="expansion-status">Future — Year 4-5</div></div>
+            <span class="expansion-badge future">Year 4-5</span>
+          </div>
+          <div class="expansion-item">
+            <div class="expansion-dot future"></div>
+            <div><div class="expansion-country">🇨🇩 DR Congo</div><div class="expansion-status">Future — Year 5</div></div>
+            <span class="expansion-badge future">Year 5</span>
+          </div>
+        </div>
       </div>
-      <div class="ngo-items">
-        <div class="ngo-item reveal-right d1">
-          <div class="ngo-item-ico">📊</div>
-          <div><h4>Real-Time Impact Analytics</h4><p>Track farmer registrations, crop yields, income changes, and post-harvest loss reduction across your program areas — all in one dashboard.</p></div>
-        </div>
-        <div class="ngo-item reveal-right d2">
-          <div class="ngo-item-ico">🎓</div>
-          <div><h4>Digital Training & Extension</h4><p>Deliver training courses, track attendance, quiz completion, and certificate issuance. Reach thousands of farmers with consistent, quality content.</p></div>
-        </div>
-        <div class="ngo-item reveal-right d3">
-          <div class="ngo-item-ico">🗺️</div>
-          <div><h4>GPS-Mapped Farmer Registry</h4><p>Every farmer registered through AGRICHAIN 360 has GPS-mapped gardens. Visualize distribution, identify gaps, and target interventions precisely.</p></div>
-        </div>
-        <div class="ngo-item reveal-right d4">
-          <div class="ngo-item-ico">🔍</div>
-          <div><h4>Traceability & Compliance</h4><p>Full digital trail from seed to market. Meet donor reporting requirements with verified, tamper-proof data. Export-ready compliance documentation.</p></div>
-        </div>
-        <div class="ngo-item reveal-right d5">
-          <div class="ngo-item-ico">🤝</div>
-          <div><h4>Village Agent Infrastructure</h4><p>Leverage our commission-based agent network to reach the last mile. Agents register farmers, deliver training, and collect data — even in areas with no internet.</p></div>
+      <div class="reveal-right d2">
+        <!-- SVG East Africa Map -->
+        <div class="expansion-map">
+          <svg viewBox="0 0 400 450" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+            <!-- Simplified East Africa map shapes -->
+            <!-- Uganda -->
+            <path d="M160 80 L220 70 L240 100 L250 150 L230 180 L200 200 L170 190 L150 160 L140 120 Z" fill="#1B5E20" opacity=".8" stroke="#0d3b0d" stroke-width="2"/>
+            <text x="190" y="140" text-anchor="middle" fill="white" font-size="12" font-weight="700">UGANDA</text>
+            <circle cx="210" cy="155" r="6" fill="#D4AF37"><animate attributeName="r" values="6;8;6" dur="2s" repeatCount="indefinite"/></circle>
+            <text x="225" y="160" fill="#D4AF37" font-size="8" font-weight="600">LIVE</text>
+            <!-- Kenya -->
+            <path d="M250 150 L310 130 L340 170 L350 230 L320 280 L280 260 L250 220 L230 180 Z" fill="#4CAF50" opacity=".3" stroke="#2E7D32" stroke-width="1.5" stroke-dasharray="4 2"/>
+            <text x="290" y="210" text-anchor="middle" fill="#2E7D32" font-size="11" font-weight="600">KENYA</text>
+            <!-- Tanzania -->
+            <path d="M230 280 L320 280 L350 320 L340 380 L290 400 L240 380 L220 340 L210 300 Z" fill="#4CAF50" opacity=".2" stroke="#2E7D32" stroke-width="1.5" stroke-dasharray="4 2"/>
+            <text x="280" y="345" text-anchor="middle" fill="#2E7D32" font-size="11" font-weight="600">TANZANIA</text>
+            <!-- Rwanda -->
+            <path d="M170 200 L200 200 L210 230 L190 240 L170 230 Z" fill="#4CAF50" opacity=".15" stroke="#2E7D32" stroke-width="1" stroke-dasharray="4 2"/>
+            <text x="188" y="222" text-anchor="middle" fill="#2E7D32" font-size="8">RWANDA</text>
+            <!-- South Sudan -->
+            <path d="M100 40 L160 30 L180 60 L160 80 L140 120 L110 100 L80 70 Z" fill="#ADB5BD" opacity=".15" stroke="#CED4DA" stroke-width="1" stroke-dasharray="4 2"/>
+            <text x="130" y="75" text-anchor="middle" fill="#6C757D" font-size="8">S. SUDAN</text>
+            <!-- DR Congo -->
+            <path d="M40 80 L100 40 L110 100 L140 120 L150 160 L130 200 L100 220 L60 200 L30 150 Z" fill="#ADB5BD" opacity=".1" stroke="#CED4DA" stroke-width="1" stroke-dasharray="4 2"/>
+            <text x="85" y="155" text-anchor="middle" fill="#6C757D" font-size="8">DR CONGO</text>
+            <!-- Connection lines (animated) -->
+            <line x1="210" y1="155" x2="290" y2="200" stroke="#D4AF37" stroke-width="1" stroke-dasharray="4 4" opacity=".5"><animate attributeName="stroke-dashoffset" values="0;-8" dur="1s" repeatCount="indefinite"/></line>
+            <line x1="210" y1="155" x2="280" y2="340" stroke="#D4AF37" stroke-width="1" stroke-dasharray="4 4" opacity=".3"><animate attributeName="stroke-dashoffset" values="0;-8" dur="1.5s" repeatCount="indefinite"/></line>
+          </svg>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ SUPPORTED CROPS ═══════════ -->
-<section class="section">
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="section testi-section" style="background:var(--gray-50)">
   <div class="container">
-    <h2 class="section-title reveal">Supported Crops</h2>
-    <div class="section-line reveal d1"></div>
-    <p class="section-sub reveal d1">Quality-certified produce across 6+ crop types with full traceability</p>
-    <div class="crops-row">
-      <div class="crop reveal d1"><div class="crop-e">🌽</div><div class="crop-n">Maize</div><div class="crop-s">Grade A/B</div></div>
-      <div class="crop reveal d2"><div class="crop-e">☕</div><div class="crop-n">Coffee</div><div class="crop-s">Arabica/Robusta</div></div>
-      <div class="crop reveal d3"><div class="crop-e">🌰</div><div class="crop-n">Cocoa</div><div class="crop-s">Premium</div></div>
-      <div class="crop reveal d4"><div class="crop-e">🥜</div><div class="crop-n">Groundnuts</div><div class="crop-s">High Yield</div></div>
-      <div class="crop reveal d5"><div class="crop-e">🌱</div><div class="crop-n">Beans</div><div class="crop-s">Multiple</div></div>
-      <div class="crop reveal d6"><div class="crop-e">🌿</div><div class="crop-n">Cassava</div><div class="crop-s">Resistant</div></div>
+    <div class="section-center">
+      <div class="section-label reveal"><span class="line"></span> VOICES FROM THE FIELD</div>
+      <h2 class="section-title reveal d1">What Stakeholders Say</h2>
     </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal d1">
+        <div class="testi-quote">"Before AGRICHAIN 360, I lost 40% of my maize to poor drying. Now I dry at the perfect moisture and get premium prices. My income has increased significantly."</div>
+        <div class="testi-author"><div class="testi-avatar">JM</div><div><div class="testi-name">John Mukasa</div><div class="testi-role">Maize Farmer, Mayuge District</div></div></div>
+      </div>
+      <div class="testi-card reveal d2">
+        <div class="testi-quote">"The Digital Quality Passport transformed our procurement. We verify every batch before purchase. No more surprises, no more disputes — just certified quality."</div>
+        <div class="testi-author"><div class="testi-avatar">GC</div><div><div class="testi-name">Grace Coffee Ltd</div><div class="testi-role">Enterprise Buyer, Kampala</div></div></div>
+      </div>
+      <div class="testi-card reveal d3">
+        <div class="testi-quote">"As a village agent, I've registered 47 farmers in my community. The commission system works perfectly, and the offline registration means I can work anywhere."</div>
+        <div class="testi-author"><div class="testi-avatar">PO</div><div><div class="testi-name">Peter Oundo</div><div class="testi-role">Village Agent, Kamuli District</div></div></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:24px;font-size:.78rem;color:var(--gray-500);font-style:italic" class="reveal d4">* Testimonials from pilot program participants. Additional endorsements being collected.</div>
   </div>
 </section>
 
-<!-- ═══════════ STATS ═══════════ -->
-<section class="section" style="background:var(--bg2)">
+<!-- ═══ CTA ═══ -->
+<section class="cta-section">
   <div class="container">
-    <h2 class="section-title reveal">Our Impact in Numbers</h2>
-    <div class="stats-grid" style="margin-top:32px">
-      <div class="stat reveal d1"><div class="stat-ico" style="color:var(--g)"><i class="fas fa-users"></i></div><div class="stat-val" style="color:var(--g)">800+</div><div class="stat-lbl">Registered Farmers</div></div>
-      <div class="stat reveal d2"><div class="stat-ico" style="color:var(--a)"><i class="fas fa-map-marked-alt"></i></div><div class="stat-val" style="color:var(--a)">4</div><div class="stat-lbl">Districts Covered</div></div>
-      <div class="stat reveal d3"><div class="stat-ico" style="color:var(--g2)"><i class="fas fa-seedling"></i></div><div class="stat-val" style="color:var(--g2)">6+</div><div class="stat-lbl">Crop Types</div></div>
-      <div class="stat reveal d4"><div class="stat-ico" style="color:var(--ad)"><i class="fas fa-chart-line"></i></div><div class="stat-val" style="color:var(--ad)">35%</div><div class="stat-lbl">Loss Reduction</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ CTA ═══════════ -->
-<section class="cta">
-  <div class="container">
-    <h2 class="reveal">Ready to Transform Post-Harvest Agriculture?</h2>
-    <p class="reveal d1">Join <strong>800+ farmers</strong> and <strong>50+ buyers</strong> already using AGRICHAIN 360 to reduce losses and increase profits.</p>
+    <h2 class="reveal">Ready to Transform Agriculture?</h2>
+    <p class="reveal d1">Join the digital infrastructure powering the future of African agriculture.</p>
     <div class="cta-btns">
-      <a href="/signup" class="hero-btn hero-btn-gold reveal d2"><i class="fas fa-user-plus"></i> Create Free Account</a>
-      <a href="/marketplace" class="hero-btn hero-btn-glass reveal d3"><i class="fas fa-store"></i> Explore Marketplace</a>
+      <a href="/signup" class="btn-hero btn-gold reveal d2"><i class="fas fa-rocket"></i> Get Started Free</a>
+      <a href="#investors" class="btn-hero btn-outline reveal d3" style="color:white;border-color:rgba(255,255,255,.3)"><i class="fas fa-file-alt"></i> Investment Prospectus</a>
+      <a href="/marketplace" class="btn-hero btn-outline reveal d4" style="color:white;border-color:rgba(255,255,255,.3)"><i class="fas fa-store"></i> Explore Marketplace</a>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ FOOTER ═══════════ -->
+<!-- ═══ FOOTER ═══ -->
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
       <div>
-        <h5>🌾 AGRICHAIN <span style="color:var(--a)">360</span>™</h5>
-        <p>Uganda's complete post-harvest platform. Connecting farmers, buyers, and service providers with verified quality, real-time IoT monitoring, and digital traceability.</p>
-        <div style="display:flex;gap:12px;margin-top:14px">
-          <a href="#" style="font-size:1.1rem"><i class="fab fa-twitter"></i></a>
-          <a href="#" style="font-size:1.1rem"><i class="fab fa-linkedin"></i></a>
-          <a href="#" style="font-size:1.1rem"><i class="fab fa-whatsapp"></i></a>
+        <div class="footer-brand">🌾 AGRICHAIN 360</div>
+        <div class="footer-desc">The digital infrastructure powering agriculture across Africa. Connecting farmers, buyers, and service providers through one intelligent ecosystem.</div>
+        <div class="footer-social">
+          <a href="#"><i class="fab fa-linkedin"></i></a>
+          <a href="#"><i class="fab fa-github"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-whatsapp"></i></a>
         </div>
       </div>
       <div>
         <h5>Platform</h5>
-        <ul class="footer-links"><li><a href="/marketplace">Marketplace</a></li><li><a href="/ai-advisor">AI Advisor</a></li><li><a href="/iot-dryer">IoT Monitoring</a></li><li><a href="/roles">Get Started</a></li></ul>
+        <ul class="footer-links">
+          <li><a href="/marketplace">Marketplace</a></li>
+          <li><a href="/ai-advisor">AI Advisor</a></li>
+          <li><a href="/iot-dryer">IoT Monitoring</a></li>
+          <li><a href="/passport/B247391">Quality Passport</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+        </ul>
       </div>
       <div>
         <h5>Stakeholders</h5>
-        <ul class="footer-links"><li><a href="#investors">For Investors</a></li><li><a href="#ngos">For NGOs</a></li><li><a href="/roles">For Farmers</a></li><li><a href="/roles">For Buyers</a></li></ul>
+        <ul class="footer-links">
+          <li><a href="/signup?role=farmer">For Farmers</a></li>
+          <li><a href="/signup?role=buyer">For Buyers</a></li>
+          <li><a href="/signup?role=partner">For Partners</a></li>
+          <li><a href="/signup?role=ngo">For NGOs</a></li>
+          <li><a href="#investors">For Investors</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Resources</h5>
+        <ul class="footer-links">
+          <li><a href="/ai-advisor">AI Crop Advisor</a></li>
+          <li><a href="/ai-disease">Disease Detection</a></li>
+          <li><a href="/ussd/ussd-test">USSD Simulator</a></li>
+          <li><a href="/analytics">Analytics</a></li>
+        </ul>
       </div>
       <div>
         <h5>Contact</h5>
-        <ul class="footer-links"><li>Batesa Ibrahim</li><li><a href="tel:+256746022547">+256 746022547</a></li><li><a href="mailto:batesaibra6@gmail.com">batesaibra6@gmail.com</a></li><li>Kampala, Uganda</li></ul>
+        <ul class="footer-links">
+          <li>Batesa Ibrahim</li>
+          <li><a href="tel:+256746022547">+256 746022547</a></li>
+          <li><a href="mailto:batesaibra6@gmail.com">batesaibra6@gmail.com</a></li>
+          <li>Mayuge District, Uganda</li>
+        </ul>
       </div>
     </div>
     <div class="footer-bottom">
       <div>© 2026 AGRICHAIN 360™. All rights reserved.</div>
-      <div><a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Cookies</a></div>
+      <div><a href="#" style="color:#888;margin-right:16px">Privacy Policy</a><a href="#" style="color:#888;margin-right:16px">Terms of Service</a><a href="#" style="color:#888">API Documentation</a></div>
     </div>
   </div>
 </footer>
 
+<!-- ═══ SCRIPTS ═══ -->
 <script>
-// Page loader
-window.addEventListener('load',function(){setTimeout(function(){document.getElementById('pageLoader').classList.add('done')},400)});
+// Navbar scroll effect
+var nav = document.getElementById('nav');
+window.addEventListener('scroll', function() {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+});
 
-// Navbar scroll
-var nb=document.getElementById('navbar');
-window.addEventListener('scroll',function(){nb.classList.toggle('scrolled',window.scrollY>50)});
+// Mobile drawer
+function openDrawer() { document.getElementById('mobDrawer').classList.add('open'); document.getElementById('mobOverlay').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeDrawer() { document.getElementById('mobDrawer').classList.remove('open'); document.getElementById('mobOverlay').classList.remove('open'); document.body.style.overflow=''; }
 
-// Mobile nav
-function openMob(){document.getElementById('mobNav').classList.add('open');document.getElementById('mobOverlay').classList.add('open');document.body.style.overflow='hidden'}
-function closeMob(){document.getElementById('mobNav').classList.remove('open');document.getElementById('mobOverlay').classList.remove('open');document.body.style.overflow=''}
-
-// Intersection Observer
-document.addEventListener('DOMContentLoaded',function(){
-  if('IntersectionObserver' in window){
-    var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
-    document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(function(el){obs.observe(el)});
-  }else{
-    document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(function(el){el.classList.add('visible')});
+// Intersection Observer for scroll animations
+document.addEventListener('DOMContentLoaded', function() {
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(function(el) { obs.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(function(el) { el.classList.add('visible'); });
   }
+});
+
+// Count-up animation for stats
+function animateCountUp(el, target, duration) {
+  var start = 0;
+  var startTime = null;
+  var isFloat = target % 1 !== 0;
+  function step(timestamp) {
+    if (!startTime) startTime = timestamp;
+    var progress = Math.min((timestamp - startTime) / duration, 1);
+    var easeOut = 1 - Math.pow(1 - progress, 3);
+    var current = start + (target - start) * easeOut;
+    el.textContent = isFloat ? current.toFixed(1) : Math.floor(current).toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// Trigger count-up when stats section enters viewport
+var statsObserved = false;
+var statsObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting && !statsObserved) {
+      statsObserved = true;
+      document.querySelectorAll('.stat-number[data-target]').forEach(function(el) {
+        animateCountUp(el, parseInt(el.dataset.target), 2000);
+      });
+    }
+  });
+}, { threshold: 0.3 });
+var statsSection = document.querySelector('.stats-section');
+if (statsSection) statsObs.observe(statsSection);
+
+// Supply chain info cards
+function showChainInfo(el, desc) {
+  document.querySelectorAll('.chain-step').forEach(function(s) { s.classList.remove('active'); });
+  el.classList.add('active');
+  // Simple tooltip effect via title for now
+  el.title = desc;
+}
+
+// Animate dashboard chart bars periodically
+setInterval(function() {
+  var bars = document.querySelectorAll('#heroChartBars .dash-bar');
+  bars.forEach(function(bar) {
+    var h = 30 + Math.random() * 60;
+    bar.style.height = h + '%';
+  });
+}, 4000);
+
+// Simulate live feed updates
+var feedMessages = [
+  { icon:'green', ico:'fa-user-plus', text:'<strong>New farmer registered</strong> — Moses W., Kamuli' },
+  { icon:'gold', ico:'fa-certificate', text:'<strong>Passport issued</strong> — AGR-2026-B48291' },
+  { icon:'blue', ico:'fa-truck', text:'<strong>Transport booked</strong> — 3T coffee to Kampala' },
+  { icon:'green', ico:'fa-solar-panel', text:'<strong>Drying complete</strong> — Batch reached 12.8%' },
+  { icon:'gold', ico:'fa-mobile-alt', text:'<strong>Payment sent</strong> — UGX 1.8M via Airtel' },
+  { icon:'blue', ico:'fa-brain', text:'<strong>AI alert</strong> — Armyworm risk: LOW' }
+];
+var feedIdx = 0;
+setInterval(function() {
+  var feed = document.getElementById('heroFeed');
+  if (!feed) return;
+  var msg = feedMessages[feedIdx % feedMessages.length];
+  var item = document.createElement('div');
+  item.className = 'dash-feed-item';
+  item.innerHTML = '<div class="dash-feed-icon ' + msg.icon + '"><i class="fas ' + msg.ico + '"></i></div><div>' + msg.text + '</div>';
+  feed.insertBefore(item, feed.firstChild);
+  if (feed.children.length > 4) feed.removeChild(feed.lastChild);
+  feedIdx++;
+}, 5000);
+
+// Animate IoT gauges
+setInterval(function() {
+  var temp = (40 + Math.random() * 6).toFixed(1);
+  var hum = Math.floor(28 + Math.random() * 8);
+  var moist = (13 + Math.random() * 3).toFixed(1);
+  var tEl = document.getElementById('iotTemp');
+  var hEl = document.getElementById('iotHum');
+  var mEl = document.getElementById('iotMoist');
+  if (tEl) tEl.textContent = temp + '°C';
+  if (hEl) hEl.textContent = hum + '%';
+  if (mEl) mEl.textContent = moist + '%';
+}, 3000);
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior:'smooth', block:'start' }); }
+  });
 });
 </script>
 </body>
