@@ -255,6 +255,11 @@ router.get('/download/proposal', (req, res) => {
   res.download(filePath, 'AGRICHAIN_360_AYuTe_Proposal.pdf');
 });
 
+// Download App Page
+router.get('/download-app', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'download-app.html'));
+});
+
 // Digital Quality Passport — Public Verification Page
 router.get('/passport/:batchId', async (req, res) => {
   try {

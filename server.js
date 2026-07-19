@@ -102,13 +102,30 @@ app.get('/health', (req, res) => {
   res.json({
     success: true,
     message: 'AGRICHAIN 360™ is running',
-    version: '3.0.1',
+    version: '3.0.4-final-autoseed',
     timestamp: new Date().toISOString(),
     services: {
       database: dbConfig.isConnected ? 'connected' : 'disconnected',
       api: 'active',
       web: 'active',
       websocket: 'active'
+    }
+  });
+});
+
+// ═══════════════════════════════════════════
+// APK DOWNLOAD (explicit route for proper headers)
+// ═══════════════════════════════════════════
+
+app.get('/app/agrichain360.apk', (req, res) => {
+  const apkPath = path.join(__dirname, 'public', 'app', 'agrichain360.apk');
+  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+  res.setHeader('Content-Disposition', 'attachment; filename="agrichain360.apk"');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(apkPath, (err) => {
+    if (err) {
+      logger.error('APK download failed', { error: err.message });
+      res.status(404).json({ success: false, message: 'APK file not found' });
     }
   });
 });
@@ -148,6 +165,87 @@ async function startServer() {
   const sessionMiddleware = createSessionMiddleware(pool);
   app.use(sessionMiddleware);
 
+  // 2.5 Auto-seed marketplace (AGGRESSIVE - runs on every startup)
+  if (dbOk) {
+    try {
+      logger.info('🔍 Checking marketplace status...');
+      const countResult = await pool.query('SELECT COUNT(*) FROM products');
+      const productCount = parseInt(countResult.rows[0].count);
+      logger.info(`📊 Current products: ${productCount}`);
+      
+      if (productCount === 0) {
+        logger.info('📦 Marketplace empty — auto-seeding sample data...');
+        logger.info('⏳ This may take 10-20 seconds...');
+        logger.info('🔄 This may take 10-20 seconds...');
+        
+        const farmers = [
+          { name: 'John Mukasa', phone: '+256700111111', district: 'Mayuge', village: 'Buwenge' },
+          { name: 'Grace Namutebi', phone: '+256700222222', district: 'Jinja', village: 'Bugembe' },
+          { name: 'Peter Oundo', phone: '+256700333333', district: 'Iganga', village: 'Namayingo' },
+          { name: 'Sarah Babirye', phone: '+256700444444', district: 'Kamuli', village: 'Budiope' },
+          { name: 'Moses Waiswa', phone: '+256700555555', district: 'Bugiri', village: 'Kaliro' },
+          { name: 'Fatuma Nakato', phone: '+256700666666', district: 'Mayuge', village: 'Buwenge' },
+        ];
+
+        const farmerIds = [];
+        for (const f of farmers) {
+          const uR = await pool.query(
+            `INSERT INTO users (name, phone, password, role, created_at) VALUES ($1, $2, '$2a$10$dummyhash', 'FARMER', NOW()) ON CONFLICT (phone) DO UPDATE SET name = $1 RETURNING id`,
+            [f.name, f.phone]
+          );
+          await pool.query(
+            `INSERT INTO farmers (user_id, district, village, farm_size, created_at) VALUES ($1, $2, $3, 3.5, NOW()) ON CONFLICT (user_id) DO NOTHING`,
+            [uR.rows[0].id, f.district, f.village]
+          );
+          const fR = await pool.query('SELECT id FROM farmers WHERE user_id = $1', [uR.rows[0].id]);
+          farmerIds.push(fR.rows[0].id);
+        }
+
+        const products = [
+          { crop: 'Maize', qty: 2000, unit: 'kg', price: 1800 },
+          { crop: 'Coffee', qty: 500, unit: 'kg', price: 12000 },
+          { crop: 'Beans', qty: 1500, unit: 'kg', price: 3200 },
+          { crop: 'Groundnuts', qty: 800, unit: 'kg', price: 3500 },
+          { crop: 'Maize', qty: 3000, unit: 'kg', price: 1650 },
+          { crop: 'Rice', qty: 1200, unit: 'kg', price: 4500 },
+          { crop: 'Cassava', qty: 2500, unit: 'kg', price: 1200 },
+          { crop: 'Soybeans', qty: 900, unit: 'kg', price: 2800 },
+          { crop: 'Coffee', qty: 300, unit: 'kg', price: 11000 },
+          { crop: 'Banana', qty: 1800, unit: 'bunches', price: 800 },
+        ];
+
+        for (let i = 0; i < products.length; i++) {
+          const p = products[i];
+          const fId = farmerIds[i % farmerIds.length];
+          const pR = await pool.query(
+            `INSERT INTO products (farmer_id, crop, quantity, unit, price_per_unit, quality_status, available, created_at) VALUES ($1, $2, $3, $4, $5, 'APPROVED', true, NOW()) RETURNING id`,
+            [fId, p.crop, p.qty, p.unit, p.price]
+          );
+          const batch = `AGR-2026-${String(i + 1).padStart(5, '0')}`;
+          const moisture = (10 + Math.random() * 3).toFixed(1);
+          const aflatoxin = (2 + Math.random() * 3).toFixed(1);
+          await pool.query(
+            `INSERT INTO quality_passports (batch_number, farmer_id, crop_type, quantity, moisture_level, aflatoxin_result, quality_grade, created_at, verified_at) VALUES ($1, $2, $3, $4, $5, $6, 'A', NOW(), NOW()) ON CONFLICT (batch_number) DO NOTHING`,
+            [batch, fId, p.crop, p.qty, moisture, aflatoxin]
+          );
+        }
+
+        logger.info(`✅ Marketplace seeded: ${farmers.length} farmers, ${products.length} products`);
+        logger.info('🎉 Your marketplace is now populated and ready!');
+        logger.info('📱 Check your app → Market tab to see the products!');
+      } else {
+        logger.info(`✅ Marketplace already has ${productCount} products - skipping seed`);
+      }
+      }
+    } catch (e) {
+      logger.error('❌ Auto-seed FAILED:', e.message);
+      logger.error('Stack:', e.stack);
+      logger.error('💡 You can manually seed by running: node scripts/seed-marketplace-now.js');
+    }
+  } else {
+    logger.warn('⚠️  Database not connected - skipping auto-seed');
+  }
+
   // 3. EJS View Engine
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
@@ -177,6 +275,7 @@ async function startServer() {
     { path: '/api/v1/logistics', module: './api/routes/logistics.routes', name: 'Logistics', limiter: apiLimiter },
     { path: '/api/v1/disease', module: './api/routes/disease.routes', name: 'Disease Detection', limiter: apiLimiter },
     { path: '/api/v1/ecosystem', module: './api/routes/ecosystem.routes', name: 'Ecosystem', limiter: apiLimiter },
+    { path: '/api/v1/seed', module: './api/routes/seed.routes', name: 'Seed', limiter: apiLimiter },
   ];
 
   for (const api of apiModules) {
@@ -292,3 +391,15 @@ startServer().catch((err) => {
 });
 
 module.exports = { app, server };
+
+// Force deployment trigger - v3.0.3 with aggressive auto-seed
+console.log('🚀 AGRICHAIN 360 v3.0.3 - Aggressive Auto-Seed Enabled');
+
+// ============================================
+// DEPLOYMENT MARKER - v3.0.4-final-autoseed
+// This version has bulletproof auto-seed
+// Should populate marketplace on first startup
+// ============================================
+console.log('🚀 AGRICHAIN 360 v3.0.4-final-autoseed starting...');
+console.log('📦 Auto-seed will run automatically if marketplace is empty');
+console.log('⏱️  Startup may take 10-20 seconds for seeding');

@@ -7,26 +7,41 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
       "backgroundColor": "#1B5E20"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.agrichain360.app",
+      "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "AGRICHAIN 360 needs camera access to scan crop diseases and QR codes."
+        "NSCameraUsageDescription": "AGRICHAIN 360 needs camera access to scan crop diseases and QR codes.",
+        "NSLocationWhenInUseUsageDescription": "AGRICHAIN 360 uses your location to find nearby village agents and markets."
       }
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1B5E20"
       },
       "package": "com.agrichain360.app",
-      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION"]
+      "versionCode": 1,
+      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION", "INTERNET"]
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-camera",
-      "expo-location"
-    ]
+      "expo-location",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
   }
 }

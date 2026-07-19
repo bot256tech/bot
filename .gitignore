@@ -8,3 +8,15 @@ build/
 
 # Pitch audio (not web-accessible)
 assets/pitch-audio/
+
+# Mobile app
+mobile/node_modules/
+mobile/.expo/
+mobile/android/app/build/
+mobile/android/.gradle/
+mobile/android/build/
+mobile/ios/
+
+# APK files (except the public download)
+*.apk
+!public/app/agrichain360.apk
