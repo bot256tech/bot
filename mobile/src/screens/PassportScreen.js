@@ -1,83 +1,137 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import api from '../services/api';
 import { COLORS, SHADOWS } from '../utils/constants';
 
-export default function PassportScreen({ route }) {
-  const { passport } = route.params || {};
-  const batchId = passport || 'AGR-2026-A12345';
+export default function PassportScreen({ route, navigation }) {
+  const initialBatch = route.params && route.params.batchNumber ? route.params.batchNumber : '';
+  const [batch, setBatch] = useState(initialBatch);
+  const [passport, setPassport] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const verify = async (batchNo) => {
+    const b = (batchNo || batch).trim();
+    if (!b) return;
+    setLoading(true);
+    setError('');
+    setPassport(null);
+    try {
+      const r = await api.verifyPassport(b);
+      setPassport(r.data);
+    } catch (e) {
+      setError(e.message || 'Passport not found.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (initialBatch) verify(initialBatch);
+  }, [initialBatch]); /* eslint-disable-line */
+
+  const gradeColor = (g) => {
+    if (g === 'A') return COLORS.green;
+    if (g === 'B') return '#1565C0';
+    if (g === 'C') return COLORS.goldDark;
+    if (g === 'REJECTED') return COLORS.red;
+    return COLORS.gray400;
+  };
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.headerLabel}>AGRICHAIN 360™</Text>
-          <Text style={styles.headerTitle}>Digital Quality Passport</Text>
-          <Text style={styles.headerSub}>Verified Agricultural Produce Certificate</Text>
+          <Ionicons name="shield-checkmark" size={34} color={COLORS.green} />
+          <Text style={styles.title}>Quality Passport Verification</Text>
+          <Text style={styles.subtitle}>Enter a batch number to inspect its recorded quality information and grade.</Text>
         </View>
-        <View style={styles.verifiedBadge}>
-          <Text style={{ fontSize: 32 }}>✅</Text>
-          <Text style={styles.verifiedText}>VERIFIED</Text>
-          <Text style={styles.verifiedDate}>Verified on July 16, 2026</Text>
+
+        <View style={styles.searchCard}>
+          <View style={styles.searchRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. AGR-DEMO-001"
+              value={batch}
+              onChangeText={setBatch}
+              onSubmitEditing={() => verify()}
+              returnKeyType="search"
+              autoCapitalize="characters"
+              placeholderTextColor={COLORS.gray300}
+            />
+            <TouchableOpacity style={styles.btn} onPress={() => verify()} disabled={loading}>
+              {loading ? <ActivityIndicator color={COLORS.white} size="small" /> : <Ionicons name="search" size={18} color={COLORS.white} />}
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.gradeCircle}><Text style={styles.gradeLetter}>A</Text></View>
-        <Text style={styles.gradeLabel}>Quality Grade</Text>
-        <View style={styles.batchBox}><Text style={styles.batchId}>{batchId}</Text></View>
-        <View style={styles.grid}>
-          <View style={styles.gridItem}><Text style={styles.gridLabel}>CROP</Text><Text style={styles.gridValue}>Maize</Text></View>
-          <View style={styles.gridItem}><Text style={styles.gridLabel}>QUANTITY</Text><Text style={styles.gridValue}>2,000 kg</Text></View>
-          <View style={styles.gridItem}><Text style={styles.gridLabel}>MOISTURE</Text><Text style={[styles.gridValue, { color: COLORS.green }]}>12.5%</Text></View>
-          <View style={styles.gridItem}><Text style={styles.gridLabel}>AFLATOXIN</Text><Text style={[styles.gridValue, { color: COLORS.green }]}>4.2 ppb ✓ Safe</Text></View>
-        </View>
-        <View style={styles.traceCard}>
-          <Text style={styles.traceTitle}>📋 Traceability Information</Text>
-          <View style={styles.traceRow}><Text style={styles.traceLabel}>Issued:</Text><Text style={styles.traceValue}>July 16, 2026</Text></View>
-          <View style={styles.traceRow}><Text style={styles.traceLabel}>Testing Lab:</Text><Text style={styles.traceValue}>Verified Partner Lab</Text></View>
-          <View style={styles.traceRow}><Text style={styles.traceLabel}>Origin:</Text><Text style={styles.traceValue}>Mayuge District, Uganda</Text></View>
-          <View style={styles.traceRow}><Text style={styles.traceLabel}>Platform:</Text><Text style={styles.traceValue}>AGRICHAIN 360™</Text></View>
-        </View>
-        <View style={styles.standards}>
-          <Text style={styles.standardsTitle}>Grading Standards</Text>
-          <Text style={styles.standardsText}>Grade A: Moisture ≤ 13% & Aflatoxin ≤ 5 ppb{'\n'}Grade B: Moisture ≤ 14% & Aflatoxin ≤ 10 ppb{'\n'}Grade C: Moisture ≤ 15% & Aflatoxin ≤ 20 ppb</Text>
-        </View>
-        <View style={styles.qrSection}>
-          <View style={styles.qrBox}><Ionicons name="qr-code" size={80} color={COLORS.green} /></View>
-          <Text style={styles.qrText}>Scan to verify authenticity</Text>
-        </View>
-        <View style={{ height: 40 }} />
+
+        {error ? (
+          <View style={styles.resultCard}>
+            <Ionicons name="alert-circle-outline" size={34} color={COLORS.goldDark} />
+            <Text style={styles.errorTitle}>Passport not found</Text>
+            <Text style={styles.errorText}>{error} Check the batch number and try again.</Text>
+          </View>
+        ) : null}
+
+        {passport ? (
+          <View style={styles.resultCard}>
+            <Text style={styles.batchNo}>{passport.batch_number}</Text>
+            <View style={[styles.gradeRow, { backgroundColor: gradeColor(passport.quality_grade) }]}>
+              <Text style={styles.gradeLetter}>{passport.quality_grade || 'P'}</Text>
+              <View>
+                <Text style={styles.gradeLabel}>{passport.quality_grade === 'REJECTED' ? 'Rejected' : passport.quality_grade ? `Grade ${passport.quality_grade}` : 'Pending grade'}</Text>
+                <Text style={styles.gradeSub}>{passport.verified_at ? 'Verified on platform records' : 'Awaiting verification'}</Text>
+              </View>
+            </View>
+
+            <Row label="Crop" value={passport.crop_type} />
+            <Row label="Quantity" value={`${parseFloat(passport.quantity).toLocaleString()} kg`} />
+            <Row label="Moisture" value={passport.moisture_level != null ? passport.moisture_level + '%' : 'Not recorded'} />
+            <Row label="Aflatoxin" value={passport.aflatoxin_result != null ? passport.aflatoxin_result + ' ppb' : 'Not recorded'} />
+            <Row label="Drying centre" value={passport.drying_center || '—'} />
+            <Row label="Data source" value={passport.record_source === 'demo' ? 'Demonstration record' : passport.record_source === 'partner' ? 'Partner-entered' : 'Farmer-entered'} />
+            <Row label="Issued" value={new Date(passport.created_at).toLocaleDateString()} />
+
+            <Text style={styles.rules}>Grading: A ≤13% & ≤5 ppb · B ≤14% & ≤10 ppb · C ≤15% & ≤20 ppb — otherwise rejected.</Text>
+          </View>
+        ) : null}
+
+        <View style={{ height: 30 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+function Row({ label, value }) {
+  return (
+    <View style={styles.row}>
+      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={styles.rowValue}>{value}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.cream },
-  header: { alignItems: 'center', paddingVertical: 32, borderBottomWidth: 3, borderBottomColor: COLORS.green },
-  headerLabel: { fontSize: 12, letterSpacing: 3, color: COLORS.gray500, textTransform: 'uppercase', fontWeight: '600' },
-  headerTitle: { fontSize: 24, fontWeight: '800', color: COLORS.green, marginTop: 8 },
-  headerSub: { fontSize: 13, color: COLORS.gray500, marginTop: 4 },
-  verifiedBadge: { alignItems: 'center', marginVertical: 24, padding: 16, backgroundColor: COLORS.greenPale, borderRadius: 16, marginHorizontal: 20, borderWidth: 2, borderColor: COLORS.greenLight },
-  verifiedText: { fontSize: 18, fontWeight: '700', color: COLORS.green, marginTop: 4 },
-  verifiedDate: { fontSize: 12, color: COLORS.gray500, marginTop: 4 },
-  gradeCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: COLORS.green, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', ...SHADOWS.md },
-  gradeLetter: { fontSize: 36, fontWeight: '900', color: COLORS.white },
-  gradeLabel: { textAlign: 'center', fontSize: 13, color: COLORS.gray500, marginTop: 8, marginBottom: 20 },
-  batchBox: { alignItems: 'center', marginBottom: 24 },
-  batchId: { fontFamily: 'monospace', fontSize: 15, letterSpacing: 1, color: COLORS.charcoal, backgroundColor: COLORS.gray50, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 50 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 20, gap: 12 },
-  gridItem: { width: '47%', backgroundColor: COLORS.white, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: COLORS.gray200 },
-  gridLabel: { fontSize: 10, color: COLORS.gray500, letterSpacing: 1, fontWeight: '600' },
-  gridValue: { fontSize: 16, fontWeight: '700', color: COLORS.charcoal, marginTop: 4 },
-  traceCard: { margin: 20, padding: 20, backgroundColor: '#E3F2FD', borderRadius: 16, borderWidth: 1, borderColor: '#90CAF9' },
-  traceTitle: { fontSize: 14, fontWeight: '700', color: '#1565C0', marginBottom: 12 },
-  traceRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
-  traceLabel: { fontSize: 13, color: COLORS.gray500 },
-  traceValue: { fontSize: 13, fontWeight: '600', color: COLORS.charcoal },
-  standards: { marginHorizontal: 20, padding: 16, backgroundColor: COLORS.gray50, borderRadius: 12, marginBottom: 20 },
-  standardsTitle: { fontSize: 12, fontWeight: '700', color: COLORS.gray500, marginBottom: 8 },
-  standardsText: { fontSize: 12, color: COLORS.gray500, lineHeight: 20 },
-  qrSection: { alignItems: 'center', marginVertical: 20 },
-  qrBox: { width: 120, height: 120, backgroundColor: COLORS.white, borderRadius: 16, justifyContent: 'center', alignItems: 'center', ...SHADOWS.sm },
-  qrText: { fontSize: 12, color: COLORS.gray500, marginTop: 8 },
+  header: { alignItems: 'center', paddingHorizontal: 24, paddingTop: 18, paddingBottom: 14 },
+  title: { fontSize: 18, fontWeight: '800', color: COLORS.charcoal, marginTop: 8, textAlign: 'center' },
+  subtitle: { fontSize: 12.5, color: COLORS.gray500, marginTop: 4, textAlign: 'center', lineHeight: 17 },
+  searchCard: { backgroundColor: COLORS.white, marginHorizontal: 16, borderRadius: 16, padding: 14, ...SHADOWS.sm },
+  searchRow: { flexDirection: 'row', gap: 10 },
+  input: { flex: 1, backgroundColor: COLORS.gray50, borderWidth: 1, borderColor: COLORS.gray200, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11, fontSize: 14.5, color: COLORS.charcoal },
+  btn: { width: 48, borderRadius: 12, backgroundColor: COLORS.green, justifyContent: 'center', alignItems: 'center' },
+  resultCard: { backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 14, borderRadius: 16, padding: 18, ...SHADOWS.sm, alignItems: 'center' },
+  errorTitle: { fontSize: 15.5, fontWeight: '700', color: COLORS.charcoal, marginTop: 10 },
+  errorText: { fontSize: 12.5, color: COLORS.gray500, marginTop: 4, textAlign: 'center' },
+  batchNo: { fontSize: 15, fontWeight: '800', color: COLORS.charcoal, letterSpacing: 0.4, marginBottom: 12 },
+  gradeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, alignSelf: 'stretch', borderRadius: 14, padding: 14, marginBottom: 8 },
+  gradeLetter: { fontSize: 24, fontWeight: '900', color: COLORS.white },
+  gradeLabel: { fontSize: 14.5, fontWeight: '800', color: COLORS.white },
+  gradeSub: { fontSize: 11, color: 'rgba(255,255,255,0.85)', marginTop: 2 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', alignSelf: 'stretch', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: COLORS.gray100 },
+  rowLabel: { fontSize: 12.5, color: COLORS.gray500 },
+  rowValue: { fontSize: 12.5, fontWeight: '700', color: COLORS.charcoal, maxWidth: '60%', textAlign: 'right' },
+  rules: { fontSize: 10.5, color: COLORS.gray400, marginTop: 12, textAlign: 'center', lineHeight: 15 },
 });

@@ -67,13 +67,15 @@ router.get('/verified', async (req, res) => {
 router.get('/product/:id', idParamValidation, async (req, res) => {
   try {
     const Product = require('../../models/Product');
+    const QualityPassport = require('../../models/QualityPassport');
     const product = await Product.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found.' });
     }
 
-    res.json({ success: true, data: product });
+    const passport = await QualityPassport.findLatestByFarmerAndCrop(product.farmer_id, product.crop);
+    res.json({ success: true, data: { ...product, passport: passport || null } });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

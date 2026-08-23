@@ -1,46 +1,164 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import api from '../services/api';
 import { COLORS, SHADOWS } from '../utils/constants';
 
 export default function ProductDetailScreen({ route, navigation }) {
-  const { product } = route.params || {};
-  if (!product) return <View style={{ flex: 1, backgroundColor: COLORS.cream }} />;
-  const emoji = product.crop === 'Maize' ? '🌽' : product.crop === 'Coffee' ? '☕' : product.crop === 'Cocoa' ? '🌰' : product.crop === 'Groundnuts' ? '🥜' : product.crop === 'Beans' ? '🌱' : '🌾';
+  const { productId } = route.params;
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [qty, setQty] = useState('');
+  const [ordering, setOrdering] = useState(false);
+
+  const user = api.user || {};
+  const isBuyer = (user.role || '').toUpperCase() === 'BUYER';
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await api.getProduct(productId);
+        setProduct(r.data);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [productId]);
+
+  const placeOrder = async () => {
+    const q = parseFloat(qty);
+    if (!Number.isFinite(q) || q <= 0) { Alert.alert('Enter a quantity', 'Quantity must be a positive number.'); return; }
+    setOrdering(true);
+    try {
+      const r = await api.placeOrder(product.id, q);
+      Alert.alert('Order request placed', `Your request for ${q} ${product.unit} of ${product.crop} was sent to the farmer. Total ${Math.round(q * parseFloat(product.price_per_unit)).toLocaleString()} UGX.`);
+      setQty('');
+    } catch (e) {
+      Alert.alert('Could not place order', e.message);
+    } finally {
+      setOrdering(false);
+    }
+  };
+
+  if (loading) return <SafeAreaView style={styles.center}><ActivityIndicator size="large" color={COLORS.green} /></SafeAreaView>;
+
+  if (error || !product) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <Ionicons name="alert-circle-outline" size={40} color={COLORS.gray300} />
+        <Text style={styles.errorTitle}>Could not load this listing</Text>
+        <Text style={styles.errorText}>{error || 'Unknown error'}</Text>
+        <TouchableOpacity style={styles.retryBtn} onPress={() => navigation.goBack()}>
+          <Text style={styles.retryBtnText}>Go back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  const passport = product.passport;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.hero}>
-          <View style={styles.heroEmoji}><Text style={{ fontSize: 48 }}>{emoji}</Text></View>
-          <Text style={styles.cropName}>{product.crop}</Text>
-          <View style={[styles.gradeBadge, product.grade === 'A' ? styles.gradeA : styles.gradeB]}>
-            <Text style={styles.gradeText}>Grade {product.grade}</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <View style={styles.card}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.crop}>{product.crop}</Text>
+              <Text style={styles.meta}>Listed by {product.farmer_name}{product.district ? ` · ${product.district}${product.village ? ', ' + product.village : ''}` : ''}</Text>
+            </View>
+            {product.quality_status === 'APPROVED' ? (
+              <View style={[styles.tag, { backgroundColor: COLORS.greenPale }]}><Text style={[styles.tagText, { color: COLORS.green }]}>Approved</Text></View>
+            ) : product.quality_status === 'REJECTED' ? (
+              <View style={[styles.tag, { backgroundColor: COLORS.redLight }]}><Text style={[styles.tagText, { color: COLORS.red }]}>Rejected</Text></View>
+            ) : (
+              <View style={[styles.tag, { backgroundColor: '#FFF8E1' }]}><Text style={[styles.tagText, { color: COLORS.goldDark }]}>Pending</Text></View>
+            )}
+          </View>
+
+          <View style={styles.statsRow}>
+            <View style={styles.stat}>
+              <Text style={styles.statValue}>{parseFloat(product.quantity).toLocaleString()}</Text>
+              <Text style={styles.statLabel}>{product.unit} available</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={[styles.statValue, { color: COLORS.green }]}>UGX {parseFloat(product.price_per_unit).toLocaleString()}</Text>
+              <Text style={styles.statLabel}>per {product.unit}</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={[styles.statValue, { color: COLORS.goldDark }]}>UGX {Math.round(parseFloat(product.quantity) * parseFloat(product.price_per_unit)).toLocaleString()}</Text>
+              <Text style={styles.statLabel}>full batch</Text>
+            </View>
           </View>
         </View>
-        <View style={styles.detailsCard}>
-          <Text style={styles.cardTitle}>Product Details</Text>
-          <View style={styles.detailRow}><Text style={styles.detailLabel}>Farmer</Text><Text style={styles.detailValue}>{product.farmer}</Text></View>
-          <View style={styles.detailRow}><Text style={styles.detailLabel}>District</Text><Text style={styles.detailValue}>{product.district}</Text></View>
-          <View style={styles.detailRow}><Text style={styles.detailLabel}>Quantity</Text><Text style={styles.detailValue}>{product.quantity.toLocaleString()} {product.unit}</Text></View>
-          <View style={styles.detailRow}><Text style={styles.detailLabel}>Price</Text><Text style={[styles.detailValue, { color: COLORS.green, fontSize: 18 }]}>UGX {product.price.toLocaleString()}/kg</Text></View>
-          <View style={styles.detailRow}><Text style={styles.detailLabel}>Total Value</Text><Text style={[styles.detailValue, { color: COLORS.goldDark }]}>UGX {(product.price * product.quantity).toLocaleString()}</Text></View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Digital Quality Passport</Text>
+          {passport ? (
+            <>
+              <View style={styles.passRow}>
+                <Text style={styles.passLabel}>Batch number</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Passport', { batchNumber: passport.batch_number })}>
+                  <Text style={styles.passLink}>{passport.batch_number}</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.passRow}>
+                <Text style={styles.passLabel}>Grade</Text>
+                <Text style={[styles.passValue, { color: passport.quality_grade === 'A' || passport.quality_grade === 'B' ? COLORS.green : COLORS.red }]}>
+                  {passport.quality_grade || 'Pending'}{passport.quality_grade === 'A' || passport.quality_grade === 'B' ? ' — passing' : ''}
+                </Text>
+              </View>
+              <View style={styles.passRow}>
+                <Text style={styles.passLabel}>Moisture</Text>
+                <Text style={styles.passValue}>{passport.moisture_level != null ? passport.moisture_level + '%' : 'Not recorded'}</Text>
+              </View>
+              <View style={styles.passRow}>
+                <Text style={styles.passLabel}>Aflatoxin</Text>
+                <Text style={styles.passValue}>{passport.aflatoxin_result != null ? passport.aflatoxin_result + ' ppb' : 'Not recorded'}</Text>
+              </View>
+              <View style={styles.passRow}>
+                <Text style={styles.passLabel}>Data source</Text>
+                <Text style={styles.passValue}>
+                  {passport.record_source === 'demo' ? 'Demonstration record' : passport.record_source === 'partner' ? 'Partner-entered' : 'Farmer-entered'}
+                </Text>
+              </View>
+              <TouchableOpacity style={styles.passBtn} onPress={() => navigation.navigate('Passport', { batchNumber: passport.batch_number })}>
+                <Ionicons name="certificate" size={16} color={COLORS.white} />
+                <Text style={styles.passBtnText}>Open Verifiable Passport</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={styles.noPassport}>No passport issued yet — moisture and test results will appear once recorded by the farmer or a testing partner.</Text>
+          )}
         </View>
-        <TouchableOpacity style={styles.passportCard} onPress={() => navigation.navigate('Passport', { passport: product.passport })}>
-          <View style={styles.passportIcon}><Ionicons name="document-text" size={24} color={COLORS.green} /></View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.passportTitle}>Digital Quality Passport</Text>
-            <Text style={styles.passportId}>{product.passport}</Text>
-            <Text style={styles.passportSub}>QR-verified certificate</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color={COLORS.gray300} />
-        </TouchableOpacity>
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.buyBtn}><Ionicons name="cart" size={20} color="#fff" /><Text style={styles.buyBtnText}>Purchase This Batch</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.contactBtn}><Ionicons name="chatbubble" size={20} color={COLORS.green} /><Text style={styles.contactBtnText}>Contact Farmer</Text></TouchableOpacity>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Place an order request</Text>
+          {isBuyer ? (
+            product.available ? (
+              <>
+                <Text style={styles.pillLabel}>Quantity ({product.unit})</Text>
+                <TextInput style={styles.input} placeholder={`1 – ${parseFloat(product.quantity)}`} value={qty} onChangeText={setQty} keyboardType="numeric" placeholderTextColor={COLORS.gray300} />
+                <TouchableOpacity style={styles.orderBtn} onPress={placeOrder} disabled={ordering}>
+                  {ordering ? <ActivityIndicator color={COLORS.white} /> : <><Ionicons name="paper-plane" size={16} color={COLORS.white} /><Text style={styles.orderBtnText}>Request Order</Text></>}
+                </TouchableOpacity>
+                <Text style={styles.note}>The farmer receives your request with your contact details. Payment is settled via mobile money on confirmation.</Text>
+              </>
+            ) : (
+              <Text style={styles.note}>This listing is currently unavailable.</Text>
+            )
+          ) : (
+            <Text style={styles.note}>
+              {api.isLoggedIn()
+                ? 'Order requests are placed by buyer accounts.'
+                : 'Log in as a buyer to place order requests.'}
+            </Text>
+          )}
         </View>
-        <View style={{ height: 40 }} />
+        <View style={{ height: 30 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -48,26 +166,31 @@ export default function ProductDetailScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.cream },
-  hero: { alignItems: 'center', paddingVertical: 40, backgroundColor: COLORS.white },
-  heroEmoji: { width: 80, height: 80, borderRadius: 24, backgroundColor: COLORS.greenPale, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
-  cropName: { fontSize: 28, fontWeight: '800', color: COLORS.charcoal },
-  gradeBadge: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 50, marginTop: 8 },
-  gradeA: { backgroundColor: COLORS.greenPale },
-  gradeB: { backgroundColor: COLORS.goldLight },
-  gradeText: { fontSize: 13, fontWeight: '700', color: COLORS.green },
-  detailsCard: { margin: 20, padding: 24, backgroundColor: COLORS.white, borderRadius: 24, ...SHADOWS.sm },
-  cardTitle: { fontSize: 18, fontWeight: '700', color: COLORS.charcoal, marginBottom: 16 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: COLORS.gray100 },
-  detailLabel: { fontSize: 14, color: COLORS.gray500 },
-  detailValue: { fontSize: 14, fontWeight: '700', color: COLORS.charcoal },
-  passportCard: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, padding: 20, backgroundColor: COLORS.white, borderRadius: 20, borderWidth: 1, borderColor: COLORS.greenPale, ...SHADOWS.sm },
-  passportIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: COLORS.greenPale, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
-  passportTitle: { fontSize: 15, fontWeight: '700', color: COLORS.charcoal },
-  passportId: { fontSize: 13, fontWeight: '600', color: COLORS.green, marginTop: 2 },
-  passportSub: { fontSize: 12, color: COLORS.gray500, marginTop: 2 },
-  actions: { padding: 20, gap: 12 },
-  buyBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, backgroundColor: COLORS.green, borderRadius: 16, ...SHADOWS.md },
-  buyBtnText: { fontSize: 16, fontWeight: '700', color: COLORS.white },
-  contactBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, backgroundColor: COLORS.white, borderRadius: 16, borderWidth: 2, borderColor: COLORS.green },
-  contactBtnText: { fontSize: 16, fontWeight: '700', color: COLORS.green },
+  center: { flex: 1, backgroundColor: COLORS.cream, alignItems: 'center', justifyContent: 'center', padding: 30 },
+  errorTitle: { fontSize: 16, fontWeight: '700', color: COLORS.charcoal, marginTop: 12 },
+  errorText: { fontSize: 12.5, color: COLORS.gray500, marginTop: 4, textAlign: 'center' },
+  retryBtn: { marginTop: 16, backgroundColor: COLORS.green, borderRadius: 12, paddingHorizontal: 22, paddingVertical: 11 },
+  retryBtnText: { color: COLORS.white, fontWeight: '700', fontSize: 13.5 },
+  card: { backgroundColor: COLORS.white, marginHorizontal: 16, marginBottom: 14, borderRadius: 16, padding: 17, ...SHADOWS.sm },
+  crop: { fontSize: 20, fontWeight: '800', color: COLORS.charcoal },
+  meta: { fontSize: 12.5, color: COLORS.gray500, marginTop: 3 },
+  statsRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  stat: { flex: 1, backgroundColor: COLORS.gray50, borderRadius: 12, padding: 12, alignItems: 'center' },
+  statValue: { fontSize: 13.5, fontWeight: '800', color: COLORS.charcoal },
+  statLabel: { fontSize: 10, color: COLORS.gray500, marginTop: 3 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.charcoal, marginBottom: 10 },
+  passRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: COLORS.gray100 },
+  passLabel: { fontSize: 12.5, color: COLORS.gray500 },
+  passValue: { fontSize: 12.5, fontWeight: '700', color: COLORS.charcoal },
+  passLink: { fontSize: 12.5, fontWeight: '800', color: COLORS.green },
+  noPassport: { fontSize: 12.5, color: COLORS.gray500, lineHeight: 18 },
+  passBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: COLORS.green, borderRadius: 12, paddingVertical: 13, marginTop: 14 },
+  passBtnText: { color: COLORS.white, fontWeight: '700', fontSize: 13.5 },
+  pillLabel: { fontSize: 12, fontWeight: '600', color: COLORS.charcoal, marginBottom: 7 },
+  input: { backgroundColor: COLORS.gray50, borderWidth: 1, borderColor: COLORS.gray200, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15, color: COLORS.charcoal },
+  orderBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: COLORS.green, borderRadius: 12, paddingVertical: 13, marginTop: 12 },
+  orderBtnText: { color: COLORS.white, fontWeight: '700', fontSize: 14 },
+  note: { fontSize: 11.5, color: COLORS.gray400, marginTop: 10, lineHeight: 16 },
+  tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+  tagText: { fontSize: 10.5, fontWeight: '700' },
 });

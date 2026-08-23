@@ -1,128 +1,113 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import api from '../services/api';
 import { COLORS, SHADOWS } from '../utils/constants';
 
-const DISEASES = {
-  maize: { name: 'Fall Armyworm', conf: 92, severity: 'Moderate', treatment: 'Apply neem-based pesticide (5ml/L) or Emamectin benzoate. Scout weekly. Remove affected plants.', recovery: '85%', prevention: 'Early planting. Regular scouting. Pheromone traps. Maintain field hygiene.' },
-  coffee: { name: 'Coffee Leaf Rust', conf: 88, severity: 'High', treatment: 'Apply copper-based fungicide. Remove affected branches. Improve air circulation.', recovery: '72%', prevention: 'Plant resistant varieties. Proper spacing. Shade management.' },
-  cocoa: { name: 'Black Pod Disease', conf: 85, severity: 'Moderate', treatment: 'Remove infected pods. Apply Ridomil Gold. Improve drainage.', recovery: '90%', prevention: 'Regular harvesting. Shade management.' },
-  beans: { name: 'Bean Rust', conf: 78, severity: 'Moderate', treatment: 'Apply Mancozeb fungicide. Remove affected leaves.', recovery: '85%', prevention: 'Resistant varieties. Crop rotation.' },
-  groundnuts: { name: 'Early Leaf Spot', conf: 82, severity: 'Moderate', treatment: 'Apply fungicide. Remove debris. Rotate crops.', recovery: '85%', prevention: '2-3 year rotation. Resistant varieties.' },
-  cassava: { name: 'Cassava Mosaic', conf: 90, severity: 'High', treatment: 'Remove infected plants. Control whiteflies.', recovery: '70%', prevention: 'Resistant varieties. Clean planting material.' },
-  banana: { name: 'Banana Wilt (BXW)', conf: 88, severity: 'High', treatment: 'Destroy infected plants. Sterilize tools.', recovery: '60%', prevention: 'Disease-free planting material.' },
-  rice: { name: 'Rice Blast', conf: 80, severity: 'Moderate', treatment: 'Apply Tricyclazole. Reduce nitrogen.', recovery: '80%', prevention: 'Resistant varieties. Balanced fertilization.' },
-};
+// Scans a passport QR code (or types a batch number) and opens the
+// verification screen. QR codes contain e.g. https://<host>/passport/AGR-XXXX
+export default function ScannerScreen({ navigation }) {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+  const [manual, setManual] = useState('');
 
-const CROPS = [
-  { key: 'maize', name: 'Maize', emoji: '🌽' },
-  { key: 'coffee', name: 'Coffee', emoji: '☕' },
-  { key: 'cocoa', name: 'Cocoa', emoji: '🌰' },
-  { key: 'beans', name: 'Beans', emoji: '🌱' },
-  { key: 'groundnuts', name: 'Groundnuts', emoji: '🥜' },
-  { key: 'cassava', name: 'Cassava', emoji: '🌿' },
-  { key: 'banana', name: 'Banana', emoji: '🍌' },
-  { key: 'rice', name: 'Rice', emoji: '🌾' },
-];
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPermission(status === 'granted');
+      } catch (e) {
+        setHasPermission(false);
+      }
+    })();
+  }, []);
 
-export default function ScannerScreen() {
-  const [selectedCrop, setSelectedCrop] = useState(null);
-  const [result, setResult] = useState(null);
-  const [analyzing, setAnalyzing] = useState(false);
+  const handleScan = ({ data }) => {
+    if (scanned) return;
+    setScanned(true);
+    let batch = data.trim();
+    const match = batch.match(/([A-Z]+(?:-\d{4})?-[A-Z0-9-]+)/i) || batch.match(/(AGR-[A-Za-z0-9-]+)/);
+    if (match) batch = match[1].toUpperCase();
+    navigation.navigate('Passport', { batchNumber: batch });
+    setTimeout(() => setScanned(false), 1200);
+  };
 
-  const analyze = (cropKey) => {
-    setSelectedCrop(cropKey);
-    setAnalyzing(true);
-    setResult(null);
-    setTimeout(() => {
-      setResult(DISEASES[cropKey]);
-      setAnalyzing(false);
-    }, 2000);
+  const openManual = () => {
+    const b = manual.trim().toUpperCase();
+    if (!b) return;
+    navigation.navigate('Passport', { batchNumber: b });
+    setManual('');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Crop Disease Scanner</Text>
-          <Text style={styles.subtitle}>Select your crop for AI-powered disease analysis</Text>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.title}>Scan Passport</Text>
+        <Text style={styles.subtitle}>Point the camera at a batch QR code, or type the batch number below.</Text>
+      </View>
 
-        <TouchableOpacity style={styles.cameraBox} onPress={() => Alert.alert('Camera', 'Camera access requires Expo Camera module. In production, tap to take a photo of your crop.')}>
-          <Ionicons name="camera" size={48} color={COLORS.green} />
-          <Text style={styles.cameraText}>Tap to take a photo</Text>
-          <Text style={styles.cameraSub}>Photograph affected leaves, stems, or fruit</Text>
+      {hasPermission === null ? (
+        <ActivityIndicator size="large" color={COLORS.green} style={{ marginTop: 40 }} />
+      ) : hasPermission ? (
+        <View style={styles.scannerWrap}>
+          <BarCodeScanner
+            onBarCodeScanned={handleScan}
+            barCodeTypes={[BarCodeScanner.Constants.BarCodeTypes.qr]}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={styles.frame}>
+            <View style={[styles.corner, styles.tl]} /><View style={[styles.corner, styles.tr]} />
+            <View style={[styles.corner, styles.bl]} /><View style={[styles.corner, styles.br]} />
+          </View>
+          {scanned ? <View style={styles.scanBadge}><Text style={styles.scanBadgeText}>Batch recognised — opening…</Text></View> : null}
+        </View>
+      ) : (
+        <View style={styles.noCam}>
+          <Ionicons name="camera-off-outline" size={30} color={COLORS.gray300} />
+          <Text style={styles.noCamTitle}>Camera unavailable</Text>
+          <Text style={styles.noCamText}>Allow camera access or type the batch number below instead.</Text>
+        </View>
+      )}
+
+      <View style={styles.manualRow}>
+        <TextInput
+          style={styles.manualInput}
+          placeholder="Batch number e.g. AGR-DEMO-001"
+          value={manual}
+          onChangeText={setManual}
+          autoCapitalize="characters"
+          onSubmitEditing={openManual}
+          returnKeyType="go"
+          placeholderTextColor={COLORS.gray300}
+        />
+        <TouchableOpacity style={styles.manualBtn} onPress={openManual}>
+          <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
         </TouchableOpacity>
-
-        <Text style={styles.sectionTitle}>Select Your Crop</Text>
-        <View style={styles.cropGrid}>
-          {CROPS.map(crop => (
-            <TouchableOpacity key={crop.key} style={[styles.cropCard, selectedCrop === crop.key && styles.cropCardActive]} onPress={() => analyze(crop.key)} activeOpacity={0.7}>
-              <Text style={styles.cropEmoji}>{crop.emoji}</Text>
-              <Text style={[styles.cropName, selectedCrop === crop.key && styles.cropNameActive]}>{crop.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {analyzing && (
-          <View style={styles.analyzingBox}>
-            <Text style={styles.analyzingText}>🔍 Analyzing crop for diseases...</Text>
-            <Text style={styles.analyzingSub}>AI is processing your photo</Text>
-          </View>
-        )}
-
-        {result && !analyzing && (
-          <View style={styles.resultCard}>
-            <View style={styles.confBadge}>
-              <Text style={styles.confText}>🔍 High Confidence ({result.conf}%)</Text>
-            </View>
-            <Text style={styles.resultTitle}>📸 Disease Analysis — {selectedCrop.charAt(0).toUpperCase() + selectedCrop.slice(1)}</Text>
-            <View style={styles.resultRow}><Text style={styles.resultLabel}>🦠 Detected:</Text><Text style={styles.resultValue}>{result.name}</Text></View>
-            <View style={styles.resultRow}><Text style={styles.resultLabel}>⚠️ Severity:</Text><Text style={[styles.resultValue, result.severity === 'High' ? { color: COLORS.red } : { color: COLORS.goldDark }]}>{result.severity}</Text></View>
-            <View style={styles.resultSection}><Text style={styles.resultSectionTitle}>💊 Treatment</Text><Text style={styles.resultSectionText}>{result.treatment}</Text></View>
-            <View style={styles.resultSection}><Text style={styles.resultSectionTitle}>🛡️ Prevention</Text><Text style={styles.resultSectionText}>{result.prevention}</Text></View>
-            <View style={styles.resultRow}><Text style={styles.resultLabel}>📊 Recovery:</Text><Text style={[styles.resultValue, { color: COLORS.green }]}>{result.recovery} with treatment</Text></View>
-            <View style={styles.disclaimer}><Ionicons name="information-circle" size={14} color={COLORS.gray500} /><Text style={styles.disclaimerText}>AI guidance only. For serious outbreaks, consult a qualified agronomist.</Text></View>
-            <TouchableOpacity style={styles.expertBtn} onPress={() => Alert.alert('Expert', 'Your request has been submitted. A verified agronomist will connect with you shortly.')}><Ionicons name="person" size={18} color={COLORS.goldDark} /><Text style={styles.expertBtnText}>Talk to an Expert</Text></TouchableOpacity>
-          </View>
-        )}
-        <View style={{ height: 40 }} />
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.cream },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  title: { fontSize: 26, fontWeight: '800', color: COLORS.charcoal },
-  subtitle: { fontSize: 14, color: COLORS.gray500, marginTop: 4 },
-  cameraBox: { margin: 20, padding: 40, backgroundColor: COLORS.white, borderRadius: 24, borderWidth: 2, borderStyle: 'dashed', borderColor: COLORS.gray200, alignItems: 'center', ...SHADOWS.sm },
-  cameraText: { fontSize: 16, fontWeight: '700', color: COLORS.charcoal, marginTop: 12 },
-  cameraSub: { fontSize: 13, color: COLORS.gray500, marginTop: 4 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: COLORS.charcoal, paddingHorizontal: 20, marginBottom: 14 },
-  cropGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 10 },
-  cropCard: { width: '22%', aspectRatio: 1, backgroundColor: COLORS.white, borderRadius: 16, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: COLORS.gray200, ...SHADOWS.sm },
-  cropCardActive: { borderColor: COLORS.green, backgroundColor: COLORS.greenPale },
-  cropEmoji: { fontSize: 28 },
-  cropName: { fontSize: 11, fontWeight: '600', color: COLORS.gray500, marginTop: 4 },
-  cropNameActive: { color: COLORS.green },
-  analyzingBox: { margin: 20, padding: 24, backgroundColor: COLORS.white, borderRadius: 20, alignItems: 'center', ...SHADOWS.sm },
-  analyzingText: { fontSize: 16, fontWeight: '600', color: COLORS.charcoal },
-  analyzingSub: { fontSize: 13, color: COLORS.gray500, marginTop: 4 },
-  resultCard: { margin: 20, padding: 24, backgroundColor: COLORS.white, borderRadius: 24, ...SHADOWS.md },
-  confBadge: { backgroundColor: COLORS.greenPale, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 50, alignSelf: 'flex-start', marginBottom: 12 },
-  confText: { fontSize: 12, fontWeight: '700', color: COLORS.green },
-  resultTitle: { fontSize: 18, fontWeight: '800', color: COLORS.charcoal, marginBottom: 16 },
-  resultRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: COLORS.gray100 },
-  resultLabel: { fontSize: 14, color: COLORS.gray500 },
-  resultValue: { fontSize: 14, fontWeight: '700', color: COLORS.charcoal },
-  resultSection: { marginTop: 16 },
-  resultSectionTitle: { fontSize: 14, fontWeight: '700', color: COLORS.charcoal, marginBottom: 6 },
-  resultSectionText: { fontSize: 14, color: COLORS.gray500, lineHeight: 22 },
-  disclaimer: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 16, padding: 12, backgroundColor: COLORS.gray50, borderRadius: 12 },
-  disclaimerText: { fontSize: 12, color: COLORS.gray500, flex: 1 },
-  expertBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16, padding: 14, backgroundColor: COLORS.goldLight, borderRadius: 14 },
-  expertBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.goldDark },
+  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 10 },
+  title: { fontSize: 21, fontWeight: '800', color: COLORS.charcoal },
+  subtitle: { fontSize: 12.5, color: COLORS.gray500, marginTop: 2 },
+  scannerWrap: { flex: 1, marginHorizontal: 16, borderRadius: 18, overflow: 'hidden', marginBottom: 12 },
+  frame: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  corner: { position: 'absolute', width: 34, height: 34, borderColor: COLORS.gold, borderWidth: 4 },
+  tl: { top: '32%', left: '18%', borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 10 },
+  tr: { top: '32%', right: '18%', borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 10 },
+  bl: { bottom: '32%', left: '18%', borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 10 },
+  br: { bottom: '32%', right: '18%', borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 10 },
+  scanBadge: { position: 'absolute', bottom: 20, alignSelf: 'center', backgroundColor: COLORS.green, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 9 },
+  scanBadgeText: { color: COLORS.white, fontSize: 12.5, fontWeight: '700' },
+  noCam: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 30 },
+  noCamTitle: { fontSize: 15.5, fontWeight: '700', color: COLORS.charcoal, marginTop: 10 },
+  noCamText: { fontSize: 12.5, color: COLORS.gray500, marginTop: 4, textAlign: 'center' },
+  manualRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 14 },
+  manualInput: { flex: 1, backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.gray200, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14.5, color: COLORS.charcoal },
+  manualBtn: { width: 50, borderRadius: 14, backgroundColor: COLORS.green, justifyContent: 'center', alignItems: 'center' },
 });

@@ -1,196 +1,199 @@
-<!-- AGRICHAIN 360™ — AI Agricultural Advisor -->
-<style> .ai-page { max-width:1200px; margin:0 auto; padding:24px 20px 60px; }
+<!-- AGRICHAIN Decision Advisor — local rules engine, real data -->
+<div class="ai-page" style="display:grid;grid-template-columns:1fr;gap:20px" id="aiPageRoot">
 
-  /* Header */
-  .ai-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
-  .ai-header-left { display:flex; align-items:center; gap:16px; }
-  .ai-logo { width:56px; height:56px; border-radius:18px; background:linear-gradient(135deg,#1B5E20,#2E7D32); display:flex; align-items:center; justify-content:center; color:white; font-size:1.5rem; box-shadow:0 4px 16px rgba(27,94,32,.25); }
-  .ai-header-text h2 { font-family:'Playfair Display',Georgia,serif; font-size:1.5rem; font-weight:800; color:#333; margin:0; line-height:1.2; }
-  .ai-header-text p { font-size:.8rem; color:#888; margin-top:3px; display:flex; align-items:center; gap:6px; }
-  .ai-header-text .live-dot { width:7px; height:7px; background:#4CAF50; border-radius:50%; display:inline-block; animation:livePulse 2s infinite; }
-  @keyframes livePulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(76,175,80,.4)} 50%{opacity:.7;box-shadow:0 0 0 6px rgba(76,175,80,0)} }
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="font-weight:800;margin-bottom:4px">Decision Advisor</h2>
+      <div style="color:var(--tx2);font-size:.9rem">
+        Answers generated from your stored platform records — listings, quality passports, partner and fee data
+      </div>
+    </div>
+    <span class="tag tag-g"><i class="fas fa-circuit-board" style="margin-right:4px"></i> Local decision engine — no external AI service</span>
+  </div>
 
-  .ai-controls { display:flex; align-items:center; gap:10px; }
-  .ai-lang-select { padding:8px 14px; border:1px solid #e0e0e0; border-radius:10px; font-size:.82rem; background:white; color:#333; cursor:pointer; outline:none; font-family:inherit; }
-  .ai-lang-select:focus { border-color:#1B5E20; box-shadow:0 0 0 3px rgba(27,94,32,.1); }
-  .ai-ctrl-btn { width:40px; height:40px; border-radius:12px; border:1px solid #e0e0e0; background:white; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; color:#888; font-size:.9rem; }
-  .ai-ctrl-btn:hover { border-color:#1B5E20; color:#1B5E20; background:rgba(27,94,32,.04); }
-  .ai-ctrl-btn.active { background:#1B5E20; color:white; border-color:#1B5E20; }
+  <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:20px;align-items:start">
+    <!-- Chat -->
+    <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;height:560px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--bd)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:11px;background:var(--g);display:flex;align-items:center;justify-content:center;color:#fff">
+            <i class="fas fa-compass-drafting"></i>
+          </div>
+          <div>
+            <div style="font-weight:800;font-size:.92rem">Conversation</div>
+            <div style="font-size:.72rem;color:var(--tx2)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g);margin-right:5px"></span>Online</div>
+          </div>
+        </div>
+        <button class="btn btn-o btn-sm" onclick="clearChat()"><i class="fas fa-redo"></i> New conversation</button>
+      </div>
 
-  /* Layout */
-  .ai-layout { display:grid; grid-template-columns:1fr 320px; gap:28px; }
-  @media(max-width:960px) { .ai-layout { grid-template-columns:1fr; } .ai-sidebar { order:-1; } }
+      <div id="aiChat" style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--bg)">
+        <div class="ai-msg" style="display:flex;gap:10px">
+          <div style="width:30px;height:30px;border-radius:10px;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem"><i class="fas fa-compass-drafting"></i></div>
+          <div style="max-width:85%;background:var(--card);border:1px solid var(--bd);border-radius:4px 14px 14px 14px;padding:12px 15px;font-size:.87rem;line-height:1.55;box-shadow:var(--sh)">
+            <strong>Hello<%= data.user ? ', ' + data.user.name.split(' ')[0] : '' %>.</strong> I am the AGRICHAIN Decision Advisor.
+            I answer from stored platform records<%= data.user ? '' : ' — log in as a farmer for advice based on your own batches' %>.
+            Try asking: <em>Can I list this coffee for sale?</em>
+          </div>
+        </div>
+      </div>
 
-  /* Chat Card */
-  .ai-chat-wrap { background:white; border-radius:24px; border:1px solid #e8e8e8; box-shadow:0 2px 20px rgba(0,0,0,.04); overflow:hidden; display:flex; flex-direction:column; }
+      <div style="padding:12px 16px;border-top:1px solid var(--bd);background:var(--card)">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px" id="aiSuggestRow">
+          <button class="btn btn-o btn-sm" onclick="ask('Can I list this coffee for sale?')">Listing readiness</button>
+          <button class="btn btn-o btn-sm" onclick="ask('What are current market prices?')">Market prices</button>
+          <button class="btn btn-o btn-sm" onclick="ask('How much does solar drying cost?')">Drying costs</button>
+          <button class="btn btn-o btn-sm" onclick="ask('Explain quality grades')">Quality grades</button>
+          <button class="btn btn-o btn-sm" onclick="ask('Any disease risk in my area?')">Disease risk</button>
+        </div>
+        <div style="display:flex;gap:10px">
+          <input type="text" id="aiInput" class="ai-text-input" placeholder="Ask about your batches, prices, quality, drying…" autocomplete="off"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();ask();}">
+          <button class="btn btn-p" id="aiSendBtn" onclick="ask()" style="flex-shrink:0"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+        <div id="aiError" style="display:none;color:#c62828;font-size:.78rem;margin-top:8px"></div>
+      </div>
+    </div>
 
-  /* Chat Top Bar */
-  .ai-topbar { padding:14px 20px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; background:#FAFAF5; }
-  .ai-topbar-left { display:flex; align-items:center; gap:8px; font-weight:600; font-size:.85rem; color:#333; }
-  .ai-topbar-left i { color:#1B5E20; }
-  .ai-topbar-btns { display:flex; gap:4px; }
-  .ai-topbar-btn { width:30px; height:30px; border-radius:8px; border:1px solid #e8e8e8; background:white; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.72rem; color:#999; transition:all .2s; }
-  .ai-topbar-btn:hover { border-color:#1B5E20; color:#1B5E20; }
+    <!-- Side info -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="card">
+        <h3 style="font-weight:800;font-size:.95rem;margin-bottom:10px"><i class="fas fa-circle-info" style="color:var(--g)"></i> How it works</h3>
+        <div style="font-size:.8rem;color:var(--tx2);line-height:1.6">
+          The advisor applies documented agricultural rules to your own records:
+          <ul style="margin:8px 0 8px 18px;padding:0">
+            <li>Batch moisture targets per crop</li>
+            <li>Aflatoxin safety thresholds</li>
+            <li>Quality grading (A/B/C/rejected)</li>
+            <li>Marketplace readiness checks</li>
+            <li>Pilot fee schedule (drying, testing, commission)</li>
+          </ul>
+          Every recommendation cites the record it came from. It does not call any external AI provider.
+        </div>
+      </div>
 
-  /* Chat Body */
-  .ai-chat-body { flex:1; padding:24px; overflow-y:auto; min-height:440px; max-height:560px; background:#FAFAF5; }
-  .ai-msg { display:flex; gap:12px; margin-bottom:20px; animation:msgSlide .4s ease; }
-  @keyframes msgSlide { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .ai-msg.user { flex-direction:row-reverse; }
-  .ai-avatar { width:34px; height:34px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
-  .ai-avatar.bot { background:linear-gradient(135deg,#E8F5E9,#C8E6C9); color:#1B5E20; }
-  .ai-avatar.user { background:linear-gradient(135deg,#1B5E20,#2E7D32); color:white; }
-  .ai-bubble { padding:16px 20px; border-radius:18px; max-width:85%; font-size:.88rem; line-height:1.65; }
-  .ai-bubble.bot { background:white; border:1px solid #e8e8e8; border-bottom-left-radius:4px; box-shadow:0 1px 4px rgba(0,0,0,.03); }
-  .ai-bubble.user { background:linear-gradient(135deg,#1B5E20,#2E7D32); color:white; border-bottom-right-radius:4px; }
-  .ai-bubble strong { font-weight:700; }
-  .ai-bubble a { color:#1B5E20; font-weight:600; text-decoration:underline; text-underline-offset:3px; }
-  .ai-bubble.bot a { color:#1B5E20; }
-  .ai-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:50px; font-size:.65rem; font-weight:700; margin-bottom:8px; letter-spacing:.02em; }
-  .ai-badge.ai-tag { background:#E8F5E9; color:#1B5E20; }
-  .ai-badge.expert-tag { background:#FFF8E1; color:#8B6914; }
+      <div class="card">
+        <h3 style="font-weight:800;font-size:.95rem;margin-bottom:10px"><i class="fas fa-certificate" style="color:var(--g)"></i> Grading standard</h3>
+        <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+          <tr><td style="padding:6px 0;color:var(--tx2)">Grade A</td><td style="text-align:right;font-weight:700">≤ 13% & ≤ 5 ppb</td></tr>
+          <tr><td style="padding:6px 0;color:var(--tx2)">Grade B</td><td style="text-align:right;font-weight:700">≤ 14% & ≤ 10 ppb</td></tr>
+          <tr><td style="padding:6px 0;color:var(--tx2)">Grade C</td><td style="text-align:right;font-weight:700">≤ 15% & ≤ 20 ppb</td></tr>
+          <tr><td style="padding:6px 0;color:var(--tx2)">Beyond limits</td><td style="text-align:right;font-weight:700;color:#c62828">Rejected</td></tr>
+        </table>
+        <a href="/verify" class="btn btn-o btn-sm" style="width:100%;justify-content:center;margin-top:12px"><i class="fas fa-shield-halved"></i> Verify a passport</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-  /* Feature Cards (Welcome) */
-  .ai-features { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
-  .ai-feat { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:14px; border:1px solid #eee; background:white; cursor:pointer; transition:all .25s; font-size:.82rem; color:#555; }
-  .ai-feat:hover { border-color:#1B5E20; background:#F1F8E9; color:#1B5E20; transform:translateY(-2px); box-shadow:0 4px 12px rgba(27,94,32,.08); }
-  .ai-feat-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
-  .ai-feat-ico.green { background:#E8F5E9; }
-  .ai-feat-ico.gold { background:#FFF8E1; }
-  .ai-feat-ico.blue { background:#E3F2FD; }
-  .ai-feat-ico.purple { background:#F3E5F5; }
-  .ai-feat-text { font-weight:600; font-size:.8rem; line-height:1.3; }
-  .ai-feat-sub { font-weight:400; font-size:.7rem; color:#999; margin-top:1px; }
-  @media(max-width:600px) { .ai-features { grid-template-columns:1fr; } }
+<style>
+  .ai-text-input{flex:1;padding:12px 16px;border:1px solid var(--bd);border-radius:14px;font-size:.9rem;background:var(--bg);color:var(--tx);outline:none}
+  .ai-text-input:focus{border-color:var(--g)}
+  .ai-msg-user{display:flex;gap:10px;justify-content:flex-end}
+  .ai-msg-user .bubble{background:var(--g);color:#fff;border-radius:14px 4px 14px 14px;padding:12px 15px;font-size:.87rem;max-width:85%;font-weight:600}
+  .ai-msg-bot{display:flex;gap:10px}
+  .ai-msg-bot .bubble{background:var(--card);border:1px solid var(--bd);border-radius:4px 14px 14px 14px;padding:12px 15px;font-size:.87rem;line-height:1.55;max-width:85%;box-shadow:var(--sh)}
+  .ai-msg-bot .bubble a{color:var(--g);font-weight:700}
+  .typing span{display:inline-block;width:7px;height:7px;margin-right:4px;border-radius:50%;background:var(--tx2);animation:aiBlink 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.2s}
+  .typing span:nth-child(3){animation-delay:.4s}
+  @keyframes aiBlink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+  @media(max-width:900px){
+    #aiPageRoot > div:nth-child(2){grid-template-columns:1fr}
+    #aiPageRoot .card[style*="560px"]{height:460px}
+  }
+</style>
 
-  /* Action buttons inside messages */
-  .ai-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
-  .ai-act { padding:6px 14px; border-radius:50px; border:1px solid #e0e0e0; background:white; font-size:.73rem; font-weight:600; cursor:pointer; transition:all .2s; color:#666; display:inline-flex; align-items:center; gap:5px; }
-  .ai-act:hover { border-color:#1B5E20; color:#1B5E20; background:#F1F8E9; }
-  .ai-act.gold { border-color:rgba(212,175,55,.4); color:#8B6914; }
-  .ai-act.gold:hover { background:#FFF8E1; }
+<script>
+var aiBusy = false;
 
-  /* Typing */
-  .ai-typing { display:flex; gap:5px; padding:16px 20px; }
-  .ai-typing span { width:8px; height:8px; background:#ccc; border-radius:50%; animation:dot 1.4s infinite; }
-  .ai-typing span:nth-child(2) { animation-delay:.2s; }
-  .ai-typing span:nth-child(3) { animation-delay:.4s; }
-  @keyframes dot { 0%,100%{opacity:.3;transform:translateY(0)} 50%{opacity:1;transform:translateY(-5px)} }
+function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
 
-  /* Input Area */
-  .ai-input-wrap { padding:16px 20px; border-top:1px solid #f0f0f0; background:white; }
-  .ai-input-row { display:flex; gap:10px; align-items:center; }
-  .ai-input { flex:1; padding:14px 20px; border:2px solid #e8e8e8; border-radius:16px; font-size:.9rem; outline:none; transition:all .2s; font-family:inherit; background:#FAFAF5; }
-  .ai-input:focus { border-color:#1B5E20; background:white; box-shadow:0 0 0 3px rgba(27,94,32,.08); }
-  .ai-input::placeholder { color:#bbb; }
-  .ai-send { width:48px; height:48px; border-radius:16px; border:none; background:linear-gradient(135deg,#1B5E20,#2E7D32); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; font-size:1.1rem; flex-shrink:0; box-shadow:0 4px 12px rgba(27,94,32,.2); }
-  .ai-send:hover { transform:scale(1.05); box-shadow:0 6px 20px rgba(27,94,32,.3); }
-  .ai-send:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+function scrollChat(){var c=document.getElementById('aiChat');if(c)c.scrollTop=c.scrollHeight}
 
-  .ai-tools { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
-  .ai-tool { padding:6px 14px; border-radius:50px; border:1px solid #e8e8e8; background:#FAFAF5; font-size:.72rem; font-weight:600; cursor:pointer; transition:all .2s; color:#777; display:inline-flex; align-items:center; gap:5px; }
-  .ai-tool:hover { border-color:#1B5E20; color:#1B5E20; background:#F1F8E9; }
-  .ai-tool.cam { border-color:rgba(212,175,55,.3); color:#8B6914; }
-  .ai-tool.cam:hover { background:#FFF8E1; }
+function addBot(html){
+  var c=document.getElementById('aiChat');
+  var m=document.createElement('div');
+  m.className='ai-msg-bot';
+  m.innerHTML='<div style="width:30px;height:30px;border-radius:10px;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem"><i class="fas fa-compass-drafting"></i></div>'+
+              '<div class="bubble">'+html+'</div>';
+  c.appendChild(m);scrollChat();
+}
 
-  /* Quick Questions */
-  .ai-quick-wrap { padding:14px 20px; border-top:1px solid #f0f0f0; background:#FAFAF5; }
-  .ai-quick-label { font-size:.68rem; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px; }
-  .ai-quick-btns { display:flex; flex-wrap:wrap; gap:6px; }
-  .ai-qbtn { padding:7px 16px; border-radius:50px; border:1px solid #e0e0e0; background:white; font-size:.75rem; font-weight:500; cursor:pointer; transition:all .2s; color:#666; }
-  .ai-qbtn:hover { border-color:#1B5E20; color:#1B5E20; background:#F1F8E9; transform:translateY(-1px); }
+function addUser(text){
+  var c=document.getElementById('aiChat');
+  var m=document.createElement('div');
+  m.className='ai-msg-user';
+  m.innerHTML='<div class="bubble">'+esc(text)+'</div>';
+  c.appendChild(m);scrollChat();
+}
 
-  /* Disclaimer */
-  .ai-footer-note { font-size:.7rem; color:#aaa; padding:10px 20px; border-top:1px solid #f0f0f0; text-align:center; line-height:1.5; background:white; }
-  .ai-footer-note a { color:#1B5E20; font-weight:600; }
+function showTyping(){
+  var c=document.getElementById('aiChat');
+  var m=document.createElement('div');
+  m.className='ai-msg-bot';m.id='aiTyping';
+  m.innerHTML='<div style="width:30px;height:30px;border-radius:10px;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem"><i class="fas fa-compass-drafting"></i></div>'+
+              '<div class="bubble typing"><span></span><span></span><span></span></div>';
+  c.appendChild(m);scrollChat();
+}
+function hideTyping(){var t=document.getElementById('aiTyping');if(t)t.remove()}
 
-  /* ═══ SIDEBAR ═══ */
-  .ai-sidebar { display:flex; flex-direction:column; gap:20px; }
-  .ai-card { background:white; border-radius:20px; border:1px solid #e8e8e8; padding:22px; box-shadow:0 2px 12px rgba(0,0,0,.03); }
-  .ai-card-head { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #f0f0f0; }
-  .ai-card-head-ico { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.85rem; }
-  .ai-card-head-ico.green { background:#E8F5E9; color:#1B5E20; }
-  .ai-card-head-ico.gold { background:#FFF8E1; color:#8B6914; }
-  .ai-card-head-ico.blue { background:#E3F2FD; color:#1565C0; }
-  .ai-card-title { font-weight:700; font-size:.88rem; color:#333; }
-  .ai-card-sub { font-size:.7rem; color:#999; }
+function showError(msg){
+  var e=document.getElementById('aiError');
+  if(!msg){e.style.display='none';e.textContent='';return}
+  e.style.display='block';e.textContent=msg;
+}
 
-  /* Context rows */
-  .ctx-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid #f5f5f5; font-size:.82rem; }
-  .ctx-row:last-child { border:none; }
-  .ctx-label { color:#999; font-size:.78rem; }
-  .ctx-val { font-weight:600; color:#333; font-size:.82rem; }
-  .ctx-edit { margin-top:14px; }
-  .ctx-edit-btn { width:100%; padding:10px; border-radius:12px; border:1px solid #e0e0e0; background:#FAFAF5; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .2s; color:#777; display:flex; align-items:center; justify-content:center; gap:6px; }
-  .ctx-edit-btn:hover { border-color:#1B5E20; color:#1B5E20; background:#F1F8E9; }
+function ask(preset){
+  var input=document.getElementById('aiInput');
+  var q=(preset||input.value||'').trim();
+  if(!q){input&&input.focus();return}
+  if(aiBusy)return;
+  showError('');
+  addUser(q);
+  if(input)input.value='';
+  aiBusy=true;
+  var btn=document.getElementById('aiSendBtn');
+  if(btn){btn.disabled=true;btn.style.opacity=.6}
+  showTyping();
 
-  /* Expert buttons */
-  .exp-btns { display:flex; flex-direction:column; gap:8px; }
-  .exp-btn { display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:14px; border:1px solid #eee; background:#FAFAF5; cursor:pointer; transition:all .2s; font-size:.82rem; color:#444; text-align:left; font-family:inherit; }
-  .exp-btn:hover { border-color:#1B5E20; background:#F1F8E9; color:#1B5E20; transform:translateX(4px); }
-  .exp-btn i { width:20px; text-align:center; font-size:.85rem; }
-  .exp-btn i.green { color:#1B5E20; }
-  .exp-btn i.gold { color:#D4AF37; }
-  .exp-note { margin-top:14px; padding:12px; background:linear-gradient(135deg,#FFF8E1,#FFFDE7); border-radius:12px; font-size:.72rem; color:#8B6914; display:flex; align-items:center; gap:8px; line-height:1.4; }
-  .exp-note i { color:#D4AF37; }
+  fetch('/api/v1/ai/ask',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    credentials:'same-origin',
+    body:JSON.stringify({question:q})
+  })
+  .then(function(r){if(!r.ok)throw new Error('Server error ('+r.status+')');return r.json()})
+  .then(function(d){
+    hideTyping();
+    if(d&&d.success&&d.data&&d.data.answer){
+      addBot(d.data.answer);
+    }else{
+      addBot('I could not process that question. Please rephrase it — for example: <em>Can I list this maize for sale?</em>');
+    }
+  })
+  .catch(function(err){
+    hideTyping();
+    addBot('The advisor service is temporarily unavailable. Please check your connection and try again in a moment.');
+    showError(err.message||'Network error');
+  })
+  .finally(function(){
+    aiBusy=false;
+    if(btn){btn.disabled=false;btn.style.opacity=1}
+    if(input)input.focus();
+  });
+}
 
-  /* Community items */
-  .com-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f5f5f5; cursor:pointer; transition:all .2s; }
-  .com-item:last-child { border:none; }
-  .com-item:hover { padding-left:6px; }
-  .com-ico { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
-  .com-ico.green { background:#E8F5E9; color:#1B5E20; }
-  .com-ico.gold { background:#FFF8E1; color:#8B6914; }
-  .com-ico.blue { background:#E3F2FD; color:#1565C0; }
-  .com-name { font-weight:600; font-size:.82rem; color:#333; }
-  .com-meta { font-size:.68rem; color:#aaa; margin-top:1px; }
-
-  /* Confidence */
-  .ai-conf { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:50px; font-size:.65rem; font-weight:700; margin-top:8px; }
-  .ai-conf.high { background:#E8F5E9; color:#1B5E20; }
-  .ai-conf.medium { background:#FFF8E1; color:#8B6914; }
-  .ai-conf.low { background:#FFEBEE; color:#c62828; }
-
-  /* Photo modal */
-  .ai-photo-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
-  .ai-photo-modal.show { display:flex; }
-  .ai-photo-box { background:white; border-radius:24px; padding:32px; max-width:500px; width:92%; box-shadow:0 24px 60px rgba(0,0,0,.2); }
-  .ai-drop { border:2px dashed #ddd; border-radius:20px; padding:44px; text-align:center; cursor:pointer; transition:all .25s; }
-  .ai-drop:hover,.ai-drop.dragover { border-color:#1B5E20; background:#F1F8E9; }
-</style> <div class="ai-page"> <!-- Header --> <div class="ai-header"> <div class="ai-header-left"> <div class="ai-logo"><i class="fas fa-seedling"></i></div> <div class="ai-header-text"> <h2>AgriIntel AI</h2> <p><span class="live-dot"></span> Online — Your 24/7 farming companion</p> </div> </div> <div class="ai-controls"> <select class="ai-lang-select" id="aiLangSelect" onchange="switchLanguage(this.value)"> <option value="en"> English</option> <option value="lg"> Luganda</option> <option value="so"> Lusoga</option> <option value="rn"> Runyankole</option> <option value="ac"> Acholi</option> <option value="sw"> Swahili</option> </select> <button class="ai-ctrl-btn" id="voiceInputBtn" onclick="toggleVoiceInput()" title="Voice input"><i class="fas fa-microphone"></i></button> <button class="ai-ctrl-btn" id="voiceOutputBtn" onclick="toggleVoiceOutput()" title="Read aloud"><i class="fas fa-volume-up"></i></button> </div> </div> <div class="ai-layout"> <!-- ═══ CHAT AREA ═══ --> <div class="ai-chat-wrap"> <div class="ai-topbar"> <div class="ai-topbar-left"><i class="fas fa-comment-dots"></i> Conversation</div> <div class="ai-topbar-btns"> <button class="ai-topbar-btn" onclick="clearChat()" title="New conversation"><i class="fas fa-redo"></i></button> <button class="ai-topbar-btn" onclick="exportChat()" title="Export"><i class="fas fa-download"></i></button> </div> </div> <div class="ai-chat-body" id="aiChat"> <!-- Welcome --> <div class="ai-msg"> <div class="ai-avatar bot"><i class="fas fa-seedling"></i></div> <div style="max-width:85%"> <div class="ai-badge ai-tag"> AI-Generated Advice</div> <div class="ai-bubble bot"> <strong>Hello! I'm AgriIntel AI</strong> — your personal agricultural advisor.<br><br> I'm here to help you make better farming decisions. Tap any topic below to get started, or type your own question.
-            </div> <!-- Feature Cards --> <div class="ai-features"> <div class="ai-feat" onclick="askAI('What should I plant this season?')"> <div class="ai-feat-ico green"></div> <div><div class="ai-feat-text">What to Plant</div><div class="ai-feat-sub">Seasonal recommendations</div></div> </div> <div class="ai-feat" onclick="askAI('What are current market prices?')"> <div class="ai-feat-ico gold"></div> <div><div class="ai-feat-text">Market Prices</div><div class="ai-feat-sub">Current prices for your crops</div></div> </div> <div class="ai-feat" onclick="openPhotoUpload()"> <div class="ai-feat-ico blue"></div> <div><div class="ai-feat-text">Scan Disease</div><div class="ai-feat-sub">Upload a photo for analysis</div></div> </div> <div class="ai-feat" onclick="askAI('How much does solar drying cost?')"> <div class="ai-feat-ico purple">☀️</div> <div><div class="ai-feat-text">Drying & Storage</div><div class="ai-feat-sub">Costs and best practices</div></div> </div> </div> </div> </div> </div> <!-- Input --> <div class="ai-input-wrap"> <div class="ai-input-row"> <input type="text" class="ai-input" id="aiInput" placeholder="Ask about crops, markets, diseases, drying..." onkeypress="if(event.key==='Enter')askAI()"> <button class="ai-send" id="aiSendBtn" onclick="askAI()"><i class="fas fa-paper-plane"></i></button> </div> <div class="ai-tools"> <button class="ai-tool cam" onclick="openPhotoUpload()"><i class="fas fa-camera"></i> Photo</button> <button class="ai-tool" onclick="askAI('What is the weather forecast for my area?')"><i class="fas fa-cloud-sun"></i> Weather</button> <button class="ai-tool" onclick="askAI('Explain quality grades for export')"><i class="fas fa-certificate"></i> Quality</button> <button class="ai-tool" onclick="askAI('How do I list my produce on the marketplace?')"><i class="fas fa-store"></i> Sell</button> <button class="ai-tool" onclick="askAI('What financing options are available?')"><i class="fas fa-hand-holding-usd"></i> Finance</button> </div> </div> <!-- Quick Questions --> <div class="ai-quick-wrap"> <div class="ai-quick-label">Suggested Questions</div> <div class="ai-quick-btns"> <button class="ai-qbtn" onclick="askAI('When should I harvest my maize?')">Harvest timing</button> <button class="ai-qbtn" onclick="askAI('Any disease risk in my area?')"> Disease risk</button> <button class="ai-qbtn" onclick="askAI('How much does solar drying cost?')">☀️ Drying costs</button> <button class="ai-qbtn" onclick="askAI('Tell me about quality passports')"> Quality passport</button> <button class="ai-qbtn" onclick="askAI('How do I register on the platform?')"> How to register</button> <button class="ai-qbtn" onclick="askAI('What transport options are available?')"> Transport</button> </div> </div> <div class="ai-footer-note"> AI-generated advice. For critical decisions, <a href="#" onclick="requestExpert();return false">talk to an expert →</a> </div> </div> <!-- ═══ SIDEBAR ═══ --> <div class="ai-sidebar"> <!-- Farm Context --> <div class="ai-card"> <div class="ai-card-head"> <div class="ai-card-head-ico green"><i class="fas fa-map-marker-alt"></i></div> <div><div class="ai-card-title">Your Farm Context</div><div class="ai-card-sub">Personalizes AI responses</div></div> </div> <div class="ctx-row"><span class="ctx-label">Location</span><span class="ctx-val" id="ctxLocation">Mayuge District</span></div> <div class="ctx-row"><span class="ctx-label">Main Crop</span><span class="ctx-val" id="ctxCrop">Maize</span></div> <div class="ctx-row"><span class="ctx-label">Farm Size</span><span class="ctx-val" id="ctxSize">3.5 acres</span></div> <div class="ctx-row"><span class="ctx-label">Growth Stage</span><span class="ctx-val" id="ctxStage">Vegetative</span></div> <div class="ctx-row"><span class="ctx-label">Weather</span><span class="ctx-val" id="ctxWeather">28°C, Partly Cloudy</span></div> <div class="ctx-edit"><button class="ctx-edit-btn" onclick="editContext()"><i class="fas fa-edit"></i> Update Context</button></div> </div> <!-- Expert Connection --> <div class="ai-card"> <div class="ai-card-head"> <div class="ai-card-head-ico gold"><i class="fas fa-user-tie"></i></div> <div><div class="ai-card-title">Connect with Expert</div><div class="ai-card-sub">Verified human agronomists</div></div> </div> <div class="exp-btns"> <button class="exp-btn" onclick="requestExpert('agronomist')"><i class="fas fa-leaf green"></i> Request Live Agronomist</button> <button class="exp-btn" onclick="requestExpert('consultation')"><i class="fas fa-calendar-check green"></i> Book Consultation</button> <button class="exp-btn" onclick="requestExpert('photo')"><i class="fas fa-image gold"></i> Send Photo to Expert</button> <button class="exp-btn" onclick="requestExpert('callback')"><i class="fas fa-phone green"></i> Request Callback</button> <button class="exp-btn" onclick="requestExpert('cooperative')"><i class="fas fa-users green"></i> Chat with Cooperative</button> </div> <div class="exp-note"> <i class="fas fa-shield-alt"></i> All expert responses are verified and marked with a <span class="ai-badge expert-tag" style="margin:0;padding:1px 6px"> Expert</span> badge
-        </div> </div> <!-- Community --> <div class="ai-card"> <div class="ai-card-head"> <div class="ai-card-head-ico blue"><i class="fas fa-comments"></i></div> <div><div class="ai-card-title">Community</div><div class="ai-card-sub">Learn from other farmers</div></div> </div> <div class="com-item" onclick="joinCommunity('maize')"> <div class="com-ico green"><i class="fas fa-seedling"></i></div> <div><div class="com-name">Maize Farmers Group</div><div class="com-meta">234 members • 12 new posts</div></div> </div> <div class="com-item" onclick="joinCommunity('coffee')"> <div class="com-ico gold"><i class="fas fa-mug-hot"></i></div> <div><div class="com-name">Coffee Growers Uganda</div><div class="com-meta">189 members • 8 new posts</div></div> </div> <div class="com-item" onclick="joinCommunity('local')"> <div class="com-ico blue"><i class="fas fa-map-pin"></i></div> <div><div class="com-name">Mayuge District Forum</div><div class="com-meta">67 members • 3 new posts</div></div> </div> <div style="margin-top:14px"> <button class="ctx-edit-btn" onclick="askCommunity()"><i class="fas fa-question-circle"></i> Ask the Community</button> </div> </div> </div> </div>
-</div> <!-- Photo Upload Modal -->
-<div class="ai-photo-modal" id="photoModal"> <div class="ai-photo-box"> <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px"> <h3 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin:0"> Crop Disease Detection</h3> <button onclick="closePhotoUpload()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999"><i class="fas fa-times"></i></button> </div> <div class="ai-drop" id="photoDrop" onclick="document.getElementById('photoFileInput').click()"> <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;color:#1B5E20;margin-bottom:14px;display:block"></i> <div style="font-weight:700;font-size:1rem;margin-bottom:4px">Upload a photo of your crop</div> <div style="font-size:.85rem;color:#888">Take a clear photo of affected leaves, stems, or fruit</div> <div style="font-size:.72rem;color:#bbb;margin-top:8px">JPG, PNG — Max 5MB</div> </div> <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"> <div id="photoPreview" style="display:none;margin-top:20px;text-align:center"> <img id="photoPreviewImg" style="max-width:100%;max-height:200px;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.1)"> <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap"> <select id="photoCropSelect" style="padding:10px 14px;border:1px solid #e0e0e0;border-radius:12px;font-size:.85rem;font-family:inherit"> <option value="maize">Maize</option><option value="coffee">Coffee</option><option value="cocoa">Cocoa</option> <option value="beans">Beans</option><option value="groundnuts">Groundnuts</option><option value="cassava">Cassava</option> <option value="banana">Banana</option><option value="rice">Rice</option> </select> <button class="ai-send" style="width:auto;padding:10px 24px;border-radius:12px;font-size:.88rem" onclick="analyzePhoto()"><i class="fas fa-search"></i> Analyze</button> </div> </div> <div style="margin-top:20px;padding:12px;background:#F1F8E9;border-radius:12px;font-size:.75rem;color:#555;display:flex;align-items:center;gap:8px"> <i class="fas fa-info-circle" style="color:#1B5E20"></i> AI analysis provides guidance only. For serious outbreaks, consult a qualified agronomist.
-    </div> </div>
-</div> <script>
-var aiLoading=false,voiceInputActive=false,voiceOutputActive=false,currentLang='en',recognition=null;
-
-function askAI(question){var inp=document.getElementById('aiInput'),q=question||(inp?inp.value.trim():'');if(!q||aiLoading)return;var chat=document.getElementById('aiChat');chat.innerHTML+='<div class="ai-msg user"><div class="ai-avatar user"><i class="fas fa-user" style="font-size:.7rem"></i></div><div class="ai-bubble user">'+escapeHtml(q)+'</div></div>';if(inp)inp.value='';chat.scrollTop=chat.scrollHeight;aiLoading=true;var btn=document.getElementById('aiSendBtn');if(btn)btn.disabled=true;var lid='ld-'+Date.now();chat.innerHTML+='<div class="ai-msg" id="'+lid+'"><div class="ai-avatar bot"><i class="fas fa-seedling"></i></div><div class="ai-typing"><span></span><span></span><span></span></div></div>';chat.scrollTop=chat.scrollHeight;fetch('/api/v1/ai/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,district:'Mayuge',crops:['Maize']})}).then(function(r){return r.json()}).then(function(d){rmEl(lid);if(d.success&&d.data&&d.data.answer){addBot(d.data.answer)}else{addBot(fallback(q.toLowerCase()))}}).catch(function(){rmEl(lid);addBot(fallback(q.toLowerCase()))}).finally(function(){aiLoading=false;if(btn)btn.disabled=false})}
-
-function addBot(html){var c=document.getElementById('aiChat'),a=ctxActions(html);c.innerHTML+='<div class="ai-msg"><div class="ai-avatar bot"><i class="fas fa-seedling"></i></div><div><div class="ai-badge ai-tag"> AI Advice</div><div class="ai-bubble bot">'+html+'</div>'+a+'</div></div>';c.scrollTop=c.scrollHeight;if(voiceOutputActive)speak(html.replace(/<[^>]*>/g,''))}
-
-function ctxActions(h){var a='<div class="ai-actions">';if(h.includes('market')||h.includes('price'))a+='<button class="ai-act" onclick="window.location.href=\'/marketplace\'"><i class="fas fa-store"></i> Marketplace</button>';if(h.includes('dry')||h.includes('moisture'))a+='<button class="ai-act" onclick="window.location.href=\'/dryer\'"><i class="fas fa-solar-panel"></i> Book Drying</button>';if(h.includes('passport')||h.includes('quality')||h.includes('certif'))a+='<button class="ai-act" onclick="window.location.href=\'/passport/B247391\'"><i class="fas fa-qrcode"></i> View Passport</button>';if(h.includes('disease')||h.includes('pest'))a+='<button class="ai-act" onclick="openPhotoUpload()"><i class="fas fa-camera"></i> Scan Crop</button>';a+='<button class="ai-act gold" onclick="requestExpert()"><i class="fas fa-user-tie"></i> Ask Expert</button></div>';return a}
-
-function fallback(q){if(q.includes('harvest')||q.includes('when to')||q.includes('ready'))return' <strong>Harvest Advisory — Mayuge District</strong><br><br>Current: 28°C, 65% humidity.<br><br> <strong>Recommendations:</strong><br>• Harvest maize at 18-22% moisture<br>• Schedule solar drying within 48 hours<br>• Cost: <strong>UGX 200/kg</strong> for maize<br>• Target: <strong>≤13%</strong> for Grade A<br><br> <a href="/dryer">Book drying slot →</a>';if(q.includes('disease')||q.includes('pest')||q.includes('risk'))return' <strong>Crop Health — Mayuge</strong><br><br>• Fall armyworm: <strong style="color:#1B5E20">LOW</strong><br>• Maize streak virus: <strong style="color:#1B5E20">LOW</strong><br>• Aflatoxin: <strong style="color:#D4AF37">MONITOR</strong><br><br> <a href="#" onclick="openPhotoUpload();return false">Upload photo</a> for AI analysis';if(q.includes('market')||q.includes('price')||q.includes('sell'))return' <strong>Current Prices:</strong><br>• Maize (A): <strong>UGX 1,500–1,800/kg</strong><br>• Coffee: <strong>UGX 8,000–12,000/kg</strong><br>• Groundnuts: <strong>UGX 3,200–3,500/kg</strong><br>• Beans: <strong>UGX 2,800–3,200/kg</strong><br><br>Certified produce earns <strong>20-40% premium</strong>. <a href="/marketplace">Browse →</a>';if(q.includes('dry')||q.includes('cost')||q.includes('moisture'))return'☀️ <strong>Drying Costs:</strong><br>• Maize/Rice: <strong>UGX 200/kg</strong><br>• Beans: <strong>UGX 250/kg</strong><br>• Groundnuts: <strong>UGX 350/kg</strong><br>• Coffee: <strong>UGX 400/kg</strong><br>• Cocoa: <strong>UGX 500/kg</strong><br><br>6-12 hours. Target: 13%. <a href="/dryer">Book →</a>';if(q.includes('quality')||q.includes('passport')||q.includes('certif')||q.includes('grade'))return' <strong>Quality Passport includes:</strong><br>• Crop type & variety<br>• GPS-verified farmer identity<br>• Moisture & aflatoxin results<br>• Quality grade (A/B/C)<br>• QR code for verification<br><br>Exporters pay <strong>20-40% premium</strong>. <a href="/passport/B247391">View sample →</a>';if(q.includes('register')||q.includes('sign up'))return' <strong>How to Register:</strong><br><br><strong>Web:</strong> <a href="/signup">Create account</a><br><strong>USSD:</strong> Dial <strong>*284#</strong><br><strong>Agent:</strong> Find a local village agent<br><br>Free for farmers.';if(q.includes('weather')||q.includes('rain'))return'️ <strong>Mayuge Weather:</strong><br>• 28°C, Partly cloudy<br>• Humidity: 65%<br>• Rain: 30% (24h)<br><br>Drying: <strong>GOOD</strong> • Disease: <strong>LOW</strong>';if(q.includes('transport'))return' <strong>Transport:</strong><br>• Shared: UGX 50-100/kg<br>• Dedicated: UGX 150-250/kg<br>• Motorcycle: UGX 300-500<br><br><a href="/transport">Book →</a>';if(q.includes('loan')||q.includes('credit')||q.includes('financ'))return' <strong>Financing:</strong><br>• Input credit<br>• Warehouse receipt financing<br>• Mobile Money loans<br>• Cooperative savings<br><br><a href="/finance">View wallet →</a>';if(q.includes('storage')||q.includes('warehouse'))return' <strong>Storage:</strong><br>• Store at ≤13% moisture<br>• Use pallets<br>• UGX 50-100/kg/month<br><br><a href="/warehouse">View →</a>';if(q.includes('plant')||q.includes('season'))return' <strong>Planting — Mayuge:</strong><br>• <strong>Maize</strong> — plant within 2 weeks<br>• <strong>Beans</strong> — intercrop with maize<br>• <strong>Groundnuts</strong> — good rotation<br><br>3.5 acres maize: 87.5kg seed, 175kg DAP, 105kg Urea';return' <strong>I can help with:</strong><br><br> Crop production advice<br> Disease identification (upload photo)<br> Market prices<br>☀️ Drying & storage<br> Quality certification<br>️ Weather impact<br> Platform help<br> Financing options<br><br>Ask me anything!'}
-
-function openPhotoUpload(){document.getElementById('photoModal').classList.add('show')}
-function closePhotoUpload(){document.getElementById('photoModal').classList.remove('show');document.getElementById('photoPreview').style.display='none'}
-function handlePhotoUpload(i){if(!i.files||!i.files[0])return;var r=new FileReader();r.onload=function(e){document.getElementById('photoPreviewImg').src=e.target.result;document.getElementById('photoPreview').style.display='block'};r.readAsDataURL(i.files[0])}
-function analyzePhoto(){var crop=document.getElementById('photoCropSelect').value;closePhotoUpload();var c=document.getElementById('aiChat');c.innerHTML+='<div class="ai-msg user"><div class="ai-avatar user"><i class="fas fa-user" style="font-size:.7rem"></i></div><div class="ai-bubble user"> [Photo] — Analyzing '+crop+'...</div></div>';c.scrollTop=c.scrollHeight;setTimeout(function(){var D={maize:{n:'Fall Armyworm',c:'high',s:'Moderate',t:'Apply neem-based pesticide (5ml/L) or Emamectin benzoate. Scout weekly.',r:'85%',p:'Early planting. Regular scouting. Pheromone traps.'},coffee:{n:'Coffee Leaf Rust',c:'high',s:'High',t:'Apply copper-based fungicide. Remove affected branches. Improve air circulation.',r:'72%',p:'Plant resistant varieties. Proper spacing. Shade management.'},cocoa:{n:'Black Pod Disease',c:'medium',s:'Moderate',t:'Remove infected pods. Apply Ridomil Gold. Improve drainage.',r:'90%',p:'Regular harvesting. Shade management. Proper spacing.'},beans:{n:'Bean Rust',c:'medium',s:'Moderate',t:'Apply Mancozeb fungicide. Remove affected leaves.',r:'85%',p:'Resistant varieties. Crop rotation.'},groundnuts:{n:'Early Leaf Spot',c:'medium',s:'Moderate',t:'Apply fungicide. Remove debris. Rotate crops.',r:'85%',p:'2-3 year rotation. Resistant varieties.'},cassava:{n:'Cassava Mosaic',c:'high',s:'High',t:'Remove infected plants. Control whiteflies.',r:'70%',p:'Resistant varieties. Clean planting material.'},banana:{n:'Banana Wilt (BXW)',c:'high',s:'High',t:'Destroy infected plants. Sterilize tools.',r:'60%',p:'Disease-free planting material. Debud flowers.'},rice:{n:'Rice Blast',c:'medium',s:'Moderate',t:'Apply Tricyclazole. Reduce nitrogen.',r:'80%',p:'Resistant varieties. Balanced fertilization.'}};var d=D[crop]||D.maize;var cc=d.c==='high'?'high':d.c==='medium'?'medium':'low';var cl=d.c==='high'?'High Confidence':d.c==='medium'?'Medium Confidence':'Low Confidence';var pct=d.c==='high'?'92':d.c==='medium'?'78':'65';addBot(' <strong>Disease Analysis — '+crop.charAt(0).toUpperCase()+crop.slice(1)+'</strong><br><br><div class="ai-conf '+cc+'"> '+cl+' ('+pct+'%)</div><br> <strong>Detected: '+d.n+'</strong><br>️ Severity: <strong>'+d.s+'</strong><br><br> <strong>Treatment:</strong><br>'+d.t+'<br><br>️ <strong>Prevention:</strong><br>'+d.p+'<br><br> Recovery: <strong>'+d.r+'</strong> with treatment<br><br><em>️ AI guidance only. For serious outbreaks, consult an agronomist.</em>')},2000)}
-
-function requestExpert(t){var m={agronomist:'‍ <strong>Live Agronomist Requested</strong><br><br>Your request has been submitted. A verified agronomist will connect shortly.<br><br> SMS notification when available.<br>⏱️ Average wait: 15-30 min.',consultation:' <strong>Consultation Booked</strong><br><br>An extension officer will contact you to schedule.<br><br> Callback within 24 hours.',photo:' <strong>Photo Sent to Expert</strong><br><br>Your photo has been forwarded to a qualified agronomist.<br><br> Response within 24 hours.',callback:' <strong>Callback Requested</strong><br><br>A representative will call within 2 hours (8AM-6PM EAT).',cooperative:' <strong>Cooperative Chat</strong><br><br>Connecting with your cooperative representative...<br><br> Chat available once they accept.'};addBot(m[t]||m.agronomist)}
-function joinCommunity(g){var n={maize:'Maize Farmers Group',coffee:'Coffee Growers Uganda',local:'Mayuge District Forum'};addBot(' <strong>Joined: '+(n[g]||g)+'</strong><br><br>Welcome! You can now:<br>• Ask other farmers<br>• Share experiences<br>• View tips & best practices<br>• Join webinars<br><br><em>All content is moderated.</em>')}
-function askCommunity(){addBot(' <strong>Ask the Community</strong><br><br>Your question will be posted to your local farming community. Type your question below.')}
-function toggleVoiceInput(){var b=document.getElementById('voiceInputBtn');if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){showToast('Voice not supported','error');return}voiceInputActive=!voiceInputActive;b.classList.toggle('active',voiceInputActive);if(voiceInputActive){var S=window.SpeechRecognition||window.webkitSpeechRecognition;recognition=new S();recognition.lang='en-UG';recognition.continuous=false;recognition.onresult=function(e){document.getElementById('aiInput').value=e.results[0][0].transcript;voiceInputActive=false;b.classList.remove('active');askAI()};recognition.onerror=function(){voiceInputActive=false;b.classList.remove('active')};recognition.onend=function(){voiceInputActive=false;b.classList.remove('active')};recognition.start()}else{if(recognition)recognition.stop()}}
-function toggleVoiceOutput(){voiceOutputActive=!voiceOutputActive;document.getElementById('voiceOutputBtn').classList.toggle('active',voiceOutputActive);if(!voiceOutputActive&&window.speechSynthesis)window.speechSynthesis.cancel()}
-function speak(t){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='en-UG';u.rate=.9;window.speechSynthesis.speak(u)}
-function switchLanguage(l){currentLang=l;var g={en:'Language: <strong>English</strong>. How can I help?',lg:'Oluganda luteekebwawo. <strong>Nkuyamba otya leero?</strong><br><br><em>(Luganda activated)</em>',so:'Olusoga luteekebwawo. <strong>Nkhuukhonya otya leelo?</strong><br><br><em>(Lusoga activated)</em>',rn:'Orunyankore ruteekebwaho. <strong>Ninkukushemereza otya?</strong><br><br><em>(Runyankole activated)</em>',ac:'Leb Acholi omede. <strong>An atwero konyi nining?</strong><br><br><em>(Acholi activated)</em>',sw:'Lugha: <strong>Kiswahili</strong>. Ninawezaje kukusaidia leo?'};addBot(g[l]||g.en)}
-function editContext(){addBot('️ <strong>Update Farm Context</strong><br><br>Tell me about your farm:<br><br>• <strong>Location/district?</strong><br>• <strong>Crops</strong> you grow?<br>• <strong>Farm size?</strong><br>• <strong>Growth stage?</strong><br><br>Type your answers and I\'ll update!')}
-function clearChat(){document.getElementById('aiChat').innerHTML='<div class="ai-msg"><div class="ai-avatar bot"><i class="fas fa-seedling"></i></div><div><div class="ai-badge ai-tag"> AI Advice</div><div class="ai-bubble bot"> Conversation cleared. How can I help?</div></div></div>'}
-function exportChat(){showToast('Chat exported','success')}
-function rmEl(id){var e=document.getElementById(id);if(e)e.remove()}
-function escapeHtml(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
-function showToast(m,t){var e=document.createElement('div');e.style.cssText='position:fixed;top:80px;right:24px;z-index:200;background:white;border:1px solid #e0e0e0;border-radius:14px;padding:14px 20px;box-shadow:0 12px 40px rgba(0,0,0,.1);font-size:.85rem;border-left:4px solid '+(t==='error'?'#c62828':'#1B5E20');e.innerHTML=(t==='error'?'️':'')+' '+m;document.body.appendChild(e);setTimeout(function(){e.style.opacity='0';e.style.transition='opacity .3s';setTimeout(function(){e.remove()},300)},3500)}
-document.addEventListener('DOMContentLoaded',function(){var d=document.getElementById('photoDrop');if(d){d.addEventListener('dragover',function(e){e.preventDefault();d.classList.add('dragover')});d.addEventListener('dragleave',function(){d.classList.remove('dragover')});d.addEventListener('drop',function(e){e.preventDefault();d.classList.remove('dragover');if(e.dataTransfer.files.length){document.getElementById('photoFileInput').files=e.dataTransfer.files;handlePhotoUpload(document.getElementById('photoFileInput'))}})}});
+function clearChat(){
+  var c=document.getElementById('aiChat');
+  if(!c)return;
+  c.innerHTML='';
+  addUser && null;
+  var m=document.createElement('div');
+  m.className='ai-msg-bot';
+  m.innerHTML='<div style="width:30px;height:30px;border-radius:10px;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem"><i class="fas fa-compass-drafting"></i></div>'+
+    '<div class="bubble"><strong>New conversation.</strong> Ask me anything about your batches, prices, quality or drying.</div>';
+  c.appendChild(m);
+  showError('');
+}
 </script>

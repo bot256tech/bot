@@ -65,9 +65,20 @@ class AgriIntelService {
   }
 
   static async getSmartResponse(q, ctx) {
+    // Greetings and small talk get a real, useful answer
+    if (/^(hi|hello|hey|good (morning|afternoon|evening)|greetings|oli otya|thank you|thanks|ok(ay)?|help)\b/.test(q) || q === 'hi' || q === 'hello') {
+      return await AgriIntelService.generalOverview(ctx, true);
+    }
     // Marketplace readiness — the flagship decision (uses the farmer's own records)
     if (/\b(list|listing|sell|selling|sale|ready for market|ready to sell|can i sell)\b/.test(q)) {
       return await AgriIntelService.marketplaceReadiness(q, ctx);
+    }
+    // "What should I do with my coffee?" → crop action plan
+    if (/\bwhat should i do|what can i do|advice for|about my\b/.test(q)) {
+      const crop = detectCrop(q);
+      if (crop) {
+        return await AgriIntelService.cropActionPlan(crop, ctx);
+      }
     }
     if (q.includes('harvest') || q.includes('when to') || q.includes('ready')) {
       return await AgriIntelService.harvestAdvice(q, ctx);
@@ -482,7 +493,27 @@ class AgriIntelService {
   // ─────────────────────────────────────────────────
   // GENERAL OVERVIEW
   // ─────────────────────────────────────────────────
-  static async generalOverview(ctx) {
+  static async cropActionPlan(crop, ctx) {
+    const key = crop.toLowerCase();
+    const target = MOISTURE_TARGETS[key] || 13;
+    let marketLine = '';
+    try {
+      const r = await db.query(
+        `SELECT AVG(price_per_unit) AS avg_price, COUNT(*)::int AS listings
+         FROM products WHERE available = true AND LOWER(crop) = LOWER($1);`, [crop]);
+      if (r.rows[0] && r.rows[0].listings > 0) {
+        marketLine = `The marketplace currently lists ${crop} at an average of <strong>${fmtUGX(r.rows[0].avg_price)}/kg</strong>. `;
+      }
+    } catch (e) { /* DB not ready */ }
+    return `<strong>Action plan for your ${crop}</strong><br><br>` +
+      `1. <strong>Harvest & dry</strong> — target ${target}% moisture or below (Grade A threshold for most crops is 13%).<br>` +
+      `2. <strong>Record quality</strong> — enter moisture and aflatoxin readings on your batch so a Digital Quality Passport is issued.<br>` +
+      `3. <strong>List</strong> — once the batch carries a passing grade, list it on the marketplace. ${marketLine}<br>` +
+      `4. <strong>Verify</strong> — buyers confirm your batch through its passport batch number.<br><br>` +
+      `If you are logged in, ask me <em>"Can I list this ${crop.toLowerCase()} for sale?"</em> and I will check your own records.`;
+  }
+
+  static async generalOverview(ctx, isGreeting = false) {
     let statsLine = '';
     try {
       const r = await db.query(
@@ -496,9 +527,12 @@ class AgriIntelService {
       }
     } catch (e) { /* DB not ready */ }
 
+    const greeting = isGreeting ? `Hello. I am the AGRICHAIN Decision Advisor — a rules-based engine that answers from your stored platform records.<br><br>` : '';
+
     return `<strong>AGRICHAIN Decision Advisor</strong><br><br>` +
+      greeting +
       statsLine +
-      `I answer questions from your stored platform records. Try:<br>` +
+      (isGreeting ? `Ask me anything about your batches — for example:<br>` : `I answer questions from your stored platform records. Try:<br>`) +
       `• "Can I list this coffee for sale?" — batch readiness decision<br>` +
       `• "What are current market prices?" — live listing averages<br>` +
       `• "How much does solar drying cost?" — pilot fee schedule<br>` +
