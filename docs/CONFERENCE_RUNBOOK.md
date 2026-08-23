@@ -1,7 +1,9 @@
 # AGRICHAIN 360 — Conference Runbook
 
-Live system: `http://16.192.159.6` · Health: `http://16.192.159.6/health`
-API index: `http://16.192.159.6/api/v1`
+Live system: `https://16.192.159.6` (self-signed certificate — accept the browser
+warning once; plain `http://` becomes available when TCP port 80 is also opened
+at the cloud edge) · Health: `https://16.192.159.6/health`
+API index: `https://16.192.159.6/api/v1`
 
 ## Demo accounts (seeded demonstration data)
 
