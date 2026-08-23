@@ -84,14 +84,15 @@ async function main() {
   await db.query(
     `INSERT INTO buyer_profiles (user_id, company_name, business_type, city, country, created_at)
      VALUES ($1, 'Busia Grains Ltd', 'TRADER', 'Busia', 'Uganda', NOW())
-     ON CONFLICT DO NOTHING;`,
+     ON CONFLICT (user_id) DO NOTHING;`,
     [userIds.BUYER]
   );
 
   // Lab partner profile (approved, so it can issue passports via the API)
   await db.query(
     `INSERT INTO partners (user_id, partner_type, business_name, location, approved, rating, created_at)
-     VALUES ($1, 'LAB', 'Busoga Quality Lab', 'Iganga', true, 4.8, NOW());`,
+     VALUES ($1, 'LAB', 'Busoga Quality Lab', 'Iganga', true, 4.8, NOW())
+     ON CONFLICT (user_id) DO UPDATE SET approved = true, rating = 4.8;`,
     [userIds.PARTNER]
   );
 
