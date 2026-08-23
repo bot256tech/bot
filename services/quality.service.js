@@ -19,21 +19,38 @@ class QualityService {
     const batch_number = `AGR-${year}-${randomHex}`;
     const qr_code = `${baseUrl()}/passport/${batch_number}`;
 
+    const moisture = data.moisture_level !== undefined && data.moisture_level !== null && data.moisture_level !== ''
+      ? data.moisture_level : null;
+    const aflatoxin = data.aflatoxin_result !== undefined && data.aflatoxin_result !== null && data.aflatoxin_result !== ''
+      ? data.aflatoxin_result : null;
+    const quality_grade = data.quality_grade || QualityService.determineGrade(moisture, aflatoxin);
+
     const passport = await QualityPassport.create({
       batch_number,
       farmer_id: data.farmer_id,
       crop_type: data.crop_type,
       quantity: data.quantity,
-      moisture_level: data.moisture_level !== undefined && data.moisture_level !== null && data.moisture_level !== ''
-        ? data.moisture_level : null,
-      aflatoxin_result: data.aflatoxin_result !== undefined && data.aflatoxin_result !== null && data.aflatoxin_result !== ''
-        ? data.aflatoxin_result : null,
-      quality_grade: data.quality_grade || null,
+      moisture_level: moisture,
+      aflatoxin_result: aflatoxin,
+      quality_grade,
       testing_partner_id: data.testing_partner_id || null,
       drying_center: data.drying_center || null,
       record_source: data.record_source || 'user',
       qr_code
     });
+
+    // Keep the linked listing in sync with the initial grade
+    if (passport && passport.farmer_id && quality_grade && quality_grade !== 'PENDING') {
+      const productStatus =
+        quality_grade === 'A' || quality_grade === 'B' ? 'APPROVED'
+        : quality_grade === 'C' ? 'PENDING'
+        : 'REJECTED';
+      try {
+        await Product.updateQualityStatusByFarmer(passport.farmer_id, passport.crop_type, productStatus);
+      } catch (err) {
+        logger.warn('Failed to update product quality status at passport creation', { error: err.message });
+      }
+    }
 
     return passport;
   }
