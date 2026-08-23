@@ -84,6 +84,21 @@ router.get('/farmer/:farmer_id', protect(), idParamValidation, async (req, res) 
 });
 
 // Get passport by ID
+// The farmer's own passports
+router.get('/my-passports', protect(['FARMER', 'farmer']), async (req, res) => {
+  try {
+    const Farmer = require('../../models/Farmer');
+    const farmer = await Farmer.findByUserId(req.user.id);
+    if (!farmer) {
+      return res.status(404).json({ success: false, message: 'Farmer profile not found.' });
+    }
+    const passports = await QualityPassport.findByFarmerId(farmer.id);
+    res.json({ success: true, count: passports.length, data: passports });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 router.get('/:id', idParamValidation, async (req, res) => {
   try {
     const passport = await QualityService.getPassportById(req.params.id);
@@ -165,21 +180,6 @@ router.post('/record', protect(['FARMER', 'farmer']), [
         product_status: (passport.quality_grade === 'A' || passport.quality_grade === 'B') ? 'APPROVED' : (passport.quality_grade === 'REJECTED' ? 'REJECTED' : 'PENDING')
       }
     });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-// The farmer's own passports
-router.get('/my-passports', protect(['FARMER', 'farmer']), async (req, res) => {
-  try {
-    const Farmer = require('../../models/Farmer');
-    const farmer = await Farmer.findByUserId(req.user.id);
-    if (!farmer) {
-      return res.status(404).json({ success: false, message: 'Farmer profile not found.' });
-    }
-    const passports = await QualityPassport.findByFarmerId(farmer.id);
-    res.json({ success: true, count: passports.length, data: passports });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
