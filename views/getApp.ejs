@@ -1,0 +1,174 @@
+<!-- Get the App — public installation page (no account required) -->
+<div id="getAppRoot" style="max-width:840px;margin:0 auto;padding:0 4px">
+
+  <div style="text-align:center;padding:8px 0 4px">
+    <div style="width:84px;height:84px;border-radius:26px;background:var(--g);display:inline-flex;align-items:center;justify-content:center;box-shadow:var(--sh)">
+      <i class="fab fa-android" style="font-size:2rem;color:#fff"></i>
+    </div>
+    <h2 style="font-weight:800;margin:16px 0 6px">Get the AGRICHAIN 360 App</h2>
+    <p style="color:var(--tx2);font-size:.95rem;max-width:520px;margin:0 auto">
+      Install directly on your device — <strong style="color:var(--g)">no account required</strong>.
+      Create an account only when you want to trade on the platform.
+    </p>
+  </div>
+
+  <!-- Already installed state -->
+  <div id="gaInstalled" class="card" style="display:none;text-align:center;margin-top:22px;border:1px solid var(--g)">
+    <i class="fas fa-circle-check" style="font-size:1.8rem;color:var(--g)"></i>
+    <h3 style="font-weight:800;margin:10px 0 4px">You already have the app</h3>
+    <p style="color:var(--tx2);font-size:.88rem">AGRICHAIN 360 is installed on this device.</p>
+    <a href="/" class="btn btn-p" style="margin-top:6px">Open AGRICHAIN 360</a>
+  </div>
+
+  <div id="gaChoices" style="display:flex;flex-direction:column;gap:20px;margin-top:22px">
+
+    <!-- Android -->
+    <div class="card" id="gaAndroid">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="width:44px;height:44px;border-radius:14px;background:var(--gl);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fab fa-android" style="font-size:1.3rem;color:var(--g)"></i>
+        </div>
+        <div style="flex:1">
+          <h3 style="font-weight:800;font-size:1rem;margin-bottom:4px">Android</h3>
+          <p style="color:var(--tx2);font-size:.85rem;margin-bottom:14px">
+            Install the full Android application (APK) — marketplace, quality passports,
+            advisor and farmer tools in one app. Works on Android 7 and newer.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a href="/app/agrichain360.apk" class="btn btn-p" download><i class="fas fa-download"></i> Download Android App</a>
+            <button id="gaPwaBtn" class="btn btn-o" style="display:none"><i class="fas fa-window-maximize"></i> Install the Web App instead</button>
+          </div>
+          <div style="font-size:.75rem;color:var(--tx2);margin-top:10px">
+            After downloading, open the file and allow installation from this source if asked.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- iOS -->
+    <div class="card" id="gaIos" style="display:none">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="width:44px;height:44px;border-radius:14px;background:var(--gl);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fab fa-apple" style="font-size:1.3rem;color:var(--g)"></i>
+        </div>
+        <div style="flex:1">
+          <h3 style="font-weight:800;font-size:1rem;margin-bottom:4px">iPhone / iPad</h3>
+          <p style="color:var(--tx2);font-size:.85rem;margin-bottom:14px">Install the web app on your home screen:</p>
+          <div style="background:var(--bg2);border-radius:12px;padding:16px 18px;font-size:.9rem;line-height:2">
+            <div style="font-weight:800;margin-bottom:2px">Install this app</div>
+            <div><strong>1.</strong> Tap the <strong>Share</strong> button
+              <i class="fas fa-arrow-up-from-bracket" style="color:#007aff"></i> in the Safari toolbar.</div>
+            <div><strong>2.</strong> Select <strong>Add to Home Screen</strong>.</div>
+            <div><strong>3.</strong> Tap <strong>Add</strong>.</div>
+          </div>
+          <div style="font-size:.75rem;color:var(--tx2);margin-top:10px">
+            The app then works full-screen from your home screen, just like a native app.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop -->
+    <div class="card" id="gaDesktop" style="display:none">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="width:44px;height:44px;border-radius:14px;background:var(--gl);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fas fa-display" style="font-size:1.2rem;color:var(--g)"></i>
+        </div>
+        <div style="flex:1">
+          <h3 style="font-weight:800;font-size:1rem;margin-bottom:4px">Desktop</h3>
+          <p style="color:var(--tx2);font-size:.85rem;margin-bottom:14px">
+            Install AGRICHAIN 360 as a desktop app — it opens in its own window and works like a native application.
+          </p>
+          <button id="gaDesktopBtn" class="btn btn-p"><i class="fas fa-circle-down"></i> Install App</button>
+          <div id="gaDesktopFallback" style="display:none;background:var(--bg2);border-radius:12px;padding:14px 16px;font-size:.85rem;line-height:1.9;margin-top:12px">
+            <div style="font-weight:800;margin-bottom:2px">Install manually</div>
+            <div><strong>Chrome / Edge:</strong> click the <strong>install icon</strong> in the address bar, or Menu → <strong>Install page as app</strong>.</div>
+            <div><strong>Safari:</strong> File → <strong>Add to Dock</strong>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other / unknown browsers -->
+    <div class="card" id="gaOther" style="display:none">
+      <h3 style="font-weight:800;font-size:1rem;margin-bottom:6px">Your browser</h3>
+      <p style="color:var(--tx2);font-size:.85rem;margin-bottom:14px">
+        You can still use AGRICHAIN 360 — it works fully in any modern browser.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="/" class="btn btn-p"><i class="fas fa-globe"></i> Open the Web App</a>
+        <a href="/app/agrichain360.apk" class="btn btn-o" download><i class="fas fa-download"></i> Android APK</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;background:var(--bg2);border:1px dashed var(--bd)">
+    <div style="font-size:.82rem;color:var(--tx2);line-height:1.7">
+      <i class="fas fa-lock" style="color:var(--g)"></i>
+      <strong>Installing is free and open to everyone.</strong> An account is only needed to trade —
+      farmers list produce, buyers place orders — and accounts are free too.
+      The Android app and web app connect to the same platform.
+    </div>
+  </div>
+</div>
+
+<script src="/js/install.js"></script>
+<script>
+(function () {
+  var s = window.AgriInstall && window.AgriInstall.state;
+  if (!s) return;
+
+  function show(id) { var el = document.getElementById(id); if (el) el.style.display = 'block'; }
+  function hide(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; }
+
+  // Already installed → done state
+  if (s.standalone) {
+    show('gaInstalled');
+    hide('gaChoices');
+    return;
+  }
+
+  // Reveal the platform-appropriate card
+  if (s.platform === 'android') {
+    hide('gaIos'); hide('gaDesktop'); hide('gaOther');
+  } else if (s.platform === 'ios') {
+    hide('gaAndroid'); hide('gaDesktop'); hide('gaOther');
+  } else if (s.platform === 'desktop') {
+    hide('gaAndroid'); hide('gaIos'); hide('gaOther');
+  } else {
+    hide('gaAndroid'); hide('gaIos'); hide('gaDesktop');
+  }
+
+  // Android: offer the PWA route too when the browser supports it
+  var pwaBtn = document.getElementById('gaPwaBtn');
+  if (pwaBtn && s.promptAvailable) {
+    pwaBtn.style.display = 'inline-flex';
+    pwaBtn.addEventListener('click', function () {
+      window.AgriInstall.promptNow().catch(function () {
+        window.AgriInstall.toast('Your browser does not support one-tap install here. Use the APK download above.');
+      });
+    });
+  }
+
+  // Desktop: native prompt if possible, otherwise manual instructions
+  var dBtn = document.getElementById('gaDesktopBtn');
+  if (dBtn) {
+    if (s.promptAvailable) {
+      dBtn.addEventListener('click', function () {
+        window.AgriInstall.promptNow().catch(function () {
+          document.getElementById('gaDesktopFallback').style.display = 'block';
+        });
+      });
+    } else {
+      dBtn.style.display = 'none';
+      show('gaDesktopFallback');
+    }
+  }
+
+  // React to successful installation
+  document.addEventListener('agriinstall:installed', function () {
+    show('gaInstalled');
+    hide('gaChoices');
+  });
+})();
+</script>

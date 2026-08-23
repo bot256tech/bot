@@ -1,5 +1,5 @@
 {
-  "name": "AGRICHAIN 360 — Smart Agriculture Platform",
+  "name": "AGRICHAIN 360 \u2014 Smart Agriculture Platform",
   "short_name": "AgriChain360",
   "description": "The digital infrastructure powering agriculture across Africa. Connect farmers, buyers, and service providers with IoT monitoring, AI intelligence, and verified quality passports.",
   "start_url": "/",
@@ -7,7 +7,11 @@
   "orientation": "portrait",
   "background_color": "#FAFAF5",
   "theme_color": "#1B5E20",
-  "categories": ["business", "productivity", "food"],
+  "categories": [
+    "business",
+    "productivity",
+    "food"
+  ],
   "lang": "en",
   "icons": [
     {
@@ -35,21 +39,36 @@
       "short_name": "Market",
       "description": "Browse verified produce",
       "url": "/marketplace",
-      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/images/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "AI Advisor",
       "short_name": "AI Help",
       "description": "Ask farming questions",
       "url": "/ai-advisor",
-      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/images/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Quality Passport",
       "short_name": "Passport",
       "description": "Verify quality certificates",
-      "url": "/passport/B247391",
-      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+      "url": "/verify",
+      "icons": [
+        {
+          "src": "/images/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

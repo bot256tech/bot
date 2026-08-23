@@ -24,6 +24,16 @@ router.get('/', (req, res) => {
 // Legacy landing → redirect
 router.get('/home', (req, res) => res.redirect('/'));
 
+// Get the App — public installation page (no account required)
+router.get('/get-app', (req, res) => {
+  res.render('layout', {
+    title: 'Get the App — AGRICHAIN 360',
+    page: 'get-app',
+    data: {},
+    body: 'getApp',
+  });
+});
+
 // Role selection page
 router.get('/roles', (req, res) => {
   res.render('layout', {
@@ -808,7 +818,7 @@ const RETIRED = {
   '/lab-dashboard': '/login',
   '/field-officer': '/login',
   '/quality-officer': '/login',
-  '/download-app': '/signup',
+  '/download-app': '/get-app',
   '/ussd/ussd-test': '/'
 };
 for (const [old, target] of Object.entries(RETIRED)) {
