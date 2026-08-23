@@ -1,0 +1,45 @@
+{
+  "pilot_name": "AGRICHAIN 360 - Busoga Region Pilot",
+  "launch_date": "2026-09-01",
+  "duration_months": 6,
+  "budget_ugx": 45000000,
+  "target_metrics": {
+    "farmers": 200,
+    "volume_mt": 40,
+    "drying_centers": [
+      "Mayuge",
+      "Bugiri"
+    ],
+    "districts": [
+      "Mayuge",
+      "Bugiri",
+      "Iganga",
+      "Jinja",
+      "Kamuli"
+    ]
+  },
+  "financial_model": {
+    "drying_fees": {
+      "Maize": 200,
+      "Coffee": 350,
+      "Cocoa": 500
+    },
+    "testing_fees": {
+      "Maize": 100,
+      "Coffee": 250,
+      "Cocoa": 400
+    },
+    "marketplace_commission": 0.03,
+    "buyer_subscription": 100000
+  },
+  "languages": [
+    "English",
+    "Lusoga"
+  ],
+  "ussd_code": "*270*XX#",
+  "support_contacts": {
+    "phone": "+256 746 022 547",
+    "email": "support@agrichain360.com",
+    "whatsapp": "+256 746 022 547"
+  }
+}

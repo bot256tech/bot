@@ -114,6 +114,78 @@ app.get('/health', (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// API ROOT (helpful information)
+// ═══════════════════════════════════════════
+
+app.get('/api/v1', (req, res) => {
+  res.json({
+    success: true,
+    name: 'AGRICHAIN 360™ API',
+    version: '3.0.4',
+    description: 'Production-grade agricultural supply chain platform API',
+    documentation: 'https://github.com/bot256tech/agrichain360',
+    endpoints: {
+      health: '/health',
+      auth: {
+        base: '/api/v1/auth',
+        routes: ['POST /register', 'POST /login', 'GET /me']
+      },
+      marketplace: {
+        base: '/api/v1/marketplace',
+        routes: [
+          'GET /products',
+          'POST /calculate-fees',
+          'POST /orders'
+        ]
+      },
+      quality: {
+        base: '/api/v1/quality',
+        routes: ['GET /verify/:batchId', 'POST /passport']
+      },
+      ai: {
+        base: '/api/v1/ai',
+        routes: ['POST /ask', 'GET /suggestions']
+      },
+      buyers: {
+        base: '/api/v1/buyers',
+        routes: ['GET /profile', 'POST /subscription']
+      },
+      villageAgents: {
+        base: '/api/v1/village-agents',
+        routes: ['GET /nearby']
+      }
+    },
+    pilot: {
+      districts: ['Mayuge', 'Bugiri', 'Iganga', 'Jinja', 'Kamuli'],
+      dryingCenters: ['Mayuge', 'Bugiri'],
+      targetFarmers: 200,
+      targetVolume: '40 MT',
+      budget: 'UGX 45,000,000'
+    },
+    financialModel: {
+      dryingFees: {
+        Maize: 'UGX 200/kg',
+        Coffee: 'UGX 350/kg',
+        Cocoa: 'UGX 500/kg'
+      },
+      testingFees: {
+        Maize: 'UGX 100/kg',
+        Coffee: 'UGX 250/kg',
+        Cocoa: 'UGX 400/kg'
+      },
+      marketplaceCommission: '3%',
+      buyerSubscription: 'UGX 100,000/month'
+    },
+    support: {
+      email: 'support@agrichain360.com',
+      phone: '+256 746 022 547',
+      whatsapp: '+256 746 022 547'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ═══════════════════════════════════════════
 // APK DOWNLOAD (explicit route for proper headers)
 // ═══════════════════════════════════════════
 
