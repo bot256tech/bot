@@ -25,9 +25,4 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Easter egg: console command
-window.AGRICHAIN = {
-  version: '1.0.0',
-  author: 'Batesa Ibrahim',
-  contact: '0746022547'
-};
+window.AGRICHAIN = { version: '3.1.0' };

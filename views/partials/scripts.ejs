@@ -1,6 +1,5 @@
 <script src="/js/app.js"></script>
-<script>
-  // ══ Dark/Light Mode Toggle ══
+<script> // ══ Dark/Light Mode Toggle ══
   function toggleTheme() {
     const h = document.documentElement;
     h.classList.toggle('dark'); h.classList.toggle('light');
@@ -36,7 +35,7 @@
     type = type || 'success';
     var t = document.createElement('div');
     t.className = 'toast ' + type;
-    t.innerHTML = '<span>' + (type === 'success' ? '✅' : '⚠️') + '</span> ' + msg;
+    t.innerHTML = '<span>' + (type === 'success' ? '' : '️') + '</span> ' + msg;
     document.body.appendChild(t);
     setTimeout(function() {
       t.style.opacity = '0'; t.style.transition = 'opacity .3s';

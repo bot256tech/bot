@@ -1,142 +1,38 @@
-<!-- Farmer Dashboard — Shows real user data from session -->
-<div style="margin-bottom:24px">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
-    <div>
-      <h2 style="font-weight:800;margin-bottom:4px">
-        Welcome back, <%= typeof user !== 'undefined' && user ? user.name : 'Farmer' %> 👋
-      </h2>
-      <div style="color:var(--tx2);font-size:.9rem">
-        Farmer Dashboard
-        <% if (typeof user !== 'undefined' && user && user.phone) { %>
-          • <%= user.phone %>
-        <% } %>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <a href="/marketplace" class="btn btn-o btn-sm"><i class="fas fa-store"></i> Marketplace</a>
-      <a href="/dryer" class="btn btn-p btn-sm"><i class="fas fa-solar-panel"></i> Book Drying</a>
-    </div>
-  </div>
+<!-- Farmer Dashboard — real data from PostgreSQL -->
+<%
+  var u = data.user || {};
+  var f = data.farmer || {};
+  var products = data.products || [];
+  var passports = data.passports || [];
+  var orders = data.orders || [];
+  var activeListings = products.filter(function(p){ return p.available; }).length;
+  var avgGrade = passports.length ? (passports[0].quality_grade || '—') : '—';
+%> <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:22px"> <div> <h2 style="font-weight:800;margin-bottom:4px">Welcome back, <%= u.name || 'Farmer' %></h2> <div style="color:var(--tx2);font-size:.9rem"> Farmer Dashboard
+      <% if (u.phone) { %> · <%= u.phone %> <% } %> <% if (f.district) { %> · <%= [f.village, f.district].filter(Boolean).join(', ') %> <% } %> <% if (f.verification_status === 'VERIFIED') { %><span class="tag tag-g">Verified Farmer</span> <% } else { %><span class="tag tag-a">Verification <%= (f.verification_status || 'PENDING').toLowerCase() %></span><% } %> </div> </div> <div style="display:flex;gap:8px;flex-wrap:wrap"> <a href="/my-listings" class="btn btn-o btn-sm"><i class="fas fa-list"></i> My Listings</a> <a href="/marketplace" class="btn btn-o btn-sm"><i class="fas fa-store"></i> Marketplace</a> <a href="/ai-advisor" class="btn btn-p btn-sm"><i class="fas fa-robot"></i> AI Advisor</a> </div>
+</div> <% if (data.success) { %> <div style="background:#e8f5e9;border:1px solid #4caf50;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#1b5e20"> <i class="fas fa-check-circle"></i> <%= data.success %> </div>
+<% } %>
+<% if (data.error) { %> <div style="background:#fff3e0;border:1px solid #ff9800;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#e65100"> <i class="fas fa-exclamation-circle"></i> <%= data.error %> </div>
+<% } %> <!-- Quick stats -->
+<div class="grid grid4" style="margin-bottom:22px"> <div class="metric"> <div class="metric-val"><%= activeListings %></div> <div class="metric-lbl">Active Listings</div> <div class="metric-tr" style="color:var(--tx2)"><%= products.length %> registered in total</div> </div> <div class="metric"> <div class="metric-val" style="color:var(--g)">UGX <%= Math.round(data.earnings || 0).toLocaleString() %></div> <div class="metric-lbl">Completed Earnings</div> <div class="metric-tr" style="color:var(--tx2)">net of platform commission</div> </div> <div class="metric"> <div class="metric-val"><%= passports.length %></div> <div class="metric-lbl">Quality Passports</div> <div class="metric-tr" style="color:var(--tx2)">latest grade: <%= avgGrade %></div> </div> <div class="metric"> <div class="metric-val" style="color:var(--a)"><%= orders.length %></div> <div class="metric-lbl">Order Requests</div> <div class="metric-tr" style="color:var(--tx2)"><%= orders.filter(function(o){return o.status==='pending';}).length %> awaiting response</div> </div>
+</div> <div class="grid grid2"> <!-- Register produce --> <div class="card"> <h3 style="font-weight:800;margin-bottom:6px"><i class="fas fa-seedling" style="color:var(--g)"></i> Register Produce</h3> <p style="color:var(--tx2);font-size:.8rem;margin-bottom:16px">Record a harvested batch before listing it on the marketplace.</p> <form method="POST" action="/farmer/produce"> <div class="grid grid2" style="gap:12px"> <div> <label style="display:block;font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:6px">Crop</label> <select name="crop" required style="width:100%"> <option value="">Select crop</option> <% ['Coffee','Maize','Beans','Rice','Cassava','Soybeans','Groundnuts','Banana','Cocoa'].forEach(function(c){ %> <option value="<%= c %>"><%= c %></option> <% }) %> </select> </div> <div> <label style="display:block;font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:6px">Quantity</label> <input type="number" name="quantity" min="1" step="1" placeholder="e.g. 500" required style="width:100%"> </div> <div> <label style="display:block;font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:6px">Unit</label> <select name="unit" style="width:100%"><option value="kg">kg</option><option value="bunches">bunches</option><option value="bags">bags</option></select> </div> <div> <label style="display:block;font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:6px">Price per unit (UGX)</label> <input type="number" name="price_per_unit" min="1" step="50" placeholder="e.g. 1800" required style="width:100%"> </div> </div> <button type="submit" class="btn btn-p" style="width:100%;justify-content:center;margin-top:16px"><i class="fas fa-plus"></i> Register Batch</button> </form> </div> <!-- Record quality information --> <div class="card"> <h3 style="font-weight:800;margin-bottom:6px"><i class="fas fa-vial" style="color:var(--g)"></i> Record Quality Information</h3> <p style="color:var(--tx2);font-size:.8rem;margin-bottom:16px"> Moisture and aflatoxin readings generate or update the batch's Digital Quality Passport and grade (A: ≤13% & ≤5 ppb, B: ≤14% & ≤10 ppb).
+    </p> <% if (products.length === 0) { %> <div style="text-align:center;padding:26px 10px;color:var(--tx2);font-size:.85rem"> <i class="fas fa-info-circle" style="font-size:1.4rem;opacity:.5"></i> <div style="margin-top:8px">Register a batch first — quality records attach to it.</div> </div> <% } else { %> <form method="POST" action="/farmer/quality"> <div class="grid grid2" style="gap:12px"> <div style="grid-column:1/-1"> <label style="display:block;font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:6px">Batch (registered produce)</label> <select name="product_id" required style="width:100%"> <option value="">Select batch</option> <% products.forEach(function(p){ %> <option value="<%= p.id %>"><%= p.crop %> — <%= parseFloat(p.quantity).toLocaleString() %> <%= p.unit %> (listed <%= new Date(p.created_at).toLocaleDateString() %>)</option> <% }) %> </select> </div> <div> <label style="display:block;font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:6px">Moisture (%)</label> <input type="number" name="moisture_level" min="0" max="60" step="0.1" placeholder="e.g. 12.4" style="width:100%"> </div> <div> <label style="display:block;font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:6px">Aflatoxin (ppb)</label> <input type="number" name="aflatoxin_result" min="0" max="500" step="0.1" placeholder="e.g. 3.0" style="width:100%"> </div> <div style="grid-column:1/-1"> <label style="display:block;font-size:.78rem;font-weight:700;color:var(--tx2);margin-bottom:6px">Drying centre (optional)</label> <select name="drying_center" style="width:100%"> <option value="">None / own premises</option> <option>Mayuge Drying Hub</option> <option>Bugiri Drying Hub</option> </select> </div> </div> <button type="submit" class="btn btn-p" style="width:100%;justify-content:center;margin-top:16px"><i class="fas fa-certificate"></i> Save Quality Record</button> </form> <% } %> </div>
+</div> <!-- AI recommendation -->
+<% if (data.aiRecommendation) { %>
+<div class="card" style="margin-top:20px;border-left:4px solid var(--g)"> <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"> <i class="fas fa-robot" style="color:var(--g);font-size:1.1rem"></i> <h3 style="font-weight:800;margin:0">AGRICHAIN Decision Advisor</h3> <span class="tag tag-g">Latest batch recommendation</span> </div> <div style="font-size:.88rem;line-height:1.6" class="ai-advice-content"> <%- data.aiRecommendation %> </div> <a href="/ai-advisor" class="btn btn-o btn-sm" style="margin-top:12px">Ask the Advisor</a>
 </div>
-
-<!-- Quick Stats -->
-<div class="grid grid4" style="margin-bottom:24px">
-  <div class="metric">
-    <div class="metric-val">0</div>
-    <div class="metric-lbl">Active Listings</div>
-    <div class="metric-tr" style="color:var(--tx3)">Add your first listing</div>
-  </div>
-  <div class="metric">
-    <div class="metric-val" style="color:var(--a)">UGX 0</div>
-    <div class="metric-lbl">Total Earnings</div>
-    <div class="metric-tr" style="color:var(--tx3)">Start selling today</div>
-  </div>
-  <div class="metric">
-    <div class="metric-val" style="color:var(--g2)">0</div>
-    <div class="metric-lbl">Batches Processed</div>
-    <div class="metric-tr" style="color:var(--tx3)">Book drying service</div>
-  </div>
-  <div class="metric">
-    <div class="metric-val" style="color:var(--ad)">—</div>
-    <div class="metric-lbl">Quality Score</div>
-    <div class="metric-tr" style="color:var(--tx3)">Pending first test</div>
-  </div>
-</div>
-
-<!-- Main Content Grid -->
-<div class="grid grid2">
-  <!-- Getting Started Guide -->
-  <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-rocket" style="color:var(--g)"></i> Getting Started</h3>
-    <div style="font-size:.9rem">
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd)">
-        <div style="width:32px;height:32px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--g);font-size:.85rem">1</div>
-        <div>
-          <div style="font-weight:600;margin-bottom:2px">Register Your Farm</div>
-          <div style="color:var(--tx2);font-size:.82rem">Add your farm location, crops, and farm size</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd)">
-        <div style="width:32px;height:32px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--g);font-size:.85rem">2</div>
-        <div>
-          <div style="font-weight:600;margin-bottom:2px">Book Solar Drying</div>
-          <div style="color:var(--tx2);font-size:.82rem">Schedule IoT-powered drying at nearest hub</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--bd)">
-        <div style="width:32px;height:32px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--g);font-size:.85rem">3</div>
-        <div>
-          <div style="font-weight:600;margin-bottom:2px">Get Quality Passport</div>
-          <div style="color:var(--tx2);font-size:.82rem">Moisture & aflatoxin tested, QR certificate issued</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0">
-        <div style="width:32px;height:32px;background:rgba(212,175,55,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--ad);font-size:.85rem">4</div>
-        <div>
-          <div style="font-weight:600;margin-bottom:2px">List on Marketplace</div>
-          <div style="color:var(--tx2);font-size:.82rem">Sell certified produce to verified buyers</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-bolt" style="color:var(--a)"></i> Quick Actions</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <a href="/marketplace" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
-        <div style="font-size:1.8rem;margin-bottom:8px">🛒</div>
-        <div style="font-weight:600;font-size:.85rem">Marketplace</div>
-        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Browse & sell</div>
-      </a>
-      <a href="/ai-advisor" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
-        <div style="font-size:1.8rem;margin-bottom:8px">🤖</div>
-        <div style="font-weight:600;font-size:.85rem">AI Advisor</div>
-        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Ask anything</div>
-      </a>
-      <a href="/ai-disease" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
-        <div style="font-size:1.8rem;margin-bottom:8px">🦠</div>
-        <div style="font-weight:600;font-size:.85rem">Disease Scan</div>
-        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Upload photo</div>
-      </a>
-      <a href="/iot-dryer" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
-        <div style="font-size:1.8rem;margin-bottom:8px">📡</div>
-        <div style="font-weight:600;font-size:.85rem">IoT Monitor</div>
-        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Live data</div>
-      </a>
-      <a href="/dryer" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
-        <div style="font-size:1.8rem;margin-bottom:8px">☀️</div>
-        <div style="font-weight:600;font-size:.85rem">Solar Drying</div>
-        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Book service</div>
-      </a>
-      <a href="/finance" class="card" style="text-align:center;padding:20px 12px;text-decoration:none;color:inherit;cursor:pointer">
-        <div style="font-size:1.8rem;margin-bottom:8px">💳</div>
-        <div style="font-weight:600;font-size:.85rem">Wallet</div>
-        <div style="font-size:.72rem;color:var(--tx2);margin-top:2px">Payments</div>
-      </a>
-    </div>
-  </div>
-</div>
-
-<!-- Account Info -->
-<div class="card" style="margin-top:24px">
-  <h3 style="font-weight:800;margin-bottom:16px"><i class="fas fa-user-circle" style="color:var(--g)"></i> Your Account</h3>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;font-size:.9rem">
-    <div>
-      <div style="color:var(--tx2);font-size:.78rem;margin-bottom:4px">Name</div>
-      <div style="font-weight:600"><%= typeof user !== 'undefined' && user ? user.name : 'Not set' %></div>
-    </div>
-    <div>
-      <div style="color:var(--tx2);font-size:.78rem;margin-bottom:4px">Phone</div>
-      <div style="font-weight:600"><%= typeof user !== 'undefined' && user ? user.phone : 'Not set' %></div>
-    </div>
-    <div>
-      <div style="color:var(--tx2);font-size:.78rem;margin-bottom:4px">Role</div>
-      <div><span class="tag tag-g"><%= typeof user !== 'undefined' && user ? user.role : 'FARMER' %></span></div>
-    </div>
-    <div>
-      <div style="color:var(--tx2);font-size:.78rem;margin-bottom:4px">Status</div>
-      <div><span class="tag tag-g">Active</span></div>
-    </div>
-  </div>
-</div>
+<% } %> <!-- Produce table -->
+<div class="card" style="margin-top:20px"> <h3 style="font-weight:800;margin-bottom:14px">My Produce</h3> <% if (products.length === 0) { %> <div style="text-align:center;padding:30px;color:var(--tx2);font-size:.88rem"> No produce registered yet. Use "Register Produce" above to add your first batch.
+    </div> <% } else { %> <div class="tbl-wrap"> <table> <thead><tr><th>Crop</th><th>Quantity</th><th>Price</th><th>Quality</th><th>Status</th><th>Created</th></tr></thead> <tbody> <% products.forEach(function(p){ %> <tr> <td><strong><%= p.crop %></strong></td> <td><%= parseFloat(p.quantity).toLocaleString() %> <%= p.unit %></td> <td>UGX <%= parseFloat(p.price_per_unit).toLocaleString() %>/<%= p.unit %></td> <td> <% if (p.quality_status === 'APPROVED') { %><span class="tag tag-g">Approved</span> <% } else if (p.quality_status === 'REJECTED') { %><span class="tag tag-r">Rejected</span> <% } else { %><span class="tag tag-a">Pending</span><% } %> </td> <td><%= p.available ? 'Listed' : 'Unlisted' %></td> <td><%= new Date(p.created_at).toLocaleDateString() %></td> </tr> <% }) %> </tbody> </table> </div> <% } %>
+</div> <!-- Passports -->
+<div class="card" style="margin-top:20px"> <h3 style="font-weight:800;margin-bottom:14px">My Digital Quality Passports</h3> <% if (passports.length === 0) { %> <div style="text-align:center;padding:30px;color:var(--tx2);font-size:.88rem"> No passports yet. Record quality information for a batch to issue one.
+    </div> <% } else { %> <div class="tbl-wrap"> <table> <thead><tr><th>Batch</th><th>Crop</th><th>Quantity</th><th>Moisture</th><th>Aflatoxin</th><th>Grade</th><th>Source</th><th></th></tr></thead> <tbody> <% passports.forEach(function(pp){ %> <tr> <td><strong><%= pp.batch_number %></strong></td> <td><%= pp.crop_type %></td> <td><%= parseFloat(pp.quantity).toLocaleString() %></td> <td><%= pp.moisture_level != null ? pp.moisture_level + '%' : '—' %></td> <td><%= pp.aflatoxin_result != null ? pp.aflatoxin_result + ' ppb' : '—' %></td> <td> <% if (pp.quality_grade === 'A' || pp.quality_grade === 'B') { %><span class="tag tag-g">Grade <%= pp.quality_grade %></span> <% } else if (pp.quality_grade === 'REJECTED') { %><span class="tag tag-r">Rejected</span> <% } else { %><span class="tag tag-a"><%= pp.quality_grade || 'Pending' %></span><% } %> </td> <td><span style="font-size:.75rem;color:var(--tx2)"><%= pp.record_source === 'demo' ? 'Demonstration' : (pp.testing_partner_id ? 'Partner' : 'Self-entered') %></span></td> <td><a href="/passport/<%= pp.batch_number %>" class="btn btn-o btn-sm">View</a></td> </tr> <% }) %> </tbody> </table> </div> <% } %>
+</div> <!-- Orders received -->
+<div class="card" style="margin-top:20px"> <h3 style="font-weight:800;margin-bottom:14px">Marketplace Activity — Order Requests</h3> <% if (orders.length === 0) { %> <div style="text-align:center;padding:30px;color:var(--tx2);font-size:.88rem"> No order requests yet. Approved, listed batches attract buyers on the marketplace.
+    </div> <% } else { %> <div class="tbl-wrap"> <table> <thead><tr><th>Date</th><th>Buyer</th><th>Crop</th><th>Quantity</th><th>Value</th><th>Status</th></tr></thead> <tbody> <% orders.forEach(function(o){ %> <tr> <td><%= new Date(o.created_at).toLocaleDateString() %></td> <td><%= o.buyer_name %> <span style="color:var(--tx2);font-size:.75rem"><%= o.buyer_phone %></span></td> <td><%= o.crop %></td> <td><%= parseFloat(o.quantity).toLocaleString() %> <%= o.unit %></td> <td><strong>UGX <%= parseFloat(o.total_amount).toLocaleString() %></strong></td> <td> <% if (o.status === 'pending') { %><span class="tag tag-a">Pending</span> <% } else if (o.status === 'completed') { %><span class="tag tag-g">Completed</span> <% } else if (o.status === 'confirmed') { %><span class="tag tag-b">Confirmed</span> <% } else { %><span class="tag tag-r">Cancelled</span><% } %> </td> </tr> <% }) %> </tbody> </table> </div> <% } %>
+</div> <style> table{width:100%;border-collapse:collapse;font-size:.84rem}
+  thead th{text-align:left;padding:10px 12px;background:var(--bg2);color:var(--tx2);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+  tbody td{padding:10px 12px;border-top:1px solid var(--bd);vertical-align:middle}
+  tbody tr:hover{background:var(--bg2)}
+  input[type=number],input[type=text],select{padding:10px 14px;border:1px solid var(--bd);border-radius:12px;font-size:.85rem;background:var(--bg);color:var(--tx);outline:none;width:100%}
+  .ai-advice-content a{color:var(--g);font-weight:700}
+</style>

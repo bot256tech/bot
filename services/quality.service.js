@@ -1,23 +1,37 @@
 const QualityPassport = require('../models/QualityPassport');
 const Product = require('../models/Product');
 const crypto = require('crypto');
+const logger = require('../config/logger');
+
+function baseUrl() {
+  return (process.env.APP_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
+}
 
 class QualityService {
+  /**
+   * Issue a Digital Quality Passport for a farmer's batch.
+   * record_source distinguishes 'user' (farmer-entered), 'partner'
+   * (partner-entered) and 'demo' (clearly identified demonstration data).
+   */
   static async createPassport(data) {
     const year = new Date().getFullYear();
     const randomHex = crypto.randomBytes(4).toString('hex').toUpperCase();
     const batch_number = `AGR-${year}-${randomHex}`;
-    const qr_code = `https://agrichain360.com/passport/${batch_number}`;
+    const qr_code = `${baseUrl()}/passport/${batch_number}`;
 
     const passport = await QualityPassport.create({
       batch_number,
       farmer_id: data.farmer_id,
       crop_type: data.crop_type,
       quantity: data.quantity,
-      moisture_level: data.moisture_level || null,
-      aflatoxin_result: data.aflatoxin_result || null,
+      moisture_level: data.moisture_level !== undefined && data.moisture_level !== null && data.moisture_level !== ''
+        ? data.moisture_level : null,
+      aflatoxin_result: data.aflatoxin_result !== undefined && data.aflatoxin_result !== null && data.aflatoxin_result !== ''
+        ? data.aflatoxin_result : null,
       quality_grade: data.quality_grade || null,
       testing_partner_id: data.testing_partner_id || null,
+      drying_center: data.drying_center || null,
+      record_source: data.record_source || 'user',
       qr_code
     });
 
@@ -48,9 +62,11 @@ class QualityService {
       quality_grade
     );
 
+    // Keep the linked listing in sync with the batch grade
     if (passport && passport.farmer_id) {
-      const productStatus = (quality_grade === 'A' || quality_grade === 'B')
-        ? 'APPROVED'
+      const productStatus =
+        quality_grade === 'A' || quality_grade === 'B' ? 'APPROVED'
+        : quality_grade === 'C' ? 'PENDING'
         : 'REJECTED';
 
       try {
@@ -60,13 +76,20 @@ class QualityService {
           productStatus
         );
       } catch (err) {
-        console.error('Failed to update product quality status:', err.message);
+        logger.warn('Failed to update product quality status', { error: err.message });
       }
     }
 
     return passport;
   }
 
+  /**
+   * Deterministic grading rules (documented on the passport verification page):
+   *   A: moisture <= 13% and aflatoxin <= 5 ppb
+   *   B: moisture <= 14% and aflatoxin <= 10 ppb
+   *   C: moisture <= 15% and aflatoxin <= 20 ppb
+   *   REJECTED beyond those limits
+   */
   static determineGrade(moisture_level, aflatoxin_result) {
     const moisture = parseFloat(moisture_level);
     const aflatoxin = parseFloat(aflatoxin_result);

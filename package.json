@@ -1,13 +1,14 @@
 {
   "name": "agrichain360",
-  "version": "2.0.0",
-  "description": "AGRICHAIN 360™ — AgriTech Ecosystem: Marketplace, Digital Quality Passport, Partnership Network, IoT & AI | Uganda",
+  "version": "3.1.0",
+  "description": "AGRICHAIN 360\u2122 \u2014 AgriTech Ecosystem: Marketplace, Digital Quality Passport, Partnership Network, IoT & AI | Uganda",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "migrate": "node database/migrate.js",
-    "build": "echo 'Static site — no build step required'"
+    "build": "echo 'Static site \u2014 no build step required'",
+    "seed": "node scripts/seed-demo.js"
   },
   "keywords": [
     "agriculture",

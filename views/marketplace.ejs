@@ -1,140 +1,18 @@
-<div class="card mb20">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-    <h3 style="font-weight:800">🛒 AgriTrade Marketplace — Live Listings</h3>
-    
-    <!-- Filters -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <select id="filterCrop" class="btn-o btn-sm" style="padding:6px 12px" onchange="applyFilters()">
-        <option value="">All Crops</option>
-        <option value="Maize">Maize</option>
-        <option value="Groundnuts">Groundnuts</option>
-        <option value="Coffee">Coffee</option>
-        <option value="Cocoa">Cocoa</option>
-      </select>
-      
-      <select id="filterLocation" class="btn-o btn-sm" style="padding:6px 12px" onchange="applyFilters()">
-        <option value="">All Locations</option>
-        <option value="Jinja">Jinja</option>
-        <option value="Iganga">Iganga</option>
-        <option value="Kamuli">Kamuli</option>
-        <option value="Mayuge">Mayuge</option>
-      </select>
-      
-      <select id="filterGrade" class="btn-o btn-sm" style="padding:6px 12px" onchange="applyFilters()">
-        <option value="">All Grades</option>
-        <option value="Grade A">Grade A</option>
-        <option value="Screen 15">Screen 15</option>
-      </select>
-      
-      <input id="marketplaceSearch" type="text" placeholder="Search..." value="<%= query %>" style="width:200px" onkeyup="applyFilters()">
-    </div>
-  </div>
-  
-  <div class="tbl-wrap">
-    <table id="marketplaceTable">
-      <thead>
-        <tr>
-          <th>Crop</th>
-          <th>Grade</th>
-          <th>Price/kg</th>
-          <th>Moisture</th>
-          <th>Tons</th>
-          <th>Location</th>
-          <th>Farmer</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% listings.forEach(function(l, index) { %>
-        <tr data-crop="<%= l.crop %>" data-location="<%= l.location %>" data-grade="<%= l.grade %>">
-          <td><strong><%= l.crop %></strong></td>
-          <td><span class="tag tag-g"><%= l.grade %></span></td>
-          <td><strong>UGX <%= l.price.toLocaleString() %></strong></td>
-          <td><%= l.moisture %></td>
-          <td><%= l.tons %> tons</td>
-          <td><%= l.location %></td>
-          <td><%= l.farmer %></td>
-          <td>
-            <button class="btn btn-p btn-sm" onclick="handleBuy('<%= l.crop %>', <%= l.tons %>, <%= l.price %>, '<%= l.location %>', '<%= encodeURIComponent(l.farmer) %>')">Buy</button>
-            <a href="/passport/B247391" class="btn btn-o btn-sm" style="margin-left:4px">Passport</a>
-          </td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Stats -->
-<div class="grid grid3">
-  <div class="card"><div style="text-align:center"><div style="font-size:2rem">6</div><div style="color:var(--tx2)">Active Listings</div></div></div>
-  <div class="card"><div style="text-align:center"><div style="font-size:2rem">70</div><div style="color:var(--tx2)">Total Tons Available</div></div></div>
-  <div class="card"><div style="text-align:center"><div style="font-size:2rem">4</div><div style="color:var(--tx2)">Export-Ready</div></div></div>
-</div>
-
-<script>
-function applyFilters() {
-  const cropFilter = document.getElementById('filterCrop').value;
-  const locationFilter = document.getElementById('filterLocation').value;
-  const gradeFilter = document.getElementById('filterGrade').value;
-  const searchTerm = document.getElementById('marketplaceSearch').value.toLowerCase();
-  
-  const rows = document.querySelectorAll('#marketplaceTable tbody tr');
-  
-  rows.forEach(row => {
-    const crop = row.getAttribute('data-crop');
-    const location = row.getAttribute('data-location');
-    const grade = row.getAttribute('data-grade');
-    const text = row.textContent.toLowerCase();
-    
-    const matchesCrop = !cropFilter || crop === cropFilter;
-    const matchesLocation = !locationFilter || location === locationFilter;
-    const matchesGrade = !gradeFilter || grade === gradeFilter;
-    const matchesSearch = !searchTerm || text.includes(searchTerm);
-    
-    row.style.display = (matchesCrop && matchesLocation && matchesGrade && matchesSearch) ? '' : 'none';
-  });
-}
-
-function handleBuy(crop, tons, price, location, farmer) {
-  // Check if user is logged in (simple check via session simulation)
-  fetch('/api/check-login')
-    .then(res => res.json())
-    .then(data => {
-      if (data.loggedIn) {
-        window.location.href = `/checkout?crop=${crop}&tons=${tons}&price=${price}&location=${location}&farmer=${farmer}`;
-      } else {
-        showLoginModal(crop, tons, price, location, farmer);
-      }
-    })
-    .catch(() => {
-      // Fallback: show login modal
-      showLoginModal(crop, tons, price, location, farmer);
-    });
-}
-
-function showLoginModal(crop, tons, price, location, farmer) {
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center';
-  modal.innerHTML = `
-    <div class="card" style="width:420px;max-width:90%">
-      <h3 style="margin-bottom:12px">Login Required</h3>
-      <p style="color:var(--tx2);margin-bottom:20px">You need to be logged in to make a purchase.</p>
-      
-      <div style="display:flex;gap:10px;margin-bottom:16px">
-        <a href="/login?redirect=/checkout?crop=${crop}&tons=${tons}&price=${price}&location=${location}&farmer=${farmer}" 
-           class="btn btn-p" style="flex:1;text-align:center">Login</a>
-        <a href="/signup" class="btn btn-o" style="flex:1;text-align:center">Sign Up</a>
-      </div>
-      
-      <div style="text-align:center">
-        <button onclick="this.closest('.card').parentElement.remove()" class="btn btn-o btn-sm">Cancel</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-}
-
-// Make sure the original search still works
-document.getElementById('marketplaceSearch')?.addEventListener('input', applyFilters);
-</script>
+<!-- Marketplace — database-backed listings -->
+<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px"> <div> <h2 style="font-weight:800;margin-bottom:4px">Marketplace</h2> <div style="color:var(--tx2);font-size:.9rem"> Verified agricultural produce from registered farmers across the Busoga region
+    </div> </div> <a href="/verify" class="btn btn-o btn-sm"><i class="fas fa-certificate"></i> Verify a Passport</a>
+</div> <% if (data.success) { %> <div style="background:#e8f5e9;border:1px solid #4caf50;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#1b5e20"> <i class="fas fa-check-circle"></i> <%= data.success %> </div>
+<% } %>
+<% if (data.error) { %> <div style="background:#fff3e0;border:1px solid #ff9800;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#e65100"> <i class="fas fa-exclamation-circle"></i> <%= data.error %> </div>
+<% } %> <!-- Summary -->
+<div class="grid grid3" style="margin-bottom:20px"> <div class="metric"> <div class="metric-val"><%= data.stats ? data.stats.listings : 0 %></div> <div class="metric-lbl">Active Listings</div> </div> <div class="metric"> <div class="metric-val"><%= data.stats ? Math.round((data.stats.total_kg || 0)).toLocaleString() : 0 %></div> <div class="metric-lbl">Kilograms Available</div> </div> <div class="metric"> <div class="metric-val" style="color:var(--g)"><%= data.stats ? data.stats.certified : 0 %></div> <div class="metric-lbl">Certified Batches (Grade A/B)</div> </div>
+</div> <!-- Filters -->
+<div class="card mb20" style="margin-bottom:20px"> <form method="GET" action="/marketplace" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"> <input type="text" name="q" placeholder="Search crop, district or farmer" value="<%= data.query %>" style="flex:1;min-width:200px"> <select name="crop" style="min-width:140px"> <option value="">All crops</option> <% (data.crops || []).forEach(function(c){ %> <option value="<%= c %>" <%= data.cropFilter === c ? 'selected' : '' %>><%= c %></option> <% }) %> </select> <select name="district" style="min-width:140px"> <option value="">All districts</option> <% (data.districts || []).forEach(function(d){ %> <option value="<%= d %>" <%= data.districtFilter === d ? 'selected' : '' %>><%= d %></option> <% }) %> </select> <button type="submit" class="btn btn-p btn-sm"><i class="fas fa-search"></i> Search</button> <a href="/marketplace" class="btn btn-o btn-sm">Reset</a> </form>
+</div> <!-- Listings -->
+<div class="card"> <% if (!data.products || data.products.length === 0) { %> <div style="text-align:center;padding:50px 20px"> <i class="fas fa-seedling" style="font-size:2.4rem;color:var(--tx2);opacity:.5"></i> <h3 style="font-weight:800;margin-top:14px">No listings match your search</h3> <p style="color:var(--tx2);font-size:.88rem;max-width:420px;margin:8px auto 16px"> Try a different crop or district, or clear the filters to see everything currently available.
+      </p> <a href="/marketplace" class="btn btn-o btn-sm">Clear filters</a> </div> <% } else { %> <div class="tbl-wrap"> <table> <thead> <tr> <th>Crop</th> <th>Quantity</th> <th>Price</th> <th>Quality</th> <th>Moisture</th> <th>Location</th> <th>Farmer</th> <th>Passport</th> <th></th> </tr> </thead> <tbody> <% data.products.forEach(function(p){ %> <tr> <td><strong><%= p.crop %></strong></td> <td><%= parseFloat(p.quantity).toLocaleString() %> <%= p.unit %></td> <td><strong>UGX <%= parseFloat(p.price_per_unit).toLocaleString() %></strong>/<%= p.unit %></td> <td> <% if (p.quality_status === 'APPROVED') { %> <span class="tag tag-g"><i class="fas fa-check"></i> Approved</span> <% } else if (p.quality_status === 'REJECTED') { %> <span class="tag tag-r">Rejected</span> <% } else { %> <span class="tag tag-a">Pending</span> <% } %> <% if (p.quality_grade) { %><span class="tag tag-b">Grade <%= p.quality_grade %></span><% } %> </td> <td><%= p.moisture_level != null ? p.moisture_level + '%' : '—' %></td> <td><%= [p.village, p.district].filter(Boolean).join(', ') || '—' %></td> <td><%= p.farmer_name %></td> <td> <% if (p.batch_number) { %> <a href="/passport/<%= p.batch_number %>" class="btn btn-o btn-sm"><i class="fas fa-certificate"></i> <%= p.batch_number %></a> <% } else { %> <span style="color:var(--tx2);font-size:.8rem">Not yet issued</span> <% } %> </td> <td><a href="/product/<%= p.id %>" class="btn btn-p btn-sm">View</a></td> </tr> <% }) %> </tbody> </table> </div> <% } %>
+</div> <style> table{width:100%;border-collapse:collapse;font-size:.85rem}
+  thead th{text-align:left;padding:12px 14px;background:var(--bg2);color:var(--tx2);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+  tbody td{padding:12px 14px;border-top:1px solid var(--bd);vertical-align:middle}
+  tbody tr:hover{background:var(--bg2)}
+</style>

@@ -1,4 +1,5 @@
-const API_BASE = 'https://agrichain360.onrender.com/api/v1';
+// Set EXPO_PUBLIC_API_BASE when building; defaults to the pilot server
+const API_BASE = (process.env.EXPO_PUBLIC_API_BASE || 'http://16.192.159.6') + '/api/v1';
 
 class ApiService {
   constructor() {

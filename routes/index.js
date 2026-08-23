@@ -1,408 +1,234 @@
 const express = require('express');
 const router = express.Router();
-const dataService = require('../data/index');
 const path = require('path');
+const db = require('../database/connection');
+const { requireWebAuth } = require('../middleware/webAuth');
+const { authLimiter, registerLimiter } = require('../config/rateLimiter');
 const ussdRouter = require('./ussd');
-const userService = require('../services/userService');
 
-// Landing Page — standalone Bootstrap page (no layout.ejs wrapper)
+const Farmer = require('../models/Farmer');
+const Product = require('../models/Product');
+const QualityPassport = require('../models/QualityPassport');
+const QualityService = require('../services/quality.service');
+const OrderService = require('../services/order.service');
+
+// ─────────────────────────────────────────────────────
+// PUBLIC PAGES
+// ─────────────────────────────────────────────────────
+
+// Landing page
 router.get('/', (req, res) => {
-  res.render('bootstrapLanding');
+  res.render('bootstrapLanding', { user: req.session ? req.session.user : null });
 });
 
-// Old landing page (accessible at /home)
-router.get('/home', (req, res) => {
-  res.render('layout', {
-    title: 'AGRICHAIN 360™ — Premium Post-Harvest Platform',
-    page: 'landingPage',
-    data: {},
-    body: 'landingPage',
-  });
-});
+// Legacy landing → redirect
+router.get('/home', (req, res) => res.redirect('/'));
 
-// Farmer Portal (Protected)
-router.get('/farmer', (req, res) => {
-  if (!req.session || !req.session.user) {
-    return res.redirect('/login?redirect=/farmer');
-  }
-  res.render('layout', {
-    title: 'Farmer Portal — AGRICHAIN 360',
-    page: 'farmer',
-    data: {
-      farmers: dataService.getFarmers(),
-      selectedFarmer: dataService.getFarmerById('F001'),
-      user: req.session.user
-    },
-    body: 'farmer',
-  });
-});
-
-// AI Crop Advisor
-router.get('/ai-advisor', (req, res) => {
-  res.render('layout', {
-    title: 'AI Crop Advisor — AGRICHAIN 360',
-    page: 'ai-advisor',
-    data: {
-      aiAdvice: dataService.getAiAdvice(),
-    },
-    body: 'aiAdvisor',
-  });
-});
-
-// AI Disease Detection
-router.get('/ai-disease', (req, res) => {
-  res.render('layout', {
-    title: 'AI Disease Detection — AGRICHAIN 360',
-    page: 'ai-disease',
-    data: {},
-    body: 'aiDisease',
-  });
-});
-
-// AI Growth & Yield Prediction
-router.get('/ai-growth', (req, res) => {
-  res.render('layout', {
-    title: 'AI Growth & Yield Prediction — AGRICHAIN 360',
-    page: 'ai-growth',
-    data: {},
-    body: 'aiGrowth',
-  });
-});
-
-// IoT Smart Dryer (Real MQTT version)
-router.get('/iot-dryer', (req, res) => {
-  res.render('layout', {
-    title: 'IoT Smart Solar Dryer — AGRICHAIN 360',
-    page: 'iot-dryer',
-    data: {},
-    body: 'iotDryerReal',
-  });
-});
-
-// Solar Drying
-router.get('/dryer', (req, res) => {
-  res.render('layout', {
-    title: 'Solar Drying System — AGRICHAIN 360',
-    page: 'dryer',
-    data: {
-      pricing: dataService.getPricingTable(),
-    },
-    body: 'dryer',
-  });
-});
-
-// Transport Hub
-router.get('/transport', (req, res) => {
-  res.render('layout', {
-    title: 'Transport Hub — AGRICHAIN 360',
-    page: 'transport',
-    data: {
-      transport: dataService.getTransportRoutes(),
-    },
-    body: 'transport',
-  });
-});
-
-// IoT Warehouse
-router.get('/warehouse', (req, res) => {
-  res.render('layout', {
-    title: 'IoT Warehouse — AGRICHAIN 360',
-    page: 'warehouse',
-    data: {},
-    body: 'warehouse',
-  });
-});
-
-// Marketplace
-router.get('/marketplace', (req, res) => {
-  const query = req.query.q || '';
-  const listings = query
-    ? dataService.searchMarketplace(query)
-    : dataService.getMarketplaceListings();
-  res.render('layout', {
-    title: 'AgriTrade Marketplace — AGRICHAIN 360',
-    page: 'marketplace',
-    data: {
-      listings,
-      query,
-    },
-    body: 'marketplace',
-  });
-});
-
-// Buyer Portal
-router.get('/buyer', (req, res) => {
-  res.render('layout', {
-    title: 'Buyer Portal — AGRICHAIN 360',
-    page: 'buyer',
-    data: {
-      buyers: dataService.getBuyers(),
-      selectedBuyer: dataService.getBuyerByName('GrainCorp East Africa'),
-    },
-    body: 'buyer',
-  });
-});
-
-// Finance & Wallet
-router.get('/finance', (req, res) => {
-  res.render('layout', {
-    title: 'Finance & Wallet — AGRICHAIN 360',
-    page: 'finance',
-    data: {
-      transactions: dataService.getTransactions(),
-      stats: dataService.getPlatformStats(),
-    },
-    body: 'finance',
-  });
-});
-
-// Analytics
-router.get('/analytics', (req, res) => {
-  res.render('layout', {
-    title: 'Analytics Dashboard — AGRICHAIN 360',
-    page: 'analytics',
-    data: {
-      analytics: dataService.getAnalytics(),
-    },
-    body: 'analytics',
-  });
-});
-
-// Investor Deck
-router.get('/investor', (req, res) => {
-  res.render('layout', {
-    title: 'Investor Deck — AGRICHAIN 360',
-    page: 'investor',
-    data: { user: req.session.user },
-    body: 'investor',
-  });
-});
-
-// Pricing / Subscription Plans
-router.get('/pricing', (req, res) => {
-  res.render('layout', {
-    title: 'Pricing & Plans — AGRICHAIN 360',
-    page: 'pricing',
-    data: {
-      pricing: dataService.getPricingTable(),
-      user: req.session.user,
-    },
-    body: 'pricing',
-  });
-});
-
-// Lab Dashboard
-router.get('/lab-dashboard', (req, res) => {
-  res.render('layout', {
-    title: 'Laboratory Dashboard — AGRICHAIN 360',
-    page: 'lab-dashboard',
-    data: { user: req.session.user },
-    body: 'labDashboard',
-  });
-});
-
-// Field Officer Dashboard
-router.get('/field-officer', (req, res) => {
-  res.render('layout', {
-    title: 'Field Officer Dashboard — AGRICHAIN 360',
-    page: 'field-officer',
-    data: { user: req.session.user },
-    body: 'fieldOfficer',
-  });
-});
-
-// Quality Officer Dashboard
-router.get('/quality-officer', (req, res) => {
-  res.render('layout', {
-    title: 'Quality Officer Dashboard — AGRICHAIN 360',
-    page: 'quality-officer',
-    data: { user: req.session.user },
-    body: 'qualityOfficer',
-  });
-});
-
-// Role Selection Page
+// Role selection page
 router.get('/roles', (req, res) => {
   res.render('layout', {
-    title: 'Select Role — AGRICHAIN 360',
+    title: 'Join AGRICHAIN 360',
     page: 'roles',
     data: {},
     body: 'roles',
   });
 });
 
-// USSD Routes
-router.use('/ussd', ussdRouter);
-
-// MQTT Gateway
-const mqttGateway = require('../mqtt-gateway');
-router.use('/mqtt', express.static('mqtt-gateway')); // expose gateway API
-router.get('/mqtt/devices', (req, res) => {
-  res.json(Object.values(mqttGateway.devices || {}));
-});
-router.get('/mqtt/devices/:id', (req, res) => {
-  const data = mqttGateway.sensorData?.[req.params.id];
-  res.json(data || { error: 'No data' });
-});
-router.post('/mqtt/devices/:id/command', (req, res) => {
-  mqttGateway.sendCommand(req.params.id, req.body);
-  res.json({ success: true });
+// Pricing (pilot fee schedule)
+router.get('/pricing', (req, res) => {
+  res.render('layout', {
+    title: 'Pricing & Fees — AGRICHAIN 360',
+    page: 'pricing',
+    data: {},
+    body: 'pricing',
+  });
 });
 
-// Download Proposal
-router.get('/download/proposal', (req, res) => {
-  const filePath = path.join(__dirname, '..', 'public', 'downloads', 'AGRICHAIN_360_AYuTe_Proposal.pdf');
-  res.download(filePath, 'AGRICHAIN_360_AYuTe_Proposal.pdf');
+// AI Decision Advisor
+router.get('/ai-advisor', (req, res) => {
+  res.render('layout', {
+    title: 'AI Decision Advisor — AGRICHAIN 360',
+    page: 'ai-advisor',
+    data: { user: req.session ? req.session.user : null },
+    body: 'aiAdvisor',
+  });
 });
 
-// Download App Page
-router.get('/download-app', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'download-app.html'));
+// ─────────────────────────────────────────────────────
+// MARKETPLACE (public)
+// ─────────────────────────────────────────────────────
+
+router.get('/marketplace', async (req, res, next) => {
+  try {
+    const { q, crop, district } = req.query;
+    const values = [];
+    const where = ['p.available = true'];
+    let n = 1;
+
+    if (q) {
+      where.push(`(LOWER(p.crop) LIKE LOWER($${n}) OR LOWER(f.district) LIKE LOWER($${n}) OR LOWER(u.name) LIKE LOWER($${n}))`);
+      values.push(`%${q}%`);
+      n++;
+    }
+    if (crop) {
+      where.push(`LOWER(p.crop) = LOWER($${n})`);
+      values.push(crop);
+      n++;
+    }
+    if (district) {
+      where.push(`LOWER(f.district) = LOWER($${n})`);
+      values.push(district);
+      n++;
+    }
+
+    const result = await db.query(
+      `SELECT p.*, f.district, f.village, u.name AS farmer_name,
+              qp.batch_number, qp.quality_grade, qp.moisture_level, qp.aflatoxin_result,
+              qp.record_source AS passport_source
+       FROM products p
+       JOIN farmers f ON p.farmer_id = f.id
+       JOIN users u ON f.user_id = u.id
+       LEFT JOIN LATERAL (
+         SELECT * FROM quality_passports q
+         WHERE q.farmer_id = p.farmer_id AND LOWER(q.crop_type) = LOWER(p.crop)
+         ORDER BY q.created_at DESC LIMIT 1
+       ) qp ON true
+       WHERE ${where.join(' AND ')}
+       ORDER BY p.created_at DESC
+       LIMIT 100;`,
+      values
+    );
+
+    // Distinct filter options
+    const crops = await db.query(`SELECT DISTINCT crop FROM products WHERE available = true ORDER BY crop;`);
+    const districts = await db.query(`SELECT DISTINCT f.district FROM products p JOIN farmers f ON p.farmer_id = f.id WHERE p.available = true AND f.district IS NOT NULL ORDER BY f.district;`);
+
+    // Summary stats (real)
+    const stats = await db.query(`
+      SELECT
+        (SELECT COUNT(*) FROM products WHERE available = true)::int AS listings,
+        (SELECT COALESCE(SUM(quantity), 0) FROM products WHERE available = true)::int AS total_kg,
+        (SELECT COUNT(*) FROM quality_passports WHERE quality_grade IN ('A','B'))::int AS certified
+    `);
+
+    res.render('layout', {
+      title: 'Marketplace — AGRICHAIN 360',
+      page: 'marketplace',
+      data: {
+        products: result.rows,
+        crops: crops.rows.map((r) => r.crop),
+        districts: districts.rows.map((r) => r.district),
+        stats: stats.rows[0],
+        query: q || '',
+        cropFilter: crop || '',
+        districtFilter: district || '',
+        user: req.session ? req.session.user : null
+      },
+      body: 'marketplace',
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
-// Digital Quality Passport — Public Verification Page
+// Product detail (public) + order form for buyers
+router.get('/product/:id', async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).render('layout', {
+        title: 'Not Found — AGRICHAIN 360',
+        page: '404', data: {}, body: 'errorPage'
+      });
+    }
+    const passport = await QualityPassport.findLatestByFarmerAndCrop(product.farmer_id, product.crop);
+    res.render('layout', {
+      title: `${product.crop} — AGRICHAIN 360 Marketplace`,
+      page: 'productDetail',
+      data: { product, passport, user: req.session ? req.session.user : null },
+      body: 'productDetail',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─────────────────────────────────────────────────────
+// QUALITY PASSPORT VERIFICATION (public)
+// ─────────────────────────────────────────────────────
+
+router.get('/verify', (req, res) => {
+  res.render('layout', {
+    title: 'Verify a Quality Passport — AGRICHAIN 360',
+    page: 'verify',
+    data: { batch: req.query.batch || '', user: req.session ? req.session.user : null },
+    body: 'verifyPassport',
+  });
+});
+
+router.post('/verify', (req, res) => {
+  const batch = (req.body.batch || '').trim();
+  if (!batch) return res.redirect('/verify');
+  res.redirect(`/passport/${encodeURIComponent(batch)}`);
+});
+
 router.get('/passport/:batchId', async (req, res) => {
   try {
-    const QualityPassport = require('./models/QualityPassport');
-    let passport = null;
-    try {
-      passport = await QualityPassport.findByBatchNumber(req.params.batchId);
-    } catch (e) {
-      // DB not available, show demo data
-    }
+    const passport = await QualityService.verifyPassport(req.params.batchId);
     res.render('layout', {
       title: `Digital Quality Passport — ${req.params.batchId}`,
       page: 'passport',
-      data: {
-        batchId: req.params.batchId,
-        passport: passport || {
-          batch_number: req.params.batchId,
-          crop_type: 'Maize',
-          quantity: 2000,
-          moisture_level: '12.5',
-          aflatoxin_result: '4.2',
-          quality_grade: 'A',
-          created_at: new Date(),
-          verified_at: new Date(),
-        },
-      },
+      data: { batchId: req.params.batchId, passport, user: req.session ? req.session.user : null },
       body: 'passportVerify',
     });
-  } catch (error) {
+  } catch (err) {
     res.render('layout', {
-      title: `Digital Quality Passport — ${req.params.batchId}`,
+      title: 'Passport Verification',
       page: 'passport',
-      data: { batchId: req.params.batchId, passport: null, error: error.message },
+      data: { batchId: req.params.batchId, passport: null, error: err.message },
       body: 'passportVerify',
     });
   }
 });
 
-// Checkout Page
-router.get('/checkout', (req, res) => {
-  const { crop, tons, price, location, farmer } = req.query;
-  res.render('layout', {
-    title: 'Checkout — AGRICHAIN 360',
-    page: 'checkout',
-    data: { crop, tons: parseFloat(tons), price: parseFloat(price), location, farmer },
-    body: 'checkout',
-  });
-});
+// ─────────────────────────────────────────────────────
+// AUTHENTICATION (web sessions, database-backed only)
+// ─────────────────────────────────────────────────────
 
-// My Sales (Farmer)
-router.get('/my-sales', (req, res) => {
-  res.render('layout', {
-    title: 'My Sales — AGRICHAIN 360',
-    page: 'my-sales',
-    data: {},
-    body: 'mySales',
-  });
-});
-
-// My Listings (Farmer) - Protected
-router.get('/my-listings', (req, res) => {
-  if (!req.session || !req.session.user) {
-    return res.redirect('/login?redirect=/my-listings');
-  }
-  res.render('layout', {
-    title: 'My Listings — AGRICHAIN 360',
-    page: 'my-listings',
-    data: {},
-    body: 'myListings',
-  });
-});
-
-// Buyer Order History - Protected
-router.get('/order-history', (req, res) => {
-  if (!req.session || !req.session.user) {
-    return res.redirect('/login?redirect=/order-history');
-  }
-  res.render('layout', {
-    title: 'Order History — AGRICHAIN 360',
-    page: 'order-history',
-    data: {},
-    body: 'orderHistory',
-  });
-});
-
-// Farmer Dashboard
-router.get('/farmer-dashboard', (req, res) => {
-  res.render('layout', {
-    title: 'Farmer Dashboard — AGRICHAIN 360',
-    page: 'farmer-dashboard',
-    data: { user: req.session.user },
-    body: 'farmerDashboard',
-  });
-});
-
-// Buyer Dashboard
-router.get('/buyer-dashboard', (req, res) => {
-  res.render('layout', {
-    title: 'Buyer Dashboard — AGRICHAIN 360',
-    page: 'buyer-dashboard',
-    data: { user: req.session.user },
-    body: 'buyerDashboard',
-  });
-});
-
-// Admin Dashboard
-router.get('/admin-dashboard', (req, res) => {
-  res.render('layout', {
-    title: 'Admin Dashboard — AGRICHAIN 360',
-    page: 'admin-dashboard',
-    data: { user: req.session.user },
-    body: 'adminDashboard',
-  });
-});
-
-// Login Page
 router.get('/login', (req, res) => {
+  if (req.session && req.session.user) return res.redirect('/login-home');
   res.render('layout', {
     title: 'Login — AGRICHAIN 360',
     page: 'login',
-    data: { redirect: req.query.redirect || '/', error: req.query.error || '' },
+    data: { redirect: req.query.redirect || '', error: req.query.error || '', showDemo: process.env.SHOW_DEMO_CREDENTIALS !== 'false' },
     body: 'login',
   });
 });
 
-// Login Handler — works with database or session-only fallback
-router.post('/login', async (req, res) => {
+// Redirect a logged-in user to their role dashboard
+router.get('/login-home', (req, res) => {
+  const role = (req.session.user.role || '').toUpperCase();
+  if (role === 'FARMER') return res.redirect('/farmer-dashboard');
+  if (role === 'BUYER') return res.redirect('/buyer-dashboard');
+  if (role === 'ADMIN') return res.redirect('/admin-dashboard');
+  res.redirect('/marketplace');
+});
+
+router.post('/login', authLimiter, async (req, res) => {
   const phone = (req.body.phone || '').trim();
   const password = (req.body.password || '').trim();
   const redirect = req.body.redirect || '';
 
-  // Validate
-  if (!phone || phone.length < 8) {
-    return res.redirect('/login?error=Please+enter+your+phone+number');
+  if (!phone || phone.replace(/\D/g, '').length < 8) {
+    return res.redirect('/login?error=' + encodeURIComponent('Enter a valid phone number'));
   }
   if (!password) {
-    return res.redirect('/login?error=Please+enter+your+password');
+    return res.redirect('/login?error=' + encodeURIComponent('Enter your password'));
   }
 
-  // Try database login first
   try {
     const AuthService = require('../services/auth.service');
-    const result = await AuthService.loginUser(phone, password);
+    const result = await AuthService.loginUser(phone, password, req);
     const user = result.user;
 
     req.session.user = {
@@ -414,122 +240,71 @@ router.post('/login', async (req, res) => {
       dbConnected: true
     };
 
-    // Role-based redirect
+    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+      return res.redirect(redirect);
+    }
+
     const role = (user.role || '').toUpperCase();
-    let redirectTo = redirect || '/';
-    if (!redirect) {
-      if (role === 'FARMER') redirectTo = '/farmer-dashboard';
-      else if (role === 'BUYER') redirectTo = '/buyer-dashboard';
-      else if (role === 'ADMIN') redirectTo = '/admin-dashboard';
-    }
-
-    return res.redirect(redirectTo);
-
-  } catch (dbError) {
-    // Database login failed — try session-based demo login
-    console.error('DB login failed:', dbError.message);
-
-    // Demo accounts for when DB is not available
-    const demoAccounts = {
-      '+256700000000': { name: 'System Admin', role: 'ADMIN', password: 'admin123' },
-      '+256700111111': { name: 'Demo Farmer', role: 'FARMER', password: 'demo123' },
-      '+256700222222': { name: 'Demo Buyer', role: 'BUYER', password: 'demo123' },
-      '+256700333333': { name: 'Demo Partner', role: 'PARTNER', password: 'demo123' }
-    };
-
-    const demo = demoAccounts[phone];
-    if (demo && demo.password === password) {
-      req.session.user = {
-        id: Date.now(),
-        phone: phone,
-        name: demo.name,
-        role: demo.role,
-        token: 'demo-' + Date.now(),
-        dbConnected: false,
-        demoMode: true
-      };
-
-      let redirectTo = redirect || '/';
-      if (!redirect) {
-        if (demo.role === 'FARMER') redirectTo = '/farmer-dashboard';
-        else if (demo.role === 'BUYER') redirectTo = '/buyer-dashboard';
-        else if (demo.role === 'ADMIN') redirectTo = '/admin-dashboard';
-      }
-      return res.redirect(redirectTo);
-    }
-
-    // If DB error was about invalid credentials (not connection issue), show that
-    if (dbError.message.includes('Invalid') || dbError.message.includes('password')) {
-      return res.redirect('/login?error=Invalid+phone+number+or+password');
-    }
-
-    // DB not available — show helpful message
-    return res.redirect('/login?error=Database+is+connecting.+Try+demo+account:+256700111111+password+demo123');
+    if (role === 'FARMER') return res.redirect('/farmer-dashboard');
+    if (role === 'BUYER') return res.redirect('/buyer-dashboard');
+    if (role === 'ADMIN') return res.redirect('/admin-dashboard');
+    return res.redirect('/marketplace');
+  } catch (err) {
+    const msg = (err && err.message) || 'Login failed';
+    return res.redirect('/login?error=' + encodeURIComponent(msg));
   }
 });
 
-// Sign Up Page
 router.get('/signup', (req, res) => {
   res.render('layout', {
-    title: 'Sign Up — AGRICHAIN 360',
+    title: 'Create Account — AGRICHAIN 360',
     page: 'signup',
     data: { error: req.query.error || '', selectedRole: req.query.role || '' },
     body: 'signup',
   });
 });
 
-// Sign Up Handler — creates user + role-specific profile (works with or without DB)
-router.post('/signup', async (req, res) => {
-  const body = req.body || {};
-  const role = body.role || 'farmer';
-  const name = body.name || body.org_name || 'User';
-  const phone = body.phone || '';
-  const email = body.email || '';
-  const password = body.password || 'changeme123';
+const ROLE_MAP = {
+  farmer: 'FARMER', buyer: 'BUYER', partner: 'PARTNER',
+  village_agent: 'PARTNER', input_dealer: 'PARTNER', lab: 'PARTNER', quality_officer: 'PARTNER',
+  cooperative: 'BUYER', finance: 'BUYER', ngo: 'BUYER', researcher: 'BUYER',
+  field_officer: 'FARMER'
+};
 
-  // Validate required fields
-  if (!name || name.length < 2) {
-    return res.redirect('/signup?error=name');
+router.post('/signup', registerLimiter, async (req, res) => {
+  const body = req.body || {};
+  const roleKey = (body.role || 'farmer').toLowerCase();
+  const backendRole = ROLE_MAP[roleKey] || 'FARMER';
+
+  if (roleKey === 'admin') {
+    return res.redirect('/signup?error=' + encodeURIComponent('Administrator accounts are provisioned by the platform team.'));
   }
-  if (!phone || phone.length < 8) {
-    return res.redirect('/signup?error=phone');
+
+  const name = (body.name || body.org_name || '').trim();
+  const phone = (body.phone || '').trim();
+  const email = (body.email || '').trim();
+  const password = body.password || '';
+
+  if (!name || name.length < 2) {
+    return res.redirect('/signup?error=' + encodeURIComponent('Enter your full name or organisation name'));
+  }
+  if (!phone || phone.replace(/\D/g, '').length < 8) {
+    return res.redirect('/signup?error=' + encodeURIComponent('Enter a valid phone number'));
   }
   if (!password || password.length < 6) {
-    return res.redirect('/signup?error=password');
+    return res.redirect('/signup?error=' + encodeURIComponent('Password must be at least 6 characters'));
   }
-
-  // Map frontend roles to backend roles
-  const roleMap = {
-    'farmer': 'FARMER', 'buyer': 'BUYER', 'partner': 'PARTNER',
-    'village_agent': 'PARTNER', 'input_dealer': 'PARTNER',
-    'cooperative': 'BUYER', 'ngo': 'ADMIN', 'finance': 'BUYER',
-    'researcher': 'ADMIN', 'field_officer': 'FARMER',
-    'quality_officer': 'FARMER', 'lab': 'FARMER', 'admin': 'ADMIN'
-  };
-  const backendRole = roleMap[role] || 'FARMER';
-
-  // Try to create user in database
-  let userId = Date.now();
-  let token = null;
-  let dbSuccess = false;
 
   try {
     const AuthService = require('../services/auth.service');
     const result = await AuthService.registerUser({
-      name: name,
-      phone: phone,
-      email: email || null,
-      password: password,
-      role: backendRole
+      name, phone, email: email || null, password, role: backendRole
     });
-    userId = result.user.id;
-    token = result.token;
-    dbSuccess = true;
+    const userId = result.user.id;
 
-    // Create role-specific profiles in database
-    if (role === 'farmer' || role === 'field_officer' || role === 'quality_officer' || role === 'lab') {
+    // Role-specific profiles
+    if (backendRole === 'FARMER') {
       try {
-        const Farmer = require('../models/Farmer');
         const cropsArray = Array.isArray(body.crops) ? body.crops : (body.crops ? [body.crops] : []);
         await Farmer.create({
           user_id: userId,
@@ -539,100 +314,505 @@ router.post('/signup', async (req, res) => {
           farm_size: body.farm_size ? parseFloat(body.farm_size) : null,
           national_id: body.national_id || null
         });
-      } catch (e) { console.error('Farmer profile:', e.message); }
+      } catch (e) {
+        req.app.locals.logger && req.app.locals.logger.warn('Farmer profile creation issue', { error: e.message });
+      }
     }
 
-    if (role === 'buyer' || role === 'cooperative' || role === 'finance') {
+    if (backendRole === 'BUYER') {
       try {
         const Buyer = require('../models/Buyer');
         await Buyer.createProfile({
           user_id: userId,
           company_name: body.org_name || name,
-          business_type: role === 'cooperative' ? 'COOPERATIVE' : (body.business_type || 'OTHER'),
+          business_type: roleKey === 'cooperative' ? 'COOPERATIVE' : (body.business_type || 'OTHER'),
           registration_number: body.registration_number || null,
           city: body.city || null,
           website: body.website || body.org_website || null
         });
-      } catch (e) { console.error('Buyer profile:', e.message); }
+      } catch (e) { /* profile optional */ }
     }
 
-    if (role === 'partner' || role === 'input_dealer') {
+    if (backendRole === 'PARTNER') {
       try {
         const Partner = require('../models/Partner');
         await Partner.create({
           user_id: userId,
-          partner_type: body.partner_type || (role === 'input_dealer' ? 'WAREHOUSE' : 'DRYER'),
+          partner_type: (body.partner_type || 'DRYER').toUpperCase(),
           business_name: body.business_name || name,
-          location: body.partner_location || null,
+          location: body.partner_location || body.district || null,
           services: [],
           pricing: null
         });
-      } catch (e) { console.error('Partner profile:', e.message); }
+      } catch (e) { /* profile optional */ }
     }
 
-    if (role === 'village_agent') {
-      try {
-        const VillageAgent = require('../models/VillageAgent');
-        await VillageAgent.create({
-          user_id: userId,
-          territory: body.territory || body.district || null,
-          sub_county: body.sub_county || null,
-          parish: body.parish || null,
-          village: body.agent_village || body.village || null
-        });
-      } catch (e) { console.error('Village agent:', e.message); }
-    }
+    req.session.user = {
+      id: userId,
+      phone,
+      name,
+      email,
+      role: backendRole,
+      token: result.token,
+      dbConnected: true,
+      createdAt: new Date().toISOString()
+    };
 
-  } catch (error) {
-    // Database not available — create user in session only (still works!)
-    console.error('DB signup fallback:', error.message);
-    token = 'session-only-' + userId;
+    if (backendRole === 'FARMER') return res.redirect('/farmer-dashboard');
+    if (backendRole === 'BUYER') return res.redirect('/buyer-dashboard');
+    return res.redirect('/marketplace');
+  } catch (err) {
+    return res.redirect('/signup?error=' + encodeURIComponent(err.message || 'Registration failed'));
   }
-
-  // Set session (always works, even without DB)
-  req.session.user = {
-    id: userId,
-    phone: phone,
-    name: name,
-    email: email,
-    role: backendRole,
-    token: token,
-    dbConnected: dbSuccess,
-    createdAt: new Date().toISOString()
-  };
-
-  // Redirect based on role
-  let redirectTo = '/';
-  if (role === 'farmer') redirectTo = '/farmer-dashboard';
-  else if (role === 'buyer') redirectTo = '/buyer-dashboard';
-  else if (role === 'admin' || role === 'ngo' || role === 'researcher') redirectTo = '/admin-dashboard';
-
-  res.redirect(redirectTo);
 });
 
-// API endpoint (for future AJAX calls)
-router.get('/api/stats', (req, res) => {
-  res.json(dataService.getPlatformStats());
-});
-
-router.get('/api/marketplace', (req, res) => {
-  const query = req.query.q || '';
-  const listings = query
-    ? dataService.searchMarketplace(query)
-    : dataService.getMarketplaceListings();
-  res.json(listings);
-});
-
-// Check if user is logged in
-router.get('/api/check-login', (req, res) => {
-  res.json({ loggedIn: !!(req.session && req.session.user) });
-});
-
-// Logout
 router.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/');
   });
 });
+
+// ─────────────────────────────────────────────────────
+// FARMER DASHBOARD (session + FARMER role)
+// ─────────────────────────────────────────────────────
+
+router.get('/farmer-dashboard', requireWebAuth(['FARMER']), async (req, res, next) => {
+  try {
+    const farmer = await Farmer.findByUserId(req.session.user.id);
+
+    // Ensure a farmer profile exists (created on first visit after signup without profile)
+    let farmerProfile = farmer;
+    if (!farmerProfile) {
+      farmerProfile = await Farmer.create({
+        user_id: req.session.user.id, district: null, village: null,
+        crops: [], farm_size: null, national_id: null
+      });
+    }
+
+    const [products, passports, orders] = await Promise.all([
+      Product.findByFarmerId(farmerProfile.id),
+      QualityPassport.findByFarmerId(farmerProfile.id),
+      OrderService.getOrdersForFarmer(farmerProfile.id)
+    ]);
+
+    // AI readiness recommendation for the latest batch
+    let aiRecommendation = null;
+    if (products.length > 0) {
+      try {
+        const AgriIntelService = require('../services/ai-advisor.service');
+        aiRecommendation = await AgriIntelService.ask(
+          `Can I list this ${products[0].crop} for sale?`,
+          { user_id: req.session.user.id, district: farmerProfile.district }
+        );
+      } catch (e) { aiRecommendation = null; }
+    }
+
+    const earnings = orders
+      .filter((o) => o.status === 'completed')
+      .reduce((s, o) => s + parseFloat(o.total_amount - o.commission), 0);
+
+    res.render('layout', {
+      title: 'Farmer Dashboard — AGRICHAIN 360',
+      page: 'farmer-dashboard',
+      data: {
+        user: req.session.user,
+        farmer: farmerProfile,
+        products,
+        passports,
+        orders,
+        aiRecommendation,
+        earnings,
+        success: req.query.success || '',
+        error: req.query.error || ''
+      },
+      body: 'farmerDashboard',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Register produce
+router.post('/farmer/produce', requireWebAuth(['FARMER']), async (req, res, next) => {
+  try {
+    const farmer = await Farmer.findByUserId(req.session.user.id);
+    if (!farmer) {
+      return res.redirect('/farmer-dashboard?error=' + encodeURIComponent('Farmer profile missing. Please contact support.'));
+    }
+
+    const crop = (req.body.crop || '').trim();
+    const quantity = parseFloat(req.body.quantity);
+    const price = parseFloat(req.body.price_per_unit);
+    const unit = (req.body.unit || 'kg').trim() || 'kg';
+
+    if (!crop || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(price) || price <= 0) {
+      return res.redirect('/farmer-dashboard?error=' + encodeURIComponent('Provide crop, quantity and price per unit.'));
+    }
+
+    // Existing latest passport for this crop decides initial quality status
+    const passport = await QualityPassport.findLatestByFarmerAndCrop(farmer.id, crop);
+    let qualityStatus = 'PENDING';
+    if (passport && passport.quality_grade === 'A' || passport && passport.quality_grade === 'B') qualityStatus = 'APPROVED';
+    if (passport && passport.quality_grade === 'REJECTED') qualityStatus = 'REJECTED';
+
+    await Product.create({
+      farmer_id: farmer.id,
+      crop,
+      quantity,
+      unit,
+      price_per_unit: price,
+      quality_status: qualityStatus
+    });
+
+    res.redirect('/farmer-dashboard?success=' + encodeURIComponent(`Listing registered: ${quantity} ${unit} of ${crop}.`));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Record quality information (creates/updates the batch passport)
+router.post('/farmer/quality', requireWebAuth(['FARMER']), async (req, res, next) => {
+  try {
+    const farmer = await Farmer.findByUserId(req.session.user.id);
+    if (!farmer) {
+      return res.redirect('/farmer-dashboard?error=' + encodeURIComponent('Farmer profile missing.'));
+    }
+
+    const productId = parseInt(req.body.product_id);
+    const moisture = req.body.moisture_level === '' ? null : parseFloat(req.body.moisture_level);
+    const aflatoxin = req.body.aflatoxin_result === '' ? null : parseFloat(req.body.aflatoxin_result);
+    const dryingCenter = (req.body.drying_center || '').trim() || null;
+
+    const product = (await Product.findByFarmerId(farmer.id)).find((p) => p.id === productId);
+    if (!product) {
+      return res.redirect('/farmer-dashboard?error=' + encodeURIComponent('Select one of your registered batches.'));
+    }
+
+    // Reuse the latest passport for this farmer+crop, otherwise issue a new one
+    const existing = await QualityPassport.findLatestByFarmerAndCrop(farmer.id, product.crop);
+    if (existing) {
+      await QualityService.updatePassportResults(existing.id, moisture, aflatoxin);
+      await db.query('UPDATE quality_passports SET drying_center = $1 WHERE id = $2;', [dryingCenter, existing.id]);
+    } else {
+      await QualityService.createPassport({
+        farmer_id: farmer.id,
+        crop_type: product.crop,
+        quantity: product.quantity,
+        moisture_level: moisture,
+        aflatoxin_result: aflatoxin,
+        drying_center: dryingCenter,
+        record_source: 'user'
+      });
+    }
+
+    const grade = QualityService.determineGrade(moisture, aflatoxin);
+    res.redirect('/farmer-dashboard?success=' + encodeURIComponent(
+      `Quality information recorded for ${product.crop}. Determined grade: ${grade}.`));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// My listings + availability toggle
+router.get('/my-listings', requireWebAuth(['FARMER']), async (req, res, next) => {
+  try {
+    const farmer = await Farmer.findByUserId(req.session.user.id);
+    const products = farmer ? await Product.findByFarmerId(farmer.id) : [];
+    const withPassports = [];
+    for (const p of products) {
+      const passport = await QualityPassport.findLatestByFarmerAndCrop(farmer.id, p.crop);
+      withPassports.push({ ...p, passport });
+    }
+    res.render('layout', {
+      title: 'My Listings — AGRICHAIN 360',
+      page: 'my-listings',
+      data: { user: req.session.user, products: withPassports, success: req.query.success || '', error: req.query.error || '' },
+      body: 'myListings',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/my-listings/:id/availability', requireWebAuth(['FARMER']), async (req, res, next) => {
+  try {
+    const farmer = await Farmer.findByUserId(req.session.user.id);
+    const products = farmer ? await Product.findByFarmerId(farmer.id) : [];
+    const owns = products.find((p) => p.id === parseInt(req.params.id));
+    if (!owns) {
+      return res.redirect('/my-listings?error=' + encodeURIComponent('Listing not found.'));
+    }
+    await Product.updateAvailability(owns.id, !owns.available);
+    res.redirect('/my-listings');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─────────────────────────────────────────────────────
+// BUYER DASHBOARD + ORDERS
+// ─────────────────────────────────────────────────────
+
+router.get('/buyer-dashboard', requireWebAuth(['BUYER']), async (req, res, next) => {
+  try {
+    const q = req.query.q || '';
+    const values = [];
+    let where = 'p.available = true';
+    if (q) {
+      values.push(`%${q}%`);
+      where += ` AND (LOWER(p.crop) LIKE LOWER($1) OR LOWER(f.district) LIKE LOWER($1))`;
+    }
+
+    const [productsResult, orders] = await Promise.all([
+      db.query(
+        `SELECT p.*, f.district, u.name AS farmer_name,
+                qp.batch_number, qp.quality_grade, qp.moisture_level
+         FROM products p
+         JOIN farmers f ON p.farmer_id = f.id
+         JOIN users u ON f.user_id = u.id
+         LEFT JOIN LATERAL (
+           SELECT * FROM quality_passports qq
+           WHERE qq.farmer_id = p.farmer_id AND LOWER(qq.crop_type) = LOWER(p.crop)
+           ORDER BY qq.created_at DESC LIMIT 1
+         ) qp ON true
+         WHERE ${where}
+         ORDER BY p.created_at DESC LIMIT 12;`,
+        values
+      ),
+      OrderService.getOrdersByBuyerUser(req.session.user.id)
+    ]);
+
+    let profile = null;
+    try {
+      const Buyer = require('../models/Buyer');
+      profile = await Buyer.findByUserId(req.session.user.id);
+    } catch (e) { profile = null; }
+
+    res.render('layout', {
+      title: 'Buyer Dashboard — AGRICHAIN 360',
+      page: 'buyer-dashboard',
+      data: {
+        user: req.session.user,
+        profile,
+        products: productsResult.rows,
+        orders,
+        query: q,
+        success: req.query.success || '',
+        error: req.query.error || ''
+      },
+      body: 'buyerDashboard',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Place an order from the product page (web, buyers only)
+router.post('/orders', requireWebAuth(['BUYER']), async (req, res, next) => {
+  try {
+    const productId = parseInt(req.body.product_id);
+    const quantity = parseFloat(req.body.quantity);
+    const order = await OrderService.createOrder({
+      buyer_user_id: req.session.user.id,
+      product_id: productId,
+      quantity
+    });
+    res.redirect('/order-history?success=' + encodeURIComponent(
+      `Order request placed for ${order.quantity} ${order.product.unit} of ${order.product.crop} (${order.product.farmer_name}). Total ${order.total_amount.toLocaleString()} UGX.`));
+  } catch (err) {
+    const back = req.body.back || '/marketplace';
+    const safeBack = back.startsWith('/') && !back.startsWith('//') ? back : '/marketplace';
+    return res.redirect(safeBack + '?error=' + encodeURIComponent(err.message));
+  }
+});
+
+router.get('/order-history', requireWebAuth(['BUYER']), async (req, res, next) => {
+  try {
+    const orders = await OrderService.getOrdersByBuyerUser(req.session.user.id);
+    res.render('layout', {
+      title: 'Order History — AGRICHAIN 360',
+      page: 'order-history',
+      data: { user: req.session.user, orders, success: req.query.success || '', error: req.query.error || '' },
+      body: 'orderHistory',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Cancel a pending order (buyer)
+router.post('/orders/:id/cancel', requireWebAuth(['BUYER']), async (req, res, next) => {
+  try {
+    const dbq = await db.query('SELECT buyer_id, status FROM orders WHERE id = $1;', [req.params.id]);
+    const row = dbq.rows[0];
+    if (!row || row.buyer_id !== req.session.user.id) {
+      return res.redirect('/order-history?error=' + encodeURIComponent('Order not found.'));
+    }
+    if (row.status !== 'pending') {
+      return res.redirect('/order-history?error=' + encodeURIComponent('Only pending orders can be cancelled.'));
+    }
+    await OrderService.updateStatus(req.params.id, 'cancelled');
+    res.redirect('/order-history?success=' + encodeURIComponent('Order cancelled.'));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─────────────────────────────────────────────────────
+// ADMIN DASHBOARD
+// ─────────────────────────────────────────────────────
+
+router.get('/admin-dashboard', requireWebAuth(['ADMIN']), async (req, res, next) => {
+  try {
+    const [users, counts, pendingFarmers, recentOrders, passportStats] = await Promise.all([
+      db.query(`SELECT role, COUNT(*)::int AS n FROM users GROUP BY role ORDER BY role;`),
+      db.query(`
+        SELECT
+          (SELECT COUNT(*) FROM users)::int AS users,
+          (SELECT COUNT(*) FROM farmers)::int AS farmers,
+          (SELECT COUNT(*) FROM buyer_profiles)::int AS buyers,
+          (SELECT COUNT(*) FROM partners)::int AS partners,
+          (SELECT COUNT(*) FROM products)::int AS products,
+          (SELECT COUNT(*) FROM orders)::int AS orders,
+          (SELECT COALESCE(SUM(total_amount), 0) FROM orders)::bigint AS order_value
+      `),
+      db.query(`
+        SELECT f.*, u.name, u.phone FROM farmers f JOIN users u ON f.user_id = u.id
+        WHERE f.verification_status = 'PENDING' ORDER BY f.created_at DESC LIMIT 10;
+      `),
+      OrderService.listRecent(10),
+      QualityPassport.getStats()
+    ]);
+
+    const latestUsers = await db.query(
+      `SELECT id, name, phone, role, status, created_at FROM users ORDER BY created_at DESC LIMIT 10;`
+    );
+
+    res.render('layout', {
+      title: 'Admin Dashboard — AGRICHAIN 360',
+      page: 'admin-dashboard',
+      data: {
+        user: req.session.user,
+        roleCounts: users.rows,
+        counts: counts.rows[0],
+        pendingFarmers: pendingFarmers.rows,
+        recentOrders,
+        latestUsers: latestUsers.rows,
+        passportStats,
+        success: req.query.success || ''
+      },
+      body: 'adminDashboard',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Admin verifies a farmer
+router.post('/admin/verify-farmer/:id', requireWebAuth(['ADMIN']), async (req, res, next) => {
+  try {
+    await Farmer.updateVerificationStatus(req.params.id, 'VERIFIED');
+    res.redirect('/admin-dashboard?success=' + encodeURIComponent('Farmer verified.'));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─────────────────────────────────────────────────────
+// JSON helpers (used by in-page scripts)
+// ─────────────────────────────────────────────────────
+
+router.get('/api/stats', async (req, res) => {
+  try {
+    const stats = await db.query(`
+      SELECT
+        (SELECT COUNT(*) FROM users)::int AS users,
+        (SELECT COUNT(*) FROM farmers)::int AS farmers,
+        (SELECT COUNT(*) FROM products WHERE available = true)::int AS active_listings,
+        (SELECT COUNT(*) FROM quality_passports)::int AS passports
+    `);
+    res.json({ success: true, data: stats.rows[0] });
+  } catch (e) {
+    res.status(503).json({ success: false, message: 'Stats unavailable (database not connected).' });
+  }
+});
+
+// Legacy JSON marketplace endpoint — now database-backed
+router.get('/api/marketplace', async (req, res) => {
+  try {
+    const query = req.query.q || '';
+    const values = [];
+    let where = 'p.available = true';
+    if (query) {
+      values.push(`%${query}%`);
+      where += ` AND (LOWER(p.crop) LIKE LOWER($1) OR LOWER(f.district) LIKE LOWER($1))`;
+    }
+    const result = await db.query(
+      `SELECT p.id, p.crop, p.quantity, p.unit, p.price_per_unit, p.quality_status,
+              f.district AS location, u.name AS farmer,
+              qp.batch_number, qp.quality_grade AS grade, qp.moisture_level AS moisture
+       FROM products p
+       JOIN farmers f ON p.farmer_id = f.id
+       JOIN users u ON f.user_id = u.id
+       LEFT JOIN LATERAL (
+         SELECT * FROM quality_passports q
+         WHERE q.farmer_id = p.farmer_id AND LOWER(q.crop_type) = LOWER(p.crop)
+         ORDER BY q.created_at DESC LIMIT 1
+       ) qp ON true
+       WHERE ${where} ORDER BY p.created_at DESC LIMIT 100;`,
+      values
+    );
+    res.json({ success: true, count: result.rows.length, data: result.rows });
+  } catch (e) {
+    res.status(503).json({ success: false, message: 'Marketplace unavailable (database not connected).' });
+  }
+});
+
+router.get('/api/check-login', (req, res) => {
+  res.json({
+    loggedIn: !!(req.session && req.session.user),
+    role: req.session && req.session.user ? req.session.user.role : null
+  });
+});
+
+// ─────────────────────────────────────────────────────
+// Downloads & integrations (kept)
+// ─────────────────────────────────────────────────────
+
+router.get('/download/proposal', (req, res) => {
+  const file = path.join(__dirname, '..', 'public', 'downloads', 'AGRICHAIN_360_AYuTe_Proposal.pdf');
+  res.download(file);
+});
+
+// USSD gateway endpoint (integration point for telecom USSD providers)
+router.use('/ussd', ussdRouter);
+
+// ─────────────────────────────────────────────────────
+// Retired pages → redirects (no dead ends)
+// ─────────────────────────────────────────────────────
+
+const RETIRED = {
+  '/checkout': '/marketplace',
+  '/my-sales': '/farmer-dashboard',
+  '/analytics': '/admin-dashboard',
+  '/finance': '/pricing',
+  '/investor': '/',
+  '/farmer': '/farmer-dashboard',
+  '/buyer': '/buyer-dashboard',
+  '/dryer': '/marketplace',
+  '/transport': '/marketplace',
+  '/warehouse': '/marketplace',
+  '/iot-dryer': '/marketplace',
+  '/ai-disease': '/ai-advisor',
+  '/ai-growth': '/ai-advisor',
+  '/lab-dashboard': '/login',
+  '/field-officer': '/login',
+  '/quality-officer': '/login',
+  '/download-app': '/signup',
+  '/ussd/ussd-test': '/'
+};
+for (const [old, target] of Object.entries(RETIRED)) {
+  router.get(old, (req, res) => res.redirect(302, target));
+}
 
 module.exports = router;

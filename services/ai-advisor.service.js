@@ -1,575 +1,533 @@
 /**
- * AGRICHAIN 360™ — AgriIntel AI Service
- * 
- * Dynamic AI that queries real database data to generate
- * contextual crop advice, market prices, disease risk, and drying costs.
- * 
- * No hardcoded responses — everything is data-driven.
+ * AGRICHAIN 360 — Decision Advisor Service
+ *
+ * A local, deterministic agricultural decision-support engine.
+ * It queries live platform data (products, quality passports, partners,
+ * fee structures) and applies documented rules. It does NOT call any
+ * external AI provider; every recommendation is generated from stored
+ * records and can be traced back to them.
+ *
+ * Rule set (aligned with services/quality.service.js grading):
+ *   - Grade A: moisture <= 13% and aflatoxin <= 5 ppb
+ *   - Grade B: moisture <= 14% and aflatoxin <= 10 ppb
+ *   - Grade C: moisture <= 15% and aflatoxin <= 20 ppb
+ *   - Beyond these limits: REJECTED — do not list
  */
 
 const db = require('../database/connection');
+const logger = require('../config/logger');
+
+// Crop-specific safe moisture targets (%), used for drying advice
+const MOISTURE_TARGETS = {
+  coffee: 12.5, cocoa: 7, groundnut: 8, rice: 14, soy: 12,
+  maize: 13, beans: 13, cassava: 12, banana: 14
+};
+
+function fmtUGX(n) {
+  return 'UGX ' + Math.round(Number(n) || 0).toLocaleString();
+}
+
+function detectCrop(text) {
+  const t = (text || '').toLowerCase();
+  if (t.includes('coffee')) return 'Coffee';
+  if (t.includes('cocoa')) return 'Cocoa';
+  if (t.includes('maize') || t.includes('corn')) return 'Maize';
+  if (t.includes('groundnut') || t.includes('peanut')) return 'Groundnuts';
+  if (t.includes('bean')) return 'Beans';
+  if (t.includes('rice')) return 'Rice';
+  if (t.includes('cassava')) return 'Cassava';
+  if (t.includes('soy')) return 'Soybeans';
+  if (t.includes('banana') || t.includes('matooke')) return 'Banana';
+  return null;
+}
+
+function detectDistrict(text) {
+  const t = (text || '').toLowerCase();
+  const districts = ['Mayuge', 'Bugiri', 'Iganga', 'Jinja', 'Kamuli', 'Busia', 'Tororo'];
+  for (const d of districts) if (t.includes(d.toLowerCase())) return d;
+  return null;
+}
 
 class AgriIntelService {
   /**
-   * Process a farmer's question and return a dynamic AI response
+   * Main entry point.
+   * @param {string} question
+   * @param {Object} farmerContext - { user_id?, district?, crops? }
    */
   static async ask(question, farmerContext = {}) {
-    const q = question.toLowerCase().trim();
-
-    // Try database-driven responses first, fall back to static if DB unavailable
+    const q = (question || '').toLowerCase().trim();
     try {
       return await AgriIntelService.getSmartResponse(q, farmerContext);
-    } catch (dbError) {
-      // DB not available — use comprehensive static responses
+    } catch (err) {
+      logger.warn('Decision advisor falling back to static response', { error: err.message });
       return AgriIntelService.getStaticResponse(q, farmerContext);
     }
   }
 
-  // ─────────────────────────────────────────────────
-  // SMART RESPONSE (tries database, falls back gracefully)
-  // ─────────────────────────────────────────────────
   static async getSmartResponse(q, ctx) {
-    // Detect intent from the question
+    // Marketplace readiness — the flagship decision (uses the farmer's own records)
+    if (/\b(list|listing|sell|selling|sale|ready for market|ready to sell|can i sell)\b/.test(q)) {
+      return await AgriIntelService.marketplaceReadiness(q, ctx);
+    }
     if (q.includes('harvest') || q.includes('when to') || q.includes('ready')) {
       return await AgriIntelService.harvestAdvice(q, ctx);
     }
     if (q.includes('disease') || q.includes('pest') || q.includes('risk') || q.includes('armyworm')) {
-      return await AgriIntelService.diseaseRisk(q, farmerContext);
+      return await AgriIntelService.diseaseRisk(q, ctx);
     }
     if (q.includes('market') || q.includes('price') || q.includes('sell') || q.includes('best')) {
-      return await AgriIntelService.marketPrices(q, farmerContext);
+      return await AgriIntelService.marketPrices(q, ctx);
     }
     if (q.includes('dry') || q.includes('cost') || q.includes('moisture') || q.includes('rate')) {
-      return await AgriIntelService.dryingAdvice(q, farmerContext);
+      return await AgriIntelService.dryingAdvice(q, ctx);
     }
     if (q.includes('quality') || q.includes('grade') || q.includes('passport') || q.includes('certif')) {
-      return await AgriIntelService.qualityInfo(q, farmerContext);
+      return await AgriIntelService.qualityInfo(q, ctx);
     }
     if (q.includes('transport') || q.includes('deliver') || q.includes('truck')) {
-      return await AgriIntelService.transportInfo(q, farmerContext);
+      return await AgriIntelService.transportInfo(q, ctx);
     }
     if (q.includes('loan') || q.includes('credit') || q.includes('finance') || q.includes('pay')) {
-      return await AgriIntelService.financeInfo(q, farmerContext);
+      return AgriIntelService.financeInfo(q, ctx);
     }
     if (q.includes('weather') || q.includes('rain') || q.includes('temperature') || q.includes('climate')) {
-      return await AgriIntelService.weatherAdvice(q, farmerContext);
+      return AgriIntelService.weatherAdvice(q, ctx);
     }
     if (q.includes('storage') || q.includes('warehouse') || q.includes('store')) {
-      return await AgriIntelService.storageAdvice(q, farmerContext);
+      return AgriIntelService.storageAdvice(q, ctx);
     }
-
-    // Default: general overview with live stats
-    return await AgriIntelService.generalOverview(farmerContext);
+    return await AgriIntelService.generalOverview(ctx);
   }
 
   // ─────────────────────────────────────────────────
-  // HARVEST ADVICE (queries real marketplace data)
+  // MARKETPLACE READINESS (flagship decision)
+  // Inspects the farmer's stored product + quality passport records.
+  // ─────────────────────────────────────────────────
+  static async marketplaceReadiness(q, ctx) {
+    const crop = detectCrop(q);
+
+    // Anonymous user: explain what the check involves
+    if (!ctx || !ctx.user_id) {
+      const cropLine = crop ? ` for your <strong>${crop}</strong>` : '';
+      return `<strong>Listing readiness check</strong><br><br>` +
+        `I can review your stored batch records${cropLine} and tell you whether the batch ` +
+        `is ready for the marketplace. To do this I check:<br>` +
+        `1. A registered product record (crop, quantity, price)<br>` +
+        `2. A Digital Quality Passport with a moisture reading<br>` +
+        `3. A quality test result (aflatoxin) and assigned grade<br><br>` +
+        `Log in as a farmer and ask again — for example: ` +
+        `<em>"Can I list this ${crop ? crop.toLowerCase() : 'coffee'} for sale?"</em>`;
+    }
+
+    const farmerResult = await db.query(
+      `SELECT f.*, u.name FROM farmers f JOIN users u ON f.user_id = u.id WHERE f.user_id = $1;`,
+      [ctx.user_id]
+    );
+    const farmer = farmerResult.rows[0];
+
+    if (!farmer) {
+      return `<strong>Listing readiness check</strong><br><br>` +
+        `Your account does not have a farmer profile yet. Complete your farmer profile ` +
+        `(district, village, crops) from the Farmer Dashboard first, then register your produce. ` +
+        `Once a batch exists I can assess its readiness for sale.`;
+    }
+
+    // Latest product (optionally filtered by crop)
+    const productResult = await db.query(
+      `SELECT * FROM products
+       WHERE farmer_id = $1 ${crop ? 'AND LOWER(crop) = LOWER($2)' : ''}
+       ORDER BY created_at DESC LIMIT 1;`,
+      crop ? [farmer.id, crop] : [farmer.id]
+    );
+    const product = productResult.rows[0];
+
+    if (!product) {
+      return `<strong>Listing readiness check</strong><br><br>` +
+        `No registered produce${crop ? ` for ${crop}` : ''} was found on your profile ` +
+        `(${farmer.district || 'district not set'}).<br><br>` +
+        `<strong>Recommendation:</strong> Register the batch first from your Farmer Dashboard ` +
+        `(crop, quantity, price). I will then verify its quality records and confirm whether it can be listed.`;
+    }
+
+    // Latest passport for this farmer (+crop)
+    const passportResult = await db.query(
+      `SELECT * FROM quality_passports
+       WHERE farmer_id = $1 ${crop ? 'AND LOWER(crop_type) = LOWER($2)' : ''}
+       ORDER BY created_at DESC LIMIT 1;`,
+      crop ? [farmer.id, crop] : [farmer.id]
+    );
+    const passport = passportResult.rows[0];
+
+    const issues = [];
+    let moisture = passport ? passport.moisture_level : null;
+    let aflatoxin = passport ? passport.aflatoxin_result : null;
+    let grade = passport ? passport.quality_grade : null;
+
+    if (!passport) {
+      issues.push('No Digital Quality Passport exists for this batch — record a moisture reading and quality test result.');
+    } else {
+      const key = (passport.crop_type || '').toLowerCase();
+      const target = MOISTURE_TARGETS[key.split(' ')[0]] || 13;
+
+      if (moisture === null || moisture === undefined) {
+        issues.push(`No moisture reading recorded. Target for ${passport.crop_type} is ${target}% or below.`);
+      } else if (parseFloat(moisture) > target) {
+        issues.push(`Recorded moisture of <strong>${moisture}%</strong> is above the ${target}% target — additional drying is recommended before listing.`);
+      }
+
+      if (aflatoxin === null || aflatoxin === undefined) {
+        issues.push('No aflatoxin/quality test result recorded. A lab result is required before buyers can trust the batch.');
+      }
+
+      if (grade === 'REJECTED') {
+        issues.push('The batch was graded <strong>REJECTED</strong>. It must not be listed; re-test after remediation.');
+      }
+    }
+
+    if (product.quality_status === 'PENDING' && passport && !issues.length) {
+      issues.push('The listing is still awaiting approval status — it will update automatically once grading is complete.');
+    }
+
+    // Market context
+    let priceLine = '';
+    try {
+      const prices = await db.query(
+        `SELECT AVG(price_per_unit) AS avg_price, COUNT(*)::int AS listings
+         FROM products WHERE available = true AND LOWER(crop) = LOWER($1);`,
+        [product.crop]
+      );
+      const p = prices.rows[0];
+      if (p && p.listings > 0) {
+        priceLine = ` Current marketplace average for ${product.crop}: <strong>${fmtUGX(p.avg_price)}/${product.unit || 'kg'}</strong> across ${p.listings} listing${p.listings === 1 ? '' : 's'}.`;
+      }
+    } catch (e) { /* non-essential */ }
+
+    if (issues.length === 0) {
+      return `<strong>Listing readiness check — ${product.crop}</strong><br><br>` +
+        `Your batch <strong>${passport.batch_number}</strong> has a recorded moisture level of ` +
+        `<strong>${moisture}%</strong> and a ${grade === 'A' ? 'top' : 'passing'} quality result ` +
+        `(grade <strong>${grade}</strong>, aflatoxin ${aflatoxin} ppb). The record contains the ` +
+        `information required for marketplace listing.${priceLine}<br><br>` +
+        `<strong>Recommendation:</strong> Proceed to the marketplace. Your listing ` +
+        `"${product.crop} — ${product.quantity} ${product.unit}" is ${product.available ? 'already listed' : 'ready to list'} ` +
+        `and its Digital Quality Passport is visible to buyers for verification.`;
+    }
+
+    return `<strong>Listing readiness check — ${product.crop}</strong><br><br>` +
+      `Before listing this batch, the following must be resolved:<br><br>` +
+      issues.map((i, idx) => `${idx + 1}. ${i}`).join('<br>') +
+      `<br><br><strong>Recommendation:</strong> Update the batch records from your Farmer Dashboard ` +
+      `(quality information section), then ask me again. ${priceLine}`;
+  }
+
+  // ─────────────────────────────────────────────────
+  // HARVEST ADVICE
   // ─────────────────────────────────────────────────
   static async harvestAdvice(question, ctx) {
-    const crop = AgriIntelService.detectCrop(question);
-    const district = ctx.district || AgriIntelService.detectDistrict(question) || 'Mayuge';
+    const crop = detectCrop(question) || 'your crop';
+    const district = ctx.district || detectDistrict(question) || 'Eastern Uganda';
 
-    // Get real market prices from database
     let priceInfo = '';
     try {
       const prices = await db.query(
-        `SELECT crop, AVG(price_per_unit) as avg_price, COUNT(*) as listings
-         FROM products WHERE available = true
-         ${crop ? `AND LOWER(crop) = LOWER('${crop}')` : ''}
-         GROUP BY crop ORDER BY avg_price DESC LIMIT 5`
+        `SELECT crop, AVG(price_per_unit) AS avg_price, COUNT(*)::int AS listings
+         FROM products WHERE available = true AND LOWER(crop) LIKE LOWER($1)
+         GROUP BY crop ORDER BY avg_price DESC LIMIT 3;`,
+        [`%${crop.toLowerCase()}%`]
       );
       if (prices.rows.length > 0) {
         const top = prices.rows[0];
-        priceInfo = `Current market rate for ${top.crop}: <strong>UGX ${Math.round(top.avg_price).toLocaleString()}/kg</strong> (${top.listings} active listings). `;
-      }
-    } catch (e) { /* DB not ready yet — use defaults */ }
-
-    // Simulated weather data (replace with real API later)
-    const temp = (25 + Math.random() * 5).toFixed(0);
-    const humidity = (60 + Math.random() * 20).toFixed(0);
-
-    const response = `🌾 <strong>Harvest Advisory for ${district}</strong><br><br>` +
-      `Current conditions: ${temp}°C, ${humidity}% humidity. ` +
-      `${priceInfo}` +
-      `<br><br>📋 <strong>Recommendations:</strong><br>` +
-      `• Harvest when grain moisture is between 18-22% for optimal drying results<br>` +
-      `• Schedule solar drying immediately after harvest to prevent aflatoxin contamination<br>` +
-      `• Drying cost: <strong>UGX 200/kg</strong> for maize, <strong>UGX 350/kg</strong> for groundnuts<br>` +
-      `• Target moisture after drying: <strong>13% or below</strong> for Grade A certification<br><br>` +
-      `💡 Book your drying slot now to avoid peak-season queues. ` +
-      `<a href="/dryer" style="color:var(--g);font-weight:700">Book Solar Drying →</a>`;
-
-    return response;
-  }
-
-  // ─────────────────────────────────────────────────
-  // DISEASE RISK (real data from quality passports)
-  // ─────────────────────────────────────────────────
-  static async diseaseRisk(question, ctx) {
-    const district = ctx.district || AgriIntelService.detectDistrict(question) || 'Eastern Uganda';
-
-    // Check quality passport data for aflatoxin trends
-    let aflatoxinInfo = '';
-    try {
-      const results = await db.query(
-        `SELECT AVG(aflatoxin_result) as avg_af, 
-                COUNT(*) as tests,
-                COUNT(*) FILTER (WHERE aflatoxin_result > 10) as high_count
-         FROM quality_passports 
-         WHERE aflatoxin_result IS NOT NULL`
-      );
-      if (results.rows[0] && results.rows[0].tests > 0) {
-        const r = results.rows[0];
-        const riskLevel = r.high_count > r.tests * 0.2 ? 'MODERATE' : 'LOW';
-        aflatoxinInfo = `Based on ${r.tests} recent tests in the region, average aflatoxin levels are <strong>${parseFloat(r.avg_af).toFixed(1)} ppb</strong>. ` +
-          `Risk level: <strong>${riskLevel}</strong>. ` +
-          `${r.high_count > 0 ? `${r.high_count} batches showed elevated levels (>10 ppb).` : 'All batches within safe limits.'}`;
+        priceInfo = ` Current market rate for ${top.crop}: <strong>${fmtUGX(top.avg_price)}/kg</strong> (${top.listings} active listings).`;
       }
     } catch (e) { /* DB not ready */ }
 
-    if (!aflatoxinInfo) {
-      aflatoxinInfo = `Based on current monitoring data, aflatoxin risk in ${district} is <strong>LOW</strong> for the next 7 days.`;
-    }
-
-    const response = `🦠 <strong>Crop Health Report — ${district}</strong><br><br>` +
-      `${aflatoxinInfo}<br><br>` +
-      `📋 <strong>Current Alerts:</strong><br>` +
-      `• Fall armyworm: <span style="color:#2E7D32;font-weight:700">LOW risk</span> — continue regular scouting<br>` +
-      `• Maize streak virus: <span style="color:#2E7D32;font-weight:700">LOW risk</span> — no outbreaks reported<br>` +
-      `• Aflatoxin contamination: <span style="color:#F57F17;font-weight:700">MONITOR</span> — dry immediately after harvest<br><br>` +
-      `💡 <strong>Prevention tips:</strong><br>` +
-      `• Dry crops to 13% moisture within 48 hours of harvest<br>` +
-      `• Use raised drying racks — never dry on bare ground<br>` +
-      `• Get your produce tested: <a href="/dryer" style="color:var(--g);font-weight:700">Book Quality Testing →</a>`;
-
-    return response;
+    return `<strong>Harvest advisory — ${crop}, ${district}</strong><br><br>` +
+      `<strong>Recommendations:</strong><br>` +
+      `• Harvest when grain moisture is between 18–22% for optimal drying results<br>` +
+      `• Schedule solar drying immediately after harvest to prevent aflatoxin build-up<br>` +
+      `• Target moisture after drying: <strong>13% or below</strong> for Grade A certification${priceInfo}<br><br>` +
+      `Book a drying slot early to avoid peak-season queues. ` +
+      `Drying partners are listed on the <a href="/marketplace" style="color:var(--g);font-weight:700">marketplace</a>.`;
   }
 
   // ─────────────────────────────────────────────────
-  // MARKET PRICES (queries real marketplace data)
+  // DISEASE / CONTAMINATION RISK (from passport data)
+  // ─────────────────────────────────────────────────
+  static async diseaseRisk(question, ctx) {
+    const district = ctx.district || detectDistrict(question) || 'Eastern Uganda';
+
+    let dataLine = '';
+    try {
+      const results = await db.query(
+        `SELECT AVG(aflatoxin_result) AS avg_af,
+                COUNT(*)::int AS tests,
+                COUNT(*) FILTER (WHERE aflatoxin_result > 10)::int AS high_count
+         FROM quality_passports WHERE aflatoxin_result IS NOT NULL;`
+      );
+      const r = results.rows[0];
+      if (r && r.tests > 0) {
+        const riskLevel = r.high_count > r.tests * 0.2 ? 'MODERATE' : 'LOW';
+        dataLine = `Based on <strong>${r.tests}</strong> quality tests recorded on the platform, average aflatoxin levels are ` +
+          `<strong>${parseFloat(r.avg_af).toFixed(1)} ppb</strong> — regional risk level <strong>${riskLevel}</strong>.` +
+          (r.high_count > 0 ? ` ${r.high_count} batch${r.high_count === 1 ? '' : 'es'} exceeded 10 ppb.` : ' All batches within safe limits.') + '<br><br>';
+      }
+    } catch (e) { /* DB not ready */ }
+
+    return `<strong>Crop health report — ${district}</strong><br><br>` +
+      dataLine +
+      `<strong>Advisory:</strong><br>` +
+      `• Fall armyworm: continue regular scouting during the vegetative stage<br>` +
+      `• Maize streak virus: no unusual outbreaks indicated by platform records<br>` +
+      `• Aflatoxin contamination: dry to 13% moisture within 48 hours of harvest<br><br>` +
+      `<strong>Prevention:</strong> Use raised drying racks, never dry on bare ground, and record a quality test for every batch.`;
+  }
+
+  // ─────────────────────────────────────────────────
+  // MARKET PRICES (live from products table)
   // ─────────────────────────────────────────────────
   static async marketPrices(question, ctx) {
-    const crop = AgriIntelService.detectCrop(question);
+    const crop = detectCrop(question);
 
     let marketData = '';
     try {
-      const query = crop
-        ? `SELECT crop, district, AVG(price_per_unit) as avg_price, 
-                  MIN(price_per_unit) as min_price, MAX(price_per_unit) as max_price,
-                  COUNT(*) as listings, SUM(quantity) as total_kg
-           FROM products p
-           JOIN farmers f ON p.farmer_id = f.id
-           WHERE p.available = true AND LOWER(p.crop) LIKE LOWER('%${crop}%')
-           GROUP BY crop, district ORDER BY avg_price DESC`
-        : `SELECT crop, AVG(price_per_unit) as avg_price, 
-                  COUNT(*) as listings, SUM(quantity) as total_kg
-           FROM products WHERE available = true
-           GROUP BY crop ORDER BY avg_price DESC LIMIT 8`;
-
-      const results = await db.query(query);
+      const params = [];
+      let where = 'WHERE available = true';
+      if (crop) {
+        params.push(`%${crop.toLowerCase()}%`);
+        where += ' AND LOWER(crop) LIKE LOWER($1)';
+      }
+      const results = await db.query(
+        `SELECT crop, district, AVG(price_per_unit) AS avg_price,
+                MIN(price_per_unit) AS min_price, MAX(price_per_unit) AS max_price,
+                COUNT(*)::int AS listings, SUM(quantity) AS total_kg
+         FROM products p JOIN farmers f ON p.farmer_id = f.id
+         ${where}
+         GROUP BY crop, district ORDER BY avg_price DESC LIMIT 8;`,
+        params
+      );
       if (results.rows.length > 0) {
-        marketData = `<strong>📊 Live Marketplace Prices:</strong><br><br>`;
-        results.rows.forEach(r => {
+        marketData = '<strong>Live marketplace prices</strong><br><br>';
+        results.rows.forEach((r) => {
           const district = r.district ? ` (${r.district})` : '';
-          marketData += `• <strong>${r.crop}</strong>${district}: UGX ${Math.round(r.avg_price).toLocaleString()}/kg` +
-            `${r.min_price ? ` (range: ${Math.round(r.min_price).toLocaleString()} – ${Math.round(r.max_price).toLocaleString()})` : ''}` +
-            ` — ${r.listings} listings, ${Math.round(r.total_kg).toLocaleString()} kg available<br>`;
+          marketData += `• <strong>${r.crop}</strong>${district}: ${fmtUGX(r.avg_price)}/kg` +
+            (r.min_price ? ` (range ${fmtUGX(r.min_price)} – ${fmtUGX(r.max_price)})` : '') +
+            ` — ${r.listings} listing${r.listings === 1 ? '' : 's'}, ${Math.round(r.total_kg).toLocaleString()} kg available<br>`;
         });
       }
     } catch (e) { /* DB not ready */ }
 
     if (!marketData) {
-      marketData = `<strong>📊 Current Market Indicators:</strong><br>` +
-        `• Maize (Grade A): <strong>UGX 1,500–1,800/kg</strong><br>` +
-        `• Groundnuts (certified): <strong>UGX 3,200–3,500/kg</strong><br>` +
-        `• Coffee (FAQ): <strong>UGX 8,000–12,000/kg</strong><br>` +
-        `• Beans (Grade 1): <strong>UGX 2,800–3,200/kg</strong><br>`;
+      marketData = 'No listings are currently priced on the marketplace. ' +
+        'Indicative Ugandan farm-gate ranges: Maize UGX 1,500–1,800/kg, Beans UGX 2,800–3,200/kg, Coffee (FAQ) UGX 8,000–12,000/kg.';
     }
 
-    const response = `🛒 <strong>Market Intelligence</strong><br><br>` +
-      `${marketData}<br>` +
-      `💡 <strong>AgriIntel Tip:</strong> Certified produce (with Digital Quality Passport) ` +
-      `commands <strong>20-40% premium</strong> from export buyers. ` +
-      `<a href="/marketplace" style="color:var(--g);font-weight:700">Browse Marketplace →</a>`;
-
-    return response;
+    return `<strong>Market intelligence</strong><br><br>${marketData}<br>` +
+      `Certified produce carrying a Digital Quality Passport typically commands a premium from institutional and export buyers. ` +
+      `<a href="/marketplace" style="color:var(--g);font-weight:700">Browse the marketplace</a>.`;
   }
 
   // ─────────────────────────────────────────────────
-  // DRYING ADVICE
+  // DRYING ADVICE (rates from fee_structures / pilot schedule)
   // ─────────────────────────────────────────────────
   static async dryingAdvice(question, ctx) {
-    const crop = AgriIntelService.detectCrop(question) || 'your crop';
+    const crop = detectCrop(question) || 'your crop';
+
+    let rateLine = null;
+    try {
+      const fee = await db.query(
+        `SELECT rate_per_kg FROM fee_structures
+         WHERE crop_type = $1 AND fee_type = 'DRYING'
+         ORDER BY effective_from DESC LIMIT 1;`,
+        [crop]
+      );
+      if (fee.rows[0]) rateLine = parseFloat(fee.rows[0].rate_per_kg);
+    } catch (e) { /* DB not ready */ }
 
     const rates = {
-      'maize': { rate: 200, time: '6-8 hours', target: '13%' },
-      'rice': { rate: 200, time: '8-10 hours', target: '14%' },
-      'soy': { rate: 200, time: '6-8 hours', target: '12%' },
-      'groundnut': { rate: 350, time: '8-12 hours', target: '8%' },
-      'sunflower': { rate: 250, time: '6-8 hours', target: '10%' },
-      'coffee': { rate: 400, time: '12-16 hours', target: '12%' },
-      'cocoa': { rate: 500, time: '16-24 hours', target: '7%' },
-      'beans': { rate: 250, time: '6-8 hours', target: '13%' }
+      maize: { rate: 200, time: '6–8 hours', target: '13%' },
+      rice: { rate: 200, time: '8–10 hours', target: '14%' },
+      soy: { rate: 200, time: '6–8 hours', target: '12%' },
+      groundnut: { rate: 350, time: '8–12 hours', target: '8%' },
+      coffee: { rate: 350, time: '12–16 hours', target: '12.5%' },
+      cocoa: { rate: 500, time: '16–24 hours', target: '7%' },
+      beans: { rate: 250, time: '6–8 hours', target: '13%' }
     };
+    const key = Object.keys(rates).find((k) => crop.toLowerCase().includes(k));
+    const info = rates[key] || { rate: 250, time: '6–10 hours', target: '13%' };
+    if (rateLine) info.rate = rateLine;
 
-    const cropKey = Object.keys(rates).find(k => crop.toLowerCase().includes(k));
-    const info = cropKey ? rates[cropKey] : { rate: 250, time: '6-10 hours', target: '13%' };
-
-    // Get real partner data
     let partnerInfo = '';
     try {
       const partners = await db.query(
-        `SELECT business_name, location, rating FROM partners 
-         WHERE partner_type = 'DRYER' AND approved = true ORDER BY rating DESC LIMIT 3`
+        `SELECT business_name, location, rating FROM partners
+         WHERE partner_type = 'DRYER' AND approved = true ORDER BY rating DESC LIMIT 3;`
       );
       if (partners.rows.length > 0) {
-        partnerInfo = `<br><br>🏭 <strong>Available Drying Partners:</strong><br>`;
-        partners.rows.forEach(p => {
-          partnerInfo += `• <strong>${p.business_name}</strong> (${p.location}) — ⭐ ${p.rating}/5<br>`;
+        partnerInfo = '<br><strong>Approved drying partners:</strong><br>';
+        partners.rows.forEach((p) => {
+          partnerInfo += `• <strong>${p.business_name}</strong> (${p.location})${p.rating ? ` — rated ${p.rating}/5` : ''}<br>`;
         });
       }
     } catch (e) { /* DB not ready */ }
 
-    const response = `☀️ <strong>Solar Drying Advisory — ${crop}</strong><br><br>` +
-      `💰 <strong>Drying Rate:</strong> UGX ${info.rate}/kg<br>` +
-      `⏱️ <strong>Estimated Time:</strong> ${info.time}<br>` +
-      `🎯 <strong>Target Moisture:</strong> ${info.target}<br>` +
-      `🚛 <strong>Transport:</strong> UGX 50-100/kg (shared route)<br><br>` +
-      `📋 <strong>All Crop Rates:</strong><br>` +
-      `• Maize / Rice / Soy: <strong>UGX 200/kg</strong><br>` +
-      `• Sunflower / Beans: <strong>UGX 250/kg</strong><br>` +
-      `• Groundnuts: <strong>UGX 350/kg</strong><br>` +
-      `• Coffee: <strong>UGX 400/kg</strong><br>` +
-      `• Cocoa: <strong>UGX 500/kg</strong><br>` +
-      `${partnerInfo}` +
-      `<br><br><a href="/dryer" style="color:var(--g);font-weight:700">Book Drying Service →</a>`;
-
-    return response;
+    return `<strong>Solar drying advisory — ${crop}</strong><br><br>` +
+      `• Drying rate: <strong>${fmtUGX(info.rate)}/kg</strong> (pilot schedule)<br>` +
+      `• Estimated drying time: ${info.time}<br>` +
+      `• Target moisture: <strong>${info.target}</strong><br>` +
+      `• Shared-route transport: approximately UGX 50–100/kg<br><br>` +
+      partnerInfo +
+      `Record the post-drying moisture on your batch so the passport reflects verified numbers.`;
   }
 
   // ─────────────────────────────────────────────────
   // QUALITY PASSPORT INFO
   // ─────────────────────────────────────────────────
   static async qualityInfo(question, ctx) {
-    let passportStats = '';
+    let stats = '';
     try {
-      const stats = await db.query(
-        `SELECT COUNT(*) as total, 
-                COUNT(*) FILTER (WHERE quality_grade = 'A') as grade_a,
-                COUNT(*) FILTER (WHERE quality_grade = 'B') as grade_b,
-                COUNT(*) FILTER (WHERE quality_grade = 'C') as grade_c
-         FROM quality_passports`
-      );
-      if (stats.rows[0] && parseInt(stats.rows[0].total) > 0) {
-        const s = stats.rows[0];
-        passportStats = `<strong>📊 Platform Quality Stats:</strong><br>` +
-          `• Total batches certified: <strong>${s.total}</strong><br>` +
-          `• Grade A: <strong>${s.grade_a}</strong> | Grade B: <strong>${s.grade_b}</strong> | Grade C: <strong>${s.grade_c}</strong><br>`;
+      const s = await db.query(
+        `SELECT COUNT(*)::int AS total,
+                COUNT(*) FILTER (WHERE quality_grade = 'A')::int AS grade_a,
+                COUNT(*) FILTER (WHERE quality_grade = 'B')::int AS grade_b,
+                COUNT(*) FILTER (WHERE quality_grade = 'C')::int AS grade_c
+         FROM quality_passports;`
+      ).rows[0];
+      if (s && s.total > 0) {
+        stats = `<strong>Platform quality record:</strong><br>` +
+          `• Batches certified: <strong>${s.total}</strong><br>` +
+          `• Grade A: <strong>${s.grade_a}</strong> | Grade B: <strong>${s.grade_b}</strong> | Grade C: <strong>${s.grade_c}</strong><br><br>`;
       }
     } catch (e) { /* DB not ready */ }
 
-    const response = `📜 <strong>Digital Quality Passport</strong><br><br>` +
-      `${passportStats}` +
-      `Each batch processed through AGRICHAIN 360 receives a <strong>Digital Quality Passport</strong> containing:<br><br>` +
-      `• ✅ Crop type and variety<br>` +
-      `• ✅ Farmer identity and location (GPS verified)<br>` +
-      `• ✅ Moisture content (lab-tested)<br>` +
-      `• ✅ Aflatoxin levels (ppb)<br>` +
-      `• ✅ Quality grade (A/B/C)<br>` +
-      `• ✅ QR code for buyer verification<br><br>` +
-      `🏆 <strong>Why it matters:</strong> Export buyers pay <strong>20-40% premium</strong> for certified produce with full traceability. ` +
-      `European and Asian markets require documented aflatoxin testing.<br><br>` +
-      `<a href="/dryer" style="color:var(--g);font-weight:700">Get Your Produce Certified →</a>`;
-
-    return response;
+    return `<strong>Digital Quality Passport</strong><br><br>` +
+      stats +
+      `Each batch registered on AGRICHAIN 360 can carry a Digital Quality Passport containing:<br>` +
+      `• Crop type and batch number<br>` +
+      `• Farmer identity and location<br>` +
+      `• Moisture content (recorded post-drying)<br>` +
+      `• Aflatoxin test result (ppb), where a partner lab result exists<br>` +
+      `• Quality grade (A/B/C) and verification status<br><br>` +
+      `Buyers verify any passport by batch number on the public ` +
+      `<a href="/verify" style="color:var(--g);font-weight:700">verification page</a>. ` +
+      `Grading rules: A requires moisture ≤ 13% and aflatoxin ≤ 5 ppb; B ≤ 14% / ≤ 10 ppb; C ≤ 15% / ≤ 20 ppb.`;
   }
 
   // ─────────────────────────────────────────────────
-  // TRANSPORT INFO
+  // TRANSPORT
   // ─────────────────────────────────────────────────
   static async transportInfo(question, ctx) {
     let partnerInfo = '';
     try {
       const partners = await db.query(
-        `SELECT business_name, location FROM partners 
-         WHERE partner_type = 'TRANSPORTER' AND approved = true LIMIT 3`
+        `SELECT business_name, location FROM partners
+         WHERE partner_type = 'TRANSPORTER' AND approved = true LIMIT 3;`
       );
       if (partners.rows.length > 0) {
-        partnerInfo = `<br>🚛 <strong>Available Transporters:</strong><br>`;
-        partners.rows.forEach(p => {
+        partnerInfo = '<br><strong>Registered transporters:</strong><br>';
+        partners.rows.forEach((p) => {
           partnerInfo += `• ${p.business_name} (${p.location})<br>`;
         });
       }
     } catch (e) { /* DB not ready */ }
 
-    const response = `🚛 <strong>Transport & Logistics</strong><br><br>` +
-      `AGRICHAIN 360 coordinates shared transport routes to reduce costs:<br><br>` +
-      `• <strong>Shared routes:</strong> UGX 50-100/kg (split among farmers on same route)<br>` +
-      `• <strong>Dedicated truck:</strong> UGX 150-250/kg<br>` +
-      `• <strong>Motorcycle (small loads):</strong> UGX 300-500 per trip<br><br>` +
-      `📋 <strong>How it works:</strong><br>` +
-      `1. Book drying or testing service<br>` +
-      `2. System matches you with nearby transporters<br>` +
-      `3. Transporter picks up from your farm<br>` +
-      `4. Live tracking until delivery<br><br>` +
-      `${partnerInfo}` +
-      `<a href="/transport" style="color:var(--g);font-weight:700">Book Transport →</a>`;
-
-    return response;
+    return `<strong>Transport and logistics</strong><br><br>` +
+      `Typical pilot costs:<br>` +
+      `• Shared routes: UGX 50–100/kg (split among farmers on the same route)<br>` +
+      `• Dedicated truck: UGX 150–250/kg<br>` +
+      `• Motorcycle (small loads): UGX 300–500 per trip<br><br>` +
+      `How it works: book drying or testing, the system matches nearby transporters, ` +
+      `pickup is arranged from the farm or drying centre.${partnerInfo}`;
   }
 
   // ─────────────────────────────────────────────────
-  // FINANCE INFO
+  // FINANCE
   // ─────────────────────────────────────────────────
-  static async financeInfo(question, ctx) {
-    const response = `💳 <strong>Finance & Payments</strong><br><br>` +
-      `AGRICHAIN 360 supports multiple payment methods:<br><br>` +
-      `• <strong>MTN Mobile Money</strong> — instant payments<br>` +
-      `• <strong>Airtel Money</strong> — instant payments<br>` +
-      `• <strong>Bank Transfer</strong> — for large transactions<br>` +
-      `• <strong>Cash</strong> — at service partner locations<br><br>` +
-      `🏦 <strong>Digital Credit (Coming Soon):</strong><br>` +
-      `Your farming history on AGRICHAIN 360 builds a financial profile. ` +
-      `Partner banks and SACCOs use this data to offer:<br>` +
-      `• Input loans (seeds, fertilizer)<br>` +
-      `• Equipment financing<br>` +
-      `• Post-harvest credit<br><br>` +
-      `📊 <strong>Your Wallet:</strong> Track all payments, earnings, and expenses in real-time. ` +
-      `<a href="/finance" style="color:var(--g);font-weight:700">View Wallet →</a>`;
-
-    return response;
+  static financeInfo(question, ctx) {
+    return `<strong>Payments and fees</strong><br><br>` +
+      `The platform's pilot fee model (Busoga region):<br>` +
+      `• Drying: UGX 200–500/kg depending on crop<br>` +
+      `• Quality testing: UGX 100–400/kg depending on crop<br>` +
+      `• Marketplace commission: 3% of transaction value<br><br>` +
+      `Payments are settled via MTN Mobile Money, Airtel Money, bank transfer, or cash at partner locations. ` +
+      `A farmer's transaction history on the platform is designed to support future credit scoring with partner SACCOs.`;
   }
 
   // ─────────────────────────────────────────────────
-  // WEATHER ADVICE
+  // WEATHER (honest: no live feed configured)
   // ─────────────────────────────────────────────────
-  static async weatherAdvice(question, ctx) {
-    const district = ctx.district || 'Eastern Uganda';
-    const temp = (25 + Math.random() * 5).toFixed(0);
-    const humidity = (60 + Math.random() * 20).toFixed(0);
-
-    const response = `🌤️ <strong>Weather Advisory — ${district}</strong><br><br>` +
-      `Current conditions: <strong>${temp}°C</strong>, <strong>${humidity}%</strong> humidity<br>` +
-      `Wind: ${Math.floor(5 + Math.random() * 10)} km/h<br><br>` +
-      `📋 <strong>Impact on your crops:</strong><br>` +
-      `• Drying conditions: <strong>${parseInt(humidity) < 70 ? 'GOOD' : 'MODERATE'}</strong> — ` +
-      `${parseInt(humidity) < 70 ? 'Low humidity is ideal for solar drying' : 'Higher humidity may extend drying time by 2-4 hours'}<br>` +
-      `• Disease risk: <strong>${parseInt(humidity) > 80 ? 'ELEVATED' : 'LOW'}</strong> — ` +
-      `${parseInt(humidity) > 80 ? 'High humidity increases fungal risk. Ensure proper drying.' : 'Current conditions are favorable.'}<br><br>` +
-      `💡 <strong>Tip:</strong> Schedule solar drying during peak sun hours (10 AM – 3 PM) for fastest results.`;
-
-    return response;
+  static weatherAdvice(question, ctx) {
+    const district = ctx.district || detectDistrict(question) || 'Eastern Uganda';
+    return `<strong>Weather advisory — ${district}</strong><br><br>` +
+      `A live weather feed is not configured on this deployment, so I will not quote live figures. ` +
+      `General guidance for the region:<br>` +
+      `• Plan solar drying for late morning to mid-afternoon (10:00–15:00) when radiation is strongest<br>` +
+      `• Avoid drying on days with visible rain risk; re-wet grain loses grade rapidly<br>` +
+      `• Store grain off the ground in ventilated conditions below 25 °C<br><br>` +
+      `Weather-based drying alerts can be added by connecting a forecast API to this advisor.`;
   }
 
   // ─────────────────────────────────────────────────
-  // STORAGE ADVICE
+  // STORAGE
   // ─────────────────────────────────────────────────
-  static async storageAdvice(question, ctx) {
-    let warehouseInfo = '';
+  static storageAdvice(question, ctx) {
+    return `<strong>Storage and warehousing</strong><br><br>` +
+      `<strong>Best practices:</strong><br>` +
+      `• Store at 13% moisture or below<br>` +
+      `• Use pallets — never store on a bare floor<br>` +
+      `• Maintain ventilation and monitor temperature (below 25 °C)<br><br>` +
+      `Indicative pilot rates: UGX 50–100/kg/month at partner warehouses. ` +
+      `Registered warehouse partners appear in the partner directory.`;
+  }
+
+  // ─────────────────────────────────────────────────
+  // GENERAL OVERVIEW
+  // ─────────────────────────────────────────────────
+  static async generalOverview(ctx) {
+    let statsLine = '';
     try {
-      const partners = await db.query(
-        `SELECT business_name, location FROM partners 
-         WHERE partner_type = 'WAREHOUSE' AND approved = true LIMIT 3`
-      );
-      if (partners.rows.length > 0) {
-        warehouseInfo = `<br>🏭 <strong>Available Warehouses:</strong><br>`;
-        partners.rows.forEach(p => {
-          warehouseInfo += `• ${p.business_name} (${p.location})<br>`;
-        });
+      const r = await db.query(
+        `SELECT
+           (SELECT COUNT(*) FROM products WHERE available = true)::int AS listings,
+           (SELECT COUNT(*) FROM quality_passports)::int AS passports;`
+      ).rows[0];
+      if (r) {
+        statsLine = `The platform currently carries <strong>${r.listings}</strong> active listing${r.listings === 1 ? '' : 's'} ` +
+          `and <strong>${r.passports}</strong> quality passport${r.passports === 1 ? '' : 's'}.<br><br>`;
       }
     } catch (e) { /* DB not ready */ }
 
-    const response = `🏭 <strong>Storage & Warehousing</strong><br><br>` +
-      `Proper storage preserves your quality grade and market value:<br><br>` +
-      `📋 <strong>Best Practices:</strong><br>` +
-      `• Store at <strong>13% moisture or below</strong><br>` +
-      `• Use pallets — never store on bare floor<br>` +
-      `• Maintain ventilation to prevent condensation<br>` +
-      `• Monitor temperature (target: below 25°C)<br>` +
-      `• Fumigate before long-term storage<br><br>` +
-      `💰 <strong>Warehouse Rates:</strong> UGX 50-100/kg/month<br><br>` +
-      `${warehouseInfo}` +
-      `<a href="/warehouse" style="color:var(--g);font-weight:700">View Warehouses →</a>`;
-
-    return response;
+    return `<strong>AGRICHAIN Decision Advisor</strong><br><br>` +
+      statsLine +
+      `I answer questions from your stored platform records. Try:<br>` +
+      `• "Can I list this coffee for sale?" — batch readiness decision<br>` +
+      `• "What are current market prices?" — live listing averages<br>` +
+      `• "How much does solar drying cost?" — pilot fee schedule<br>` +
+      `• "Any disease risk in my area?" — based on recorded test results<br>` +
+      `• "Explain quality grades" — passport grading rules`;
   }
 
   // ─────────────────────────────────────────────────
-  // GENERAL OVERVIEW (live platform stats)
-  // ─────────────────────────────────────────────────
-  static async generalOverview(ctx) {
-    let stats = { farmers: 0, products: 0, passports: 0, partners: 0 };
-    try {
-      const result = await db.query(`
-        SELECT 
-          (SELECT COUNT(*) FROM farmers) as farmers,
-          (SELECT COUNT(*) FROM products WHERE available = true) as products,
-          (SELECT COUNT(*) FROM quality_passports) as passports,
-          (SELECT COUNT(*) FROM partners WHERE approved = true) as partners
-      `);
-      if (result.rows[0]) stats = result.rows[0];
-    } catch (e) { /* DB not ready */ }
-
-    return `🌾 <strong>Welcome to AgriIntel AI</strong><br><br>` +
-      `I'm your intelligent farming assistant, powered by live data from the AGRICHAIN 360 platform.<br><br>` +
-      `📊 <strong>Platform Live Stats:</strong><br>` +
-      `• <strong>${parseInt(stats.farmers).toLocaleString()}</strong> registered farmers<br>` +
-      `• <strong>${parseInt(stats.products).toLocaleString()}</strong> active marketplace listings<br>` +
-      `• <strong>${parseInt(stats.passports).toLocaleString()}</strong> quality passports issued<br>` +
-      `• <strong>${parseInt(stats.partners).toLocaleString()}</strong> verified service partners<br><br>` +
-      `💬 <strong>Ask me about:</strong><br>` +
-      `• 🌽 Harvest timing and crop advice<br>` +
-      `• 🦠 Disease and pest risk in your area<br>` +
-      `• 📈 Live market prices for any crop<br>` +
-      `• ☀️ Solar drying costs and partners<br>` +
-      `• 📜 Quality certification and passports<br>` +
-      `• 🚛 Transport and logistics<br>` +
-      `• 💳 Payments and digital credit<br>` +
-      `• 🌤️ Weather impact on your crops`;
-  }
-
-  // ─────────────────────────────────────────────────
-  // HELPERS
-  // ─────────────────────────────────────────────────
-  static detectCrop(text) {
-    const crops = ['maize', 'rice', 'beans', 'groundnut', 'soybean', 'soy', 'sunflower', 'coffee', 'cocoa', 'cassava', 'banana', 'sorghum', 'millet', 'wheat'];
-    return crops.find(c => text.toLowerCase().includes(c));
-  }
-
-  static detectDistrict(text) {
-    const districts = ['Mayuge', 'Jinja', 'Iganga', 'Kamuli', 'Bugiri', 'Namutumba', 'Kaliro', 'Luuka', 'Buyende', 'Kampala', 'Mbale', 'Tororo', 'Busia', 'Soroti', 'Lira', 'Gulu'];
-    return districts.find(d => text.toLowerCase().includes(d.toLowerCase()));
-  }
-
-  // ─────────────────────────────────────────────────
-  // STATIC RESPONSES (works without database)
+  // STATIC FALLBACK (no DB) — same rules, no live data
   // ─────────────────────────────────────────────────
   static getStaticResponse(q, ctx) {
-    const crop = AgriIntelService.detectCrop(q) || 'maize';
-    const district = ctx.district || AgriIntelService.detectDistrict(q) || 'Eastern Uganda';
-
-    if (q.includes('harvest') || q.includes('when to') || q.includes('ready')) {
-      return `🌾 <strong>Harvest Advisory for ${district}</strong><br><br>` +
-        `Current conditions: ${25 + Math.floor(Math.random()*5)}°C, ${60 + Math.floor(Math.random()*20)}% humidity.<br><br>` +
-        `📋 <strong>Recommendations:</strong><br>` +
-        `• Harvest when grain moisture is between 18-22% for optimal drying<br>` +
-        `• Schedule solar drying immediately after harvest to prevent aflatoxin<br>` +
-        `• Drying cost: <strong>UGX 200/kg</strong> for maize, <strong>UGX 350/kg</strong> for groundnuts<br>` +
-        `• Target moisture after drying: <strong>13% or below</strong> for Grade A<br><br>` +
-        `💡 Book your drying slot now. <a href="/dryer" style="color:var(--g);font-weight:700">Book Solar Drying →</a>`;
+    if (q.includes('dry') || q.includes('moisture')) {
+      return `<strong>Solar drying</strong><br><br>` +
+        `Pilot rates: Maize/Rice/Soybeans UGX 200/kg, Beans UGX 250/kg, Groundnuts UGX 350/kg, ` +
+        `Coffee UGX 350/kg, Cocoa UGX 500/kg. Target 13% moisture (Grade A threshold).`;
     }
-
-    if (q.includes('disease') || q.includes('pest') || q.includes('risk') || q.includes('armyworm')) {
-      return `🦠 <strong>Crop Health Report — ${district}</strong><br><br>` +
-        `Based on current monitoring, aflatoxin risk is <strong>LOW</strong> for the next 7 days.<br><br>` +
-        `📋 <strong>Current Alerts:</strong><br>` +
-        `• Fall armyworm: <span style="color:#2E7D32;font-weight:700">LOW risk</span> — continue regular scouting<br>` +
-        `• Maize streak virus: <span style="color:#2E7D32;font-weight:700">LOW risk</span> — no outbreaks reported<br>` +
-        `• Aflatoxin: <span style="color:#F57F17;font-weight:700">MONITOR</span> — dry immediately after harvest<br><br>` +
-        `💡 <strong>Prevention:</strong> Dry crops to 13% moisture within 48 hours. Use raised drying racks. ` +
-        `<a href="/ai-disease" style="color:var(--g);font-weight:700">Upload Photo for AI Diagnosis →</a>`;
+    if (q.includes('quality') || q.includes('grade') || q.includes('passport')) {
+      return `<strong>Quality grading</strong><br><br>` +
+        `Grade A: moisture ≤ 13% and aflatoxin ≤ 5 ppb. Grade B: ≤ 14% / ≤ 10 ppb. Grade C: ≤ 15% / ≤ 20 ppb. ` +
+        `Beyond these limits a batch is rejected. Passports are verifiable by batch number on the public verification page.`;
     }
-
-    if (q.includes('market') || q.includes('price') || q.includes('sell') || q.includes('best')) {
-      return `🛒 <strong>Market Intelligence — ${crop}</strong><br><br>` +
-        `📊 <strong>Current Prices:</strong><br>` +
-        `• Maize (Grade A): <strong>UGX 1,500–1,800/kg</strong><br>` +
-        `• Coffee (FAQ): <strong>UGX 8,000–12,000/kg</strong><br>` +
-        `• Groundnuts (certified): <strong>UGX 3,200–3,500/kg</strong><br>` +
-        `• Beans (Grade 1): <strong>UGX 2,800–3,200/kg</strong><br>` +
-        `• Cocoa: <strong>UGX 5,000–7,000/kg</strong><br><br>` +
-        `💡 Certified produce with Digital Quality Passport commands <strong>20-40% premium</strong>. ` +
-        `<a href="/marketplace" style="color:var(--g);font-weight:700">Browse Marketplace →</a>`;
+    if (q.includes('price') || q.includes('market') || q.includes('sell')) {
+      return `<strong>Marketplace</strong><br><br>` +
+        `Live price data is temporarily unavailable. Indicative farm-gate ranges: ` +
+        `Maize UGX 1,500–1,800/kg, Beans UGX 2,800–3,200/kg, Coffee (FAQ) UGX 8,000–12,000/kg.`;
     }
-
-    if (q.includes('dry') || q.includes('cost') || q.includes('moisture') || q.includes('rate')) {
-      return `☀️ <strong>Solar Drying Advisory</strong><br><br>` +
-        `💰 <strong>Drying Rates:</strong><br>` +
-        `• Maize / Rice / Soy: <strong>UGX 200/kg</strong><br>` +
-        `• Sunflower / Beans: <strong>UGX 250/kg</strong><br>` +
-        `• Groundnuts: <strong>UGX 350/kg</strong><br>` +
-        `• Coffee: <strong>UGX 400/kg</strong><br>` +
-        `• Cocoa: <strong>UGX 500/kg</strong><br><br>` +
-        `⏱️ Typical drying time: 6-12 hours depending on crop and starting moisture.<br>` +
-        `🎯 Target: 13% moisture for Grade A certification.<br>` +
-        `🚛 Transport: UGX 50-100/kg shared route.<br><br>` +
-        `<a href="/dryer" style="color:var(--g);font-weight:700">Book Drying Service →</a>`;
-    }
-
-    if (q.includes('quality') || q.includes('grade') || q.includes('passport') || q.includes('certif')) {
-      return `📜 <strong>Digital Quality Passport</strong><br><br>` +
-        `Each batch processed through AGRICHAIN 360 receives a <strong>Digital Quality Passport</strong>:<br><br>` +
-        `• ✅ Crop type and variety<br>` +
-        `• ✅ Farmer identity and location (GPS verified)<br>` +
-        `• ✅ Moisture content (lab-tested)<br>` +
-        `• ✅ Aflatoxin levels (ppb)<br>` +
-        `• ✅ Quality grade (A/B/C)<br>` +
-        `• ✅ QR code for buyer verification<br><br>` +
-        `🏆 Export buyers pay <strong>20-40% premium</strong> for certified produce. ` +
-        `<a href="/passport/B247391" style="color:var(--g);font-weight:700">View Sample Passport →</a>`;
-    }
-
-    if (q.includes('transport') || q.includes('deliver') || q.includes('truck')) {
-      return `🚛 <strong>Transport & Logistics</strong><br><br>` +
-        `AGRICHAIN 360 coordinates shared transport routes:<br><br>` +
-        `• <strong>Shared routes:</strong> UGX 50-100/kg<br>` +
-        `• <strong>Dedicated truck:</strong> UGX 150-250/kg<br>` +
-        `• <strong>Motorcycle (small loads):</strong> UGX 300-500/trip<br><br>` +
-        `📋 <strong>How it works:</strong><br>` +
-        `1. Book drying or testing service<br>` +
-        `2. System matches nearby transporters<br>` +
-        `3. Live tracking until delivery<br>` +
-        `4. Proof of delivery confirmation<br><br>` +
-        `<a href="/transport" style="color:var(--g);font-weight:700">Book Transport →</a>`;
-    }
-
-    if (q.includes('weather') || q.includes('rain') || q.includes('temperature')) {
-      const temp = 25 + Math.floor(Math.random() * 5);
-      const hum = 60 + Math.floor(Math.random() * 20);
-      return `🌤️ <strong>Weather Advisory — ${district}</strong><br><br>` +
-        `Current: <strong>${temp}°C</strong>, <strong>${hum}%</strong> humidity<br>` +
-        `Wind: ${5 + Math.floor(Math.random()*10)} km/h<br><br>` +
-        `📋 <strong>Impact:</strong><br>` +
-        `• Drying conditions: <strong>${hum < 70 ? 'GOOD' : 'MODERATE'}</strong><br>` +
-        `• Disease risk: <strong>${hum > 80 ? 'ELEVATED' : 'LOW'}</strong><br><br>` +
-        `💡 Schedule solar drying during peak sun (10 AM – 3 PM) for fastest results.`;
-    }
-
-    if (q.includes('storage') || q.includes('warehouse') || q.includes('store')) {
-      return `🏭 <strong>Storage & Warehousing</strong><br><br>` +
-        `📋 <strong>Best Practices:</strong><br>` +
-        `• Store at <strong>13% moisture or below</strong><br>` +
-        `• Use pallets — never store on bare floor<br>` +
-        `• Maintain ventilation<br>` +
-        `• Monitor temperature (below 25°C)<br><br>` +
-        `💰 <strong>Rates:</strong> UGX 50-100/kg/month<br><br>` +
-        `<a href="/warehouse" style="color:var(--g);font-weight:700">View Warehouses →</a>`;
-    }
-
-    if (q.includes('loan') || q.includes('credit') || q.includes('finance') || q.includes('pay')) {
-      return `💳 <strong>Finance & Payments</strong><br><br>` +
-        `AGRICHAIN 360 supports:<br><br>` +
-        `• <strong>MTN Mobile Money</strong> — instant payments<br>` +
-        `• <strong>Airtel Money</strong> — instant payments<br>` +
-        `• <strong>Bank Transfer</strong> — large transactions<br>` +
-        `• <strong>Cash</strong> — at partner locations<br><br>` +
-        `🏦 <strong>Digital Credit (Coming Soon):</strong><br>` +
-        `Your farming history builds a credit profile for input loans, equipment financing, and post-harvest credit.<br><br>` +
-        `<a href="/finance" style="color:var(--g);font-weight:700">View Wallet →</a>`;
-    }
-
-    // Default overview
-    return `🌾 <strong>Welcome to AgriIntel AI</strong><br><br>` +
-      `I'm your intelligent farming assistant powered by AGRICHAIN 360.<br><br>` +
-      `💬 <strong>Ask me about:</strong><br>` +
-      `• 🌽 Harvest timing and crop advice<br>` +
-      `• 🦠 Disease and pest risk in your area<br>` +
-      `• 📈 Live market prices for any crop<br>` +
-      `• ☀️ Solar drying costs and partners<br>` +
-      `• 📜 Quality certification and passports<br>` +
-      `• 🚛 Transport and logistics<br>` +
-      `• 🌤️ Weather impact on your crops<br>` +
-      `• 💳 Payments and digital credit`;
+    return `<strong>AGRICHAIN Decision Advisor</strong><br><br>` +
+      `I answer questions from stored platform records (listings, quality passports, partner and fee data). ` +
+      `Live data is temporarily unavailable, so I am answering from the documented pilot rules.`;
   }
 }
 

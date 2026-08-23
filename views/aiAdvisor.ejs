@@ -1,6 +1,5 @@
 <!-- AGRICHAIN 360™ — AI Agricultural Advisor -->
-<style>
-  .ai-page { max-width:1200px; margin:0 auto; padding:24px 20px 60px; }
+<style> .ai-page { max-width:1200px; margin:0 auto; padding:24px 20px 60px; }
 
   /* Header */
   .ai-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
@@ -158,230 +157,40 @@
   .ai-photo-box { background:white; border-radius:24px; padding:32px; max-width:500px; width:92%; box-shadow:0 24px 60px rgba(0,0,0,.2); }
   .ai-drop { border:2px dashed #ddd; border-radius:20px; padding:44px; text-align:center; cursor:pointer; transition:all .25s; }
   .ai-drop:hover,.ai-drop.dragover { border-color:#1B5E20; background:#F1F8E9; }
-</style>
-
-<div class="ai-page">
-  <!-- Header -->
-  <div class="ai-header">
-    <div class="ai-header-left">
-      <div class="ai-logo"><i class="fas fa-seedling"></i></div>
-      <div class="ai-header-text">
-        <h2>AgriIntel AI</h2>
-        <p><span class="live-dot"></span> Online — Your 24/7 farming companion</p>
-      </div>
-    </div>
-    <div class="ai-controls">
-      <select class="ai-lang-select" id="aiLangSelect" onchange="switchLanguage(this.value)">
-        <option value="en">🇬🇧 English</option>
-        <option value="lg">🇺🇬 Luganda</option>
-        <option value="so">🇺🇬 Lusoga</option>
-        <option value="rn">🇺🇬 Runyankole</option>
-        <option value="ac">🇺🇬 Acholi</option>
-        <option value="sw">🇰🇪 Swahili</option>
-      </select>
-      <button class="ai-ctrl-btn" id="voiceInputBtn" onclick="toggleVoiceInput()" title="Voice input"><i class="fas fa-microphone"></i></button>
-      <button class="ai-ctrl-btn" id="voiceOutputBtn" onclick="toggleVoiceOutput()" title="Read aloud"><i class="fas fa-volume-up"></i></button>
-    </div>
-  </div>
-
-  <div class="ai-layout">
-    <!-- ═══ CHAT AREA ═══ -->
-    <div class="ai-chat-wrap">
-      <div class="ai-topbar">
-        <div class="ai-topbar-left"><i class="fas fa-comment-dots"></i> Conversation</div>
-        <div class="ai-topbar-btns">
-          <button class="ai-topbar-btn" onclick="clearChat()" title="New conversation"><i class="fas fa-redo"></i></button>
-          <button class="ai-topbar-btn" onclick="exportChat()" title="Export"><i class="fas fa-download"></i></button>
-        </div>
-      </div>
-
-      <div class="ai-chat-body" id="aiChat">
-        <!-- Welcome -->
-        <div class="ai-msg">
-          <div class="ai-avatar bot"><i class="fas fa-seedling"></i></div>
-          <div style="max-width:85%">
-            <div class="ai-badge ai-tag">🤖 AI-Generated Advice</div>
-            <div class="ai-bubble bot">
-              👋 <strong>Hello! I'm AgriIntel AI</strong> — your personal agricultural advisor.<br><br>
-              I'm here to help you make better farming decisions. Tap any topic below to get started, or type your own question.
-            </div>
-            <!-- Feature Cards -->
-            <div class="ai-features">
-              <div class="ai-feat" onclick="askAI('What should I plant this season?')">
-                <div class="ai-feat-ico green">🌱</div>
-                <div><div class="ai-feat-text">What to Plant</div><div class="ai-feat-sub">Seasonal recommendations</div></div>
-              </div>
-              <div class="ai-feat" onclick="askAI('What are current market prices?')">
-                <div class="ai-feat-ico gold">📈</div>
-                <div><div class="ai-feat-text">Market Prices</div><div class="ai-feat-sub">Current prices for your crops</div></div>
-              </div>
-              <div class="ai-feat" onclick="openPhotoUpload()">
-                <div class="ai-feat-ico blue">📸</div>
-                <div><div class="ai-feat-text">Scan Disease</div><div class="ai-feat-sub">Upload a photo for analysis</div></div>
-              </div>
-              <div class="ai-feat" onclick="askAI('How much does solar drying cost?')">
-                <div class="ai-feat-ico purple">☀️</div>
-                <div><div class="ai-feat-text">Drying & Storage</div><div class="ai-feat-sub">Costs and best practices</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Input -->
-      <div class="ai-input-wrap">
-        <div class="ai-input-row">
-          <input type="text" class="ai-input" id="aiInput" placeholder="Ask about crops, markets, diseases, drying..." onkeypress="if(event.key==='Enter')askAI()">
-          <button class="ai-send" id="aiSendBtn" onclick="askAI()"><i class="fas fa-paper-plane"></i></button>
-        </div>
-        <div class="ai-tools">
-          <button class="ai-tool cam" onclick="openPhotoUpload()"><i class="fas fa-camera"></i> Photo</button>
-          <button class="ai-tool" onclick="askAI('What is the weather forecast for my area?')"><i class="fas fa-cloud-sun"></i> Weather</button>
-          <button class="ai-tool" onclick="askAI('Explain quality grades for export')"><i class="fas fa-certificate"></i> Quality</button>
-          <button class="ai-tool" onclick="askAI('How do I list my produce on the marketplace?')"><i class="fas fa-store"></i> Sell</button>
-          <button class="ai-tool" onclick="askAI('What financing options are available?')"><i class="fas fa-hand-holding-usd"></i> Finance</button>
-        </div>
-      </div>
-
-      <!-- Quick Questions -->
-      <div class="ai-quick-wrap">
-        <div class="ai-quick-label">Suggested Questions</div>
-        <div class="ai-quick-btns">
-          <button class="ai-qbtn" onclick="askAI('When should I harvest my maize?')">🌽 Harvest timing</button>
-          <button class="ai-qbtn" onclick="askAI('Any disease risk in my area?')">🦠 Disease risk</button>
-          <button class="ai-qbtn" onclick="askAI('How much does solar drying cost?')">☀️ Drying costs</button>
-          <button class="ai-qbtn" onclick="askAI('Tell me about quality passports')">📜 Quality passport</button>
-          <button class="ai-qbtn" onclick="askAI('How do I register on the platform?')">📝 How to register</button>
-          <button class="ai-qbtn" onclick="askAI('What transport options are available?')">🚛 Transport</button>
-        </div>
-      </div>
-
-      <div class="ai-footer-note">
-        🤖 AI-generated advice. For critical decisions, <a href="#" onclick="requestExpert();return false">talk to an expert →</a>
-      </div>
-    </div>
-
-    <!-- ═══ SIDEBAR ═══ -->
-    <div class="ai-sidebar">
-      <!-- Farm Context -->
-      <div class="ai-card">
-        <div class="ai-card-head">
-          <div class="ai-card-head-ico green"><i class="fas fa-map-marker-alt"></i></div>
-          <div><div class="ai-card-title">Your Farm Context</div><div class="ai-card-sub">Personalizes AI responses</div></div>
-        </div>
-        <div class="ctx-row"><span class="ctx-label">Location</span><span class="ctx-val" id="ctxLocation">Mayuge District</span></div>
-        <div class="ctx-row"><span class="ctx-label">Main Crop</span><span class="ctx-val" id="ctxCrop">Maize</span></div>
-        <div class="ctx-row"><span class="ctx-label">Farm Size</span><span class="ctx-val" id="ctxSize">3.5 acres</span></div>
-        <div class="ctx-row"><span class="ctx-label">Growth Stage</span><span class="ctx-val" id="ctxStage">Vegetative</span></div>
-        <div class="ctx-row"><span class="ctx-label">Weather</span><span class="ctx-val" id="ctxWeather">28°C, Partly Cloudy</span></div>
-        <div class="ctx-edit"><button class="ctx-edit-btn" onclick="editContext()"><i class="fas fa-edit"></i> Update Context</button></div>
-      </div>
-
-      <!-- Expert Connection -->
-      <div class="ai-card">
-        <div class="ai-card-head">
-          <div class="ai-card-head-ico gold"><i class="fas fa-user-tie"></i></div>
-          <div><div class="ai-card-title">Connect with Expert</div><div class="ai-card-sub">Verified human agronomists</div></div>
-        </div>
-        <div class="exp-btns">
-          <button class="exp-btn" onclick="requestExpert('agronomist')"><i class="fas fa-leaf green"></i> Request Live Agronomist</button>
-          <button class="exp-btn" onclick="requestExpert('consultation')"><i class="fas fa-calendar-check green"></i> Book Consultation</button>
-          <button class="exp-btn" onclick="requestExpert('photo')"><i class="fas fa-image gold"></i> Send Photo to Expert</button>
-          <button class="exp-btn" onclick="requestExpert('callback')"><i class="fas fa-phone green"></i> Request Callback</button>
-          <button class="exp-btn" onclick="requestExpert('cooperative')"><i class="fas fa-users green"></i> Chat with Cooperative</button>
-        </div>
-        <div class="exp-note">
-          <i class="fas fa-shield-alt"></i>
-          All expert responses are verified and marked with a <span class="ai-badge expert-tag" style="margin:0;padding:1px 6px">✓ Expert</span> badge
-        </div>
-      </div>
-
-      <!-- Community -->
-      <div class="ai-card">
-        <div class="ai-card-head">
-          <div class="ai-card-head-ico blue"><i class="fas fa-comments"></i></div>
-          <div><div class="ai-card-title">Community</div><div class="ai-card-sub">Learn from other farmers</div></div>
-        </div>
-        <div class="com-item" onclick="joinCommunity('maize')">
-          <div class="com-ico green"><i class="fas fa-seedling"></i></div>
-          <div><div class="com-name">Maize Farmers Group</div><div class="com-meta">234 members • 12 new posts</div></div>
-        </div>
-        <div class="com-item" onclick="joinCommunity('coffee')">
-          <div class="com-ico gold"><i class="fas fa-mug-hot"></i></div>
-          <div><div class="com-name">Coffee Growers Uganda</div><div class="com-meta">189 members • 8 new posts</div></div>
-        </div>
-        <div class="com-item" onclick="joinCommunity('local')">
-          <div class="com-ico blue"><i class="fas fa-map-pin"></i></div>
-          <div><div class="com-name">Mayuge District Forum</div><div class="com-meta">67 members • 3 new posts</div></div>
-        </div>
-        <div style="margin-top:14px">
-          <button class="ctx-edit-btn" onclick="askCommunity()"><i class="fas fa-question-circle"></i> Ask the Community</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Photo Upload Modal -->
-<div class="ai-photo-modal" id="photoModal">
-  <div class="ai-photo-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
-      <h3 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin:0">📸 Crop Disease Detection</h3>
-      <button onclick="closePhotoUpload()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="ai-drop" id="photoDrop" onclick="document.getElementById('photoFileInput').click()">
-      <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;color:#1B5E20;margin-bottom:14px;display:block"></i>
-      <div style="font-weight:700;font-size:1rem;margin-bottom:4px">Upload a photo of your crop</div>
-      <div style="font-size:.85rem;color:#888">Take a clear photo of affected leaves, stems, or fruit</div>
-      <div style="font-size:.72rem;color:#bbb;margin-top:8px">JPG, PNG — Max 5MB</div>
-    </div>
-    <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
-    <div id="photoPreview" style="display:none;margin-top:20px;text-align:center">
-      <img id="photoPreviewImg" style="max-width:100%;max-height:200px;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.1)">
-      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap">
-        <select id="photoCropSelect" style="padding:10px 14px;border:1px solid #e0e0e0;border-radius:12px;font-size:.85rem;font-family:inherit">
-          <option value="maize">Maize</option><option value="coffee">Coffee</option><option value="cocoa">Cocoa</option>
-          <option value="beans">Beans</option><option value="groundnuts">Groundnuts</option><option value="cassava">Cassava</option>
-          <option value="banana">Banana</option><option value="rice">Rice</option>
-        </select>
-        <button class="ai-send" style="width:auto;padding:10px 24px;border-radius:12px;font-size:.88rem" onclick="analyzePhoto()"><i class="fas fa-search"></i> Analyze</button>
-      </div>
-    </div>
-    <div style="margin-top:20px;padding:12px;background:#F1F8E9;border-radius:12px;font-size:.75rem;color:#555;display:flex;align-items:center;gap:8px">
-      <i class="fas fa-info-circle" style="color:#1B5E20"></i>
-      AI analysis provides guidance only. For serious outbreaks, consult a qualified agronomist.
-    </div>
-  </div>
-</div>
-
-<script>
+</style> <div class="ai-page"> <!-- Header --> <div class="ai-header"> <div class="ai-header-left"> <div class="ai-logo"><i class="fas fa-seedling"></i></div> <div class="ai-header-text"> <h2>AgriIntel AI</h2> <p><span class="live-dot"></span> Online — Your 24/7 farming companion</p> </div> </div> <div class="ai-controls"> <select class="ai-lang-select" id="aiLangSelect" onchange="switchLanguage(this.value)"> <option value="en"> English</option> <option value="lg"> Luganda</option> <option value="so"> Lusoga</option> <option value="rn"> Runyankole</option> <option value="ac"> Acholi</option> <option value="sw"> Swahili</option> </select> <button class="ai-ctrl-btn" id="voiceInputBtn" onclick="toggleVoiceInput()" title="Voice input"><i class="fas fa-microphone"></i></button> <button class="ai-ctrl-btn" id="voiceOutputBtn" onclick="toggleVoiceOutput()" title="Read aloud"><i class="fas fa-volume-up"></i></button> </div> </div> <div class="ai-layout"> <!-- ═══ CHAT AREA ═══ --> <div class="ai-chat-wrap"> <div class="ai-topbar"> <div class="ai-topbar-left"><i class="fas fa-comment-dots"></i> Conversation</div> <div class="ai-topbar-btns"> <button class="ai-topbar-btn" onclick="clearChat()" title="New conversation"><i class="fas fa-redo"></i></button> <button class="ai-topbar-btn" onclick="exportChat()" title="Export"><i class="fas fa-download"></i></button> </div> </div> <div class="ai-chat-body" id="aiChat"> <!-- Welcome --> <div class="ai-msg"> <div class="ai-avatar bot"><i class="fas fa-seedling"></i></div> <div style="max-width:85%"> <div class="ai-badge ai-tag"> AI-Generated Advice</div> <div class="ai-bubble bot"> <strong>Hello! I'm AgriIntel AI</strong> — your personal agricultural advisor.<br><br> I'm here to help you make better farming decisions. Tap any topic below to get started, or type your own question.
+            </div> <!-- Feature Cards --> <div class="ai-features"> <div class="ai-feat" onclick="askAI('What should I plant this season?')"> <div class="ai-feat-ico green"></div> <div><div class="ai-feat-text">What to Plant</div><div class="ai-feat-sub">Seasonal recommendations</div></div> </div> <div class="ai-feat" onclick="askAI('What are current market prices?')"> <div class="ai-feat-ico gold"></div> <div><div class="ai-feat-text">Market Prices</div><div class="ai-feat-sub">Current prices for your crops</div></div> </div> <div class="ai-feat" onclick="openPhotoUpload()"> <div class="ai-feat-ico blue"></div> <div><div class="ai-feat-text">Scan Disease</div><div class="ai-feat-sub">Upload a photo for analysis</div></div> </div> <div class="ai-feat" onclick="askAI('How much does solar drying cost?')"> <div class="ai-feat-ico purple">☀️</div> <div><div class="ai-feat-text">Drying & Storage</div><div class="ai-feat-sub">Costs and best practices</div></div> </div> </div> </div> </div> </div> <!-- Input --> <div class="ai-input-wrap"> <div class="ai-input-row"> <input type="text" class="ai-input" id="aiInput" placeholder="Ask about crops, markets, diseases, drying..." onkeypress="if(event.key==='Enter')askAI()"> <button class="ai-send" id="aiSendBtn" onclick="askAI()"><i class="fas fa-paper-plane"></i></button> </div> <div class="ai-tools"> <button class="ai-tool cam" onclick="openPhotoUpload()"><i class="fas fa-camera"></i> Photo</button> <button class="ai-tool" onclick="askAI('What is the weather forecast for my area?')"><i class="fas fa-cloud-sun"></i> Weather</button> <button class="ai-tool" onclick="askAI('Explain quality grades for export')"><i class="fas fa-certificate"></i> Quality</button> <button class="ai-tool" onclick="askAI('How do I list my produce on the marketplace?')"><i class="fas fa-store"></i> Sell</button> <button class="ai-tool" onclick="askAI('What financing options are available?')"><i class="fas fa-hand-holding-usd"></i> Finance</button> </div> </div> <!-- Quick Questions --> <div class="ai-quick-wrap"> <div class="ai-quick-label">Suggested Questions</div> <div class="ai-quick-btns"> <button class="ai-qbtn" onclick="askAI('When should I harvest my maize?')">Harvest timing</button> <button class="ai-qbtn" onclick="askAI('Any disease risk in my area?')"> Disease risk</button> <button class="ai-qbtn" onclick="askAI('How much does solar drying cost?')">☀️ Drying costs</button> <button class="ai-qbtn" onclick="askAI('Tell me about quality passports')"> Quality passport</button> <button class="ai-qbtn" onclick="askAI('How do I register on the platform?')"> How to register</button> <button class="ai-qbtn" onclick="askAI('What transport options are available?')"> Transport</button> </div> </div> <div class="ai-footer-note"> AI-generated advice. For critical decisions, <a href="#" onclick="requestExpert();return false">talk to an expert →</a> </div> </div> <!-- ═══ SIDEBAR ═══ --> <div class="ai-sidebar"> <!-- Farm Context --> <div class="ai-card"> <div class="ai-card-head"> <div class="ai-card-head-ico green"><i class="fas fa-map-marker-alt"></i></div> <div><div class="ai-card-title">Your Farm Context</div><div class="ai-card-sub">Personalizes AI responses</div></div> </div> <div class="ctx-row"><span class="ctx-label">Location</span><span class="ctx-val" id="ctxLocation">Mayuge District</span></div> <div class="ctx-row"><span class="ctx-label">Main Crop</span><span class="ctx-val" id="ctxCrop">Maize</span></div> <div class="ctx-row"><span class="ctx-label">Farm Size</span><span class="ctx-val" id="ctxSize">3.5 acres</span></div> <div class="ctx-row"><span class="ctx-label">Growth Stage</span><span class="ctx-val" id="ctxStage">Vegetative</span></div> <div class="ctx-row"><span class="ctx-label">Weather</span><span class="ctx-val" id="ctxWeather">28°C, Partly Cloudy</span></div> <div class="ctx-edit"><button class="ctx-edit-btn" onclick="editContext()"><i class="fas fa-edit"></i> Update Context</button></div> </div> <!-- Expert Connection --> <div class="ai-card"> <div class="ai-card-head"> <div class="ai-card-head-ico gold"><i class="fas fa-user-tie"></i></div> <div><div class="ai-card-title">Connect with Expert</div><div class="ai-card-sub">Verified human agronomists</div></div> </div> <div class="exp-btns"> <button class="exp-btn" onclick="requestExpert('agronomist')"><i class="fas fa-leaf green"></i> Request Live Agronomist</button> <button class="exp-btn" onclick="requestExpert('consultation')"><i class="fas fa-calendar-check green"></i> Book Consultation</button> <button class="exp-btn" onclick="requestExpert('photo')"><i class="fas fa-image gold"></i> Send Photo to Expert</button> <button class="exp-btn" onclick="requestExpert('callback')"><i class="fas fa-phone green"></i> Request Callback</button> <button class="exp-btn" onclick="requestExpert('cooperative')"><i class="fas fa-users green"></i> Chat with Cooperative</button> </div> <div class="exp-note"> <i class="fas fa-shield-alt"></i> All expert responses are verified and marked with a <span class="ai-badge expert-tag" style="margin:0;padding:1px 6px"> Expert</span> badge
+        </div> </div> <!-- Community --> <div class="ai-card"> <div class="ai-card-head"> <div class="ai-card-head-ico blue"><i class="fas fa-comments"></i></div> <div><div class="ai-card-title">Community</div><div class="ai-card-sub">Learn from other farmers</div></div> </div> <div class="com-item" onclick="joinCommunity('maize')"> <div class="com-ico green"><i class="fas fa-seedling"></i></div> <div><div class="com-name">Maize Farmers Group</div><div class="com-meta">234 members • 12 new posts</div></div> </div> <div class="com-item" onclick="joinCommunity('coffee')"> <div class="com-ico gold"><i class="fas fa-mug-hot"></i></div> <div><div class="com-name">Coffee Growers Uganda</div><div class="com-meta">189 members • 8 new posts</div></div> </div> <div class="com-item" onclick="joinCommunity('local')"> <div class="com-ico blue"><i class="fas fa-map-pin"></i></div> <div><div class="com-name">Mayuge District Forum</div><div class="com-meta">67 members • 3 new posts</div></div> </div> <div style="margin-top:14px"> <button class="ctx-edit-btn" onclick="askCommunity()"><i class="fas fa-question-circle"></i> Ask the Community</button> </div> </div> </div> </div>
+</div> <!-- Photo Upload Modal -->
+<div class="ai-photo-modal" id="photoModal"> <div class="ai-photo-box"> <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px"> <h3 style="font-family:'Playfair Display',serif;font-weight:800;font-size:1.2rem;margin:0"> Crop Disease Detection</h3> <button onclick="closePhotoUpload()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999"><i class="fas fa-times"></i></button> </div> <div class="ai-drop" id="photoDrop" onclick="document.getElementById('photoFileInput').click()"> <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;color:#1B5E20;margin-bottom:14px;display:block"></i> <div style="font-weight:700;font-size:1rem;margin-bottom:4px">Upload a photo of your crop</div> <div style="font-size:.85rem;color:#888">Take a clear photo of affected leaves, stems, or fruit</div> <div style="font-size:.72rem;color:#bbb;margin-top:8px">JPG, PNG — Max 5MB</div> </div> <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"> <div id="photoPreview" style="display:none;margin-top:20px;text-align:center"> <img id="photoPreviewImg" style="max-width:100%;max-height:200px;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.1)"> <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap"> <select id="photoCropSelect" style="padding:10px 14px;border:1px solid #e0e0e0;border-radius:12px;font-size:.85rem;font-family:inherit"> <option value="maize">Maize</option><option value="coffee">Coffee</option><option value="cocoa">Cocoa</option> <option value="beans">Beans</option><option value="groundnuts">Groundnuts</option><option value="cassava">Cassava</option> <option value="banana">Banana</option><option value="rice">Rice</option> </select> <button class="ai-send" style="width:auto;padding:10px 24px;border-radius:12px;font-size:.88rem" onclick="analyzePhoto()"><i class="fas fa-search"></i> Analyze</button> </div> </div> <div style="margin-top:20px;padding:12px;background:#F1F8E9;border-radius:12px;font-size:.75rem;color:#555;display:flex;align-items:center;gap:8px"> <i class="fas fa-info-circle" style="color:#1B5E20"></i> AI analysis provides guidance only. For serious outbreaks, consult a qualified agronomist.
+    </div> </div>
+</div> <script>
 var aiLoading=false,voiceInputActive=false,voiceOutputActive=false,currentLang='en',recognition=null;
 
 function askAI(question){var inp=document.getElementById('aiInput'),q=question||(inp?inp.value.trim():'');if(!q||aiLoading)return;var chat=document.getElementById('aiChat');chat.innerHTML+='<div class="ai-msg user"><div class="ai-avatar user"><i class="fas fa-user" style="font-size:.7rem"></i></div><div class="ai-bubble user">'+escapeHtml(q)+'</div></div>';if(inp)inp.value='';chat.scrollTop=chat.scrollHeight;aiLoading=true;var btn=document.getElementById('aiSendBtn');if(btn)btn.disabled=true;var lid='ld-'+Date.now();chat.innerHTML+='<div class="ai-msg" id="'+lid+'"><div class="ai-avatar bot"><i class="fas fa-seedling"></i></div><div class="ai-typing"><span></span><span></span><span></span></div></div>';chat.scrollTop=chat.scrollHeight;fetch('/api/v1/ai/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,district:'Mayuge',crops:['Maize']})}).then(function(r){return r.json()}).then(function(d){rmEl(lid);if(d.success&&d.data&&d.data.answer){addBot(d.data.answer)}else{addBot(fallback(q.toLowerCase()))}}).catch(function(){rmEl(lid);addBot(fallback(q.toLowerCase()))}).finally(function(){aiLoading=false;if(btn)btn.disabled=false})}
 
-function addBot(html){var c=document.getElementById('aiChat'),a=ctxActions(html);c.innerHTML+='<div class="ai-msg"><div class="ai-avatar bot"><i class="fas fa-seedling"></i></div><div><div class="ai-badge ai-tag">🤖 AI Advice</div><div class="ai-bubble bot">'+html+'</div>'+a+'</div></div>';c.scrollTop=c.scrollHeight;if(voiceOutputActive)speak(html.replace(/<[^>]*>/g,''))}
+function addBot(html){var c=document.getElementById('aiChat'),a=ctxActions(html);c.innerHTML+='<div class="ai-msg"><div class="ai-avatar bot"><i class="fas fa-seedling"></i></div><div><div class="ai-badge ai-tag"> AI Advice</div><div class="ai-bubble bot">'+html+'</div>'+a+'</div></div>';c.scrollTop=c.scrollHeight;if(voiceOutputActive)speak(html.replace(/<[^>]*>/g,''))}
 
 function ctxActions(h){var a='<div class="ai-actions">';if(h.includes('market')||h.includes('price'))a+='<button class="ai-act" onclick="window.location.href=\'/marketplace\'"><i class="fas fa-store"></i> Marketplace</button>';if(h.includes('dry')||h.includes('moisture'))a+='<button class="ai-act" onclick="window.location.href=\'/dryer\'"><i class="fas fa-solar-panel"></i> Book Drying</button>';if(h.includes('passport')||h.includes('quality')||h.includes('certif'))a+='<button class="ai-act" onclick="window.location.href=\'/passport/B247391\'"><i class="fas fa-qrcode"></i> View Passport</button>';if(h.includes('disease')||h.includes('pest'))a+='<button class="ai-act" onclick="openPhotoUpload()"><i class="fas fa-camera"></i> Scan Crop</button>';a+='<button class="ai-act gold" onclick="requestExpert()"><i class="fas fa-user-tie"></i> Ask Expert</button></div>';return a}
 
-function fallback(q){if(q.includes('harvest')||q.includes('when to')||q.includes('ready'))return'🌾 <strong>Harvest Advisory — Mayuge District</strong><br><br>Current: 28°C, 65% humidity.<br><br>📋 <strong>Recommendations:</strong><br>• Harvest maize at 18-22% moisture<br>• Schedule solar drying within 48 hours<br>• Cost: <strong>UGX 200/kg</strong> for maize<br>• Target: <strong>≤13%</strong> for Grade A<br><br>💡 <a href="/dryer">Book drying slot →</a>';if(q.includes('disease')||q.includes('pest')||q.includes('risk'))return'🦠 <strong>Crop Health — Mayuge</strong><br><br>• Fall armyworm: <strong style="color:#1B5E20">LOW</strong><br>• Maize streak virus: <strong style="color:#1B5E20">LOW</strong><br>• Aflatoxin: <strong style="color:#D4AF37">MONITOR</strong><br><br>📸 <a href="#" onclick="openPhotoUpload();return false">Upload photo</a> for AI analysis';if(q.includes('market')||q.includes('price')||q.includes('sell'))return'📈 <strong>Current Prices:</strong><br>• Maize (A): <strong>UGX 1,500–1,800/kg</strong><br>• Coffee: <strong>UGX 8,000–12,000/kg</strong><br>• Groundnuts: <strong>UGX 3,200–3,500/kg</strong><br>• Beans: <strong>UGX 2,800–3,200/kg</strong><br><br>Certified produce earns <strong>20-40% premium</strong>. <a href="/marketplace">Browse →</a>';if(q.includes('dry')||q.includes('cost')||q.includes('moisture'))return'☀️ <strong>Drying Costs:</strong><br>• Maize/Rice: <strong>UGX 200/kg</strong><br>• Beans: <strong>UGX 250/kg</strong><br>• Groundnuts: <strong>UGX 350/kg</strong><br>• Coffee: <strong>UGX 400/kg</strong><br>• Cocoa: <strong>UGX 500/kg</strong><br><br>6-12 hours. Target: 13%. <a href="/dryer">Book →</a>';if(q.includes('quality')||q.includes('passport')||q.includes('certif')||q.includes('grade'))return'📜 <strong>Quality Passport includes:</strong><br>• Crop type & variety<br>• GPS-verified farmer identity<br>• Moisture & aflatoxin results<br>• Quality grade (A/B/C)<br>• QR code for verification<br><br>Exporters pay <strong>20-40% premium</strong>. <a href="/passport/B247391">View sample →</a>';if(q.includes('register')||q.includes('sign up'))return'📝 <strong>How to Register:</strong><br><br><strong>Web:</strong> <a href="/signup">Create account</a><br><strong>USSD:</strong> Dial <strong>*284#</strong><br><strong>Agent:</strong> Find a local village agent<br><br>Free for farmers.';if(q.includes('weather')||q.includes('rain'))return'🌤️ <strong>Mayuge Weather:</strong><br>• 28°C, Partly cloudy<br>• Humidity: 65%<br>• Rain: 30% (24h)<br><br>Drying: <strong>GOOD</strong> • Disease: <strong>LOW</strong>';if(q.includes('transport'))return'🚛 <strong>Transport:</strong><br>• Shared: UGX 50-100/kg<br>• Dedicated: UGX 150-250/kg<br>• Motorcycle: UGX 300-500<br><br><a href="/transport">Book →</a>';if(q.includes('loan')||q.includes('credit')||q.includes('financ'))return'💰 <strong>Financing:</strong><br>• Input credit<br>• Warehouse receipt financing<br>• Mobile Money loans<br>• Cooperative savings<br><br><a href="/finance">View wallet →</a>';if(q.includes('storage')||q.includes('warehouse'))return'🏭 <strong>Storage:</strong><br>• Store at ≤13% moisture<br>• Use pallets<br>• UGX 50-100/kg/month<br><br><a href="/warehouse">View →</a>';if(q.includes('plant')||q.includes('season'))return'🌱 <strong>Planting — Mayuge:</strong><br>• <strong>Maize</strong> — plant within 2 weeks<br>• <strong>Beans</strong> — intercrop with maize<br>• <strong>Groundnuts</strong> — good rotation<br><br>3.5 acres maize: 87.5kg seed, 175kg DAP, 105kg Urea';return'🌾 <strong>I can help with:</strong><br><br>🌽 Crop production advice<br>🦠 Disease identification (upload photo)<br>📈 Market prices<br>☀️ Drying & storage<br>📜 Quality certification<br>🌤️ Weather impact<br>📝 Platform help<br>💰 Financing options<br><br>Ask me anything!'}
+function fallback(q){if(q.includes('harvest')||q.includes('when to')||q.includes('ready'))return' <strong>Harvest Advisory — Mayuge District</strong><br><br>Current: 28°C, 65% humidity.<br><br> <strong>Recommendations:</strong><br>• Harvest maize at 18-22% moisture<br>• Schedule solar drying within 48 hours<br>• Cost: <strong>UGX 200/kg</strong> for maize<br>• Target: <strong>≤13%</strong> for Grade A<br><br> <a href="/dryer">Book drying slot →</a>';if(q.includes('disease')||q.includes('pest')||q.includes('risk'))return' <strong>Crop Health — Mayuge</strong><br><br>• Fall armyworm: <strong style="color:#1B5E20">LOW</strong><br>• Maize streak virus: <strong style="color:#1B5E20">LOW</strong><br>• Aflatoxin: <strong style="color:#D4AF37">MONITOR</strong><br><br> <a href="#" onclick="openPhotoUpload();return false">Upload photo</a> for AI analysis';if(q.includes('market')||q.includes('price')||q.includes('sell'))return' <strong>Current Prices:</strong><br>• Maize (A): <strong>UGX 1,500–1,800/kg</strong><br>• Coffee: <strong>UGX 8,000–12,000/kg</strong><br>• Groundnuts: <strong>UGX 3,200–3,500/kg</strong><br>• Beans: <strong>UGX 2,800–3,200/kg</strong><br><br>Certified produce earns <strong>20-40% premium</strong>. <a href="/marketplace">Browse →</a>';if(q.includes('dry')||q.includes('cost')||q.includes('moisture'))return'☀️ <strong>Drying Costs:</strong><br>• Maize/Rice: <strong>UGX 200/kg</strong><br>• Beans: <strong>UGX 250/kg</strong><br>• Groundnuts: <strong>UGX 350/kg</strong><br>• Coffee: <strong>UGX 400/kg</strong><br>• Cocoa: <strong>UGX 500/kg</strong><br><br>6-12 hours. Target: 13%. <a href="/dryer">Book →</a>';if(q.includes('quality')||q.includes('passport')||q.includes('certif')||q.includes('grade'))return' <strong>Quality Passport includes:</strong><br>• Crop type & variety<br>• GPS-verified farmer identity<br>• Moisture & aflatoxin results<br>• Quality grade (A/B/C)<br>• QR code for verification<br><br>Exporters pay <strong>20-40% premium</strong>. <a href="/passport/B247391">View sample →</a>';if(q.includes('register')||q.includes('sign up'))return' <strong>How to Register:</strong><br><br><strong>Web:</strong> <a href="/signup">Create account</a><br><strong>USSD:</strong> Dial <strong>*284#</strong><br><strong>Agent:</strong> Find a local village agent<br><br>Free for farmers.';if(q.includes('weather')||q.includes('rain'))return'️ <strong>Mayuge Weather:</strong><br>• 28°C, Partly cloudy<br>• Humidity: 65%<br>• Rain: 30% (24h)<br><br>Drying: <strong>GOOD</strong> • Disease: <strong>LOW</strong>';if(q.includes('transport'))return' <strong>Transport:</strong><br>• Shared: UGX 50-100/kg<br>• Dedicated: UGX 150-250/kg<br>• Motorcycle: UGX 300-500<br><br><a href="/transport">Book →</a>';if(q.includes('loan')||q.includes('credit')||q.includes('financ'))return' <strong>Financing:</strong><br>• Input credit<br>• Warehouse receipt financing<br>• Mobile Money loans<br>• Cooperative savings<br><br><a href="/finance">View wallet →</a>';if(q.includes('storage')||q.includes('warehouse'))return' <strong>Storage:</strong><br>• Store at ≤13% moisture<br>• Use pallets<br>• UGX 50-100/kg/month<br><br><a href="/warehouse">View →</a>';if(q.includes('plant')||q.includes('season'))return' <strong>Planting — Mayuge:</strong><br>• <strong>Maize</strong> — plant within 2 weeks<br>• <strong>Beans</strong> — intercrop with maize<br>• <strong>Groundnuts</strong> — good rotation<br><br>3.5 acres maize: 87.5kg seed, 175kg DAP, 105kg Urea';return' <strong>I can help with:</strong><br><br> Crop production advice<br> Disease identification (upload photo)<br> Market prices<br>☀️ Drying & storage<br> Quality certification<br>️ Weather impact<br> Platform help<br> Financing options<br><br>Ask me anything!'}
 
 function openPhotoUpload(){document.getElementById('photoModal').classList.add('show')}
 function closePhotoUpload(){document.getElementById('photoModal').classList.remove('show');document.getElementById('photoPreview').style.display='none'}
 function handlePhotoUpload(i){if(!i.files||!i.files[0])return;var r=new FileReader();r.onload=function(e){document.getElementById('photoPreviewImg').src=e.target.result;document.getElementById('photoPreview').style.display='block'};r.readAsDataURL(i.files[0])}
-function analyzePhoto(){var crop=document.getElementById('photoCropSelect').value;closePhotoUpload();var c=document.getElementById('aiChat');c.innerHTML+='<div class="ai-msg user"><div class="ai-avatar user"><i class="fas fa-user" style="font-size:.7rem"></i></div><div class="ai-bubble user">📸 [Photo] — Analyzing '+crop+'...</div></div>';c.scrollTop=c.scrollHeight;setTimeout(function(){var D={maize:{n:'Fall Armyworm',c:'high',s:'Moderate',t:'Apply neem-based pesticide (5ml/L) or Emamectin benzoate. Scout weekly.',r:'85%',p:'Early planting. Regular scouting. Pheromone traps.'},coffee:{n:'Coffee Leaf Rust',c:'high',s:'High',t:'Apply copper-based fungicide. Remove affected branches. Improve air circulation.',r:'72%',p:'Plant resistant varieties. Proper spacing. Shade management.'},cocoa:{n:'Black Pod Disease',c:'medium',s:'Moderate',t:'Remove infected pods. Apply Ridomil Gold. Improve drainage.',r:'90%',p:'Regular harvesting. Shade management. Proper spacing.'},beans:{n:'Bean Rust',c:'medium',s:'Moderate',t:'Apply Mancozeb fungicide. Remove affected leaves.',r:'85%',p:'Resistant varieties. Crop rotation.'},groundnuts:{n:'Early Leaf Spot',c:'medium',s:'Moderate',t:'Apply fungicide. Remove debris. Rotate crops.',r:'85%',p:'2-3 year rotation. Resistant varieties.'},cassava:{n:'Cassava Mosaic',c:'high',s:'High',t:'Remove infected plants. Control whiteflies.',r:'70%',p:'Resistant varieties. Clean planting material.'},banana:{n:'Banana Wilt (BXW)',c:'high',s:'High',t:'Destroy infected plants. Sterilize tools.',r:'60%',p:'Disease-free planting material. Debud flowers.'},rice:{n:'Rice Blast',c:'medium',s:'Moderate',t:'Apply Tricyclazole. Reduce nitrogen.',r:'80%',p:'Resistant varieties. Balanced fertilization.'}};var d=D[crop]||D.maize;var cc=d.c==='high'?'high':d.c==='medium'?'medium':'low';var cl=d.c==='high'?'High Confidence':d.c==='medium'?'Medium Confidence':'Low Confidence';var pct=d.c==='high'?'92':d.c==='medium'?'78':'65';addBot('📸 <strong>Disease Analysis — '+crop.charAt(0).toUpperCase()+crop.slice(1)+'</strong><br><br><div class="ai-conf '+cc+'">🔍 '+cl+' ('+pct+'%)</div><br>🦠 <strong>Detected: '+d.n+'</strong><br>⚠️ Severity: <strong>'+d.s+'</strong><br><br>💊 <strong>Treatment:</strong><br>'+d.t+'<br><br>🛡️ <strong>Prevention:</strong><br>'+d.p+'<br><br>📊 Recovery: <strong>'+d.r+'</strong> with treatment<br><br><em>⚠️ AI guidance only. For serious outbreaks, consult an agronomist.</em>')},2000)}
+function analyzePhoto(){var crop=document.getElementById('photoCropSelect').value;closePhotoUpload();var c=document.getElementById('aiChat');c.innerHTML+='<div class="ai-msg user"><div class="ai-avatar user"><i class="fas fa-user" style="font-size:.7rem"></i></div><div class="ai-bubble user"> [Photo] — Analyzing '+crop+'...</div></div>';c.scrollTop=c.scrollHeight;setTimeout(function(){var D={maize:{n:'Fall Armyworm',c:'high',s:'Moderate',t:'Apply neem-based pesticide (5ml/L) or Emamectin benzoate. Scout weekly.',r:'85%',p:'Early planting. Regular scouting. Pheromone traps.'},coffee:{n:'Coffee Leaf Rust',c:'high',s:'High',t:'Apply copper-based fungicide. Remove affected branches. Improve air circulation.',r:'72%',p:'Plant resistant varieties. Proper spacing. Shade management.'},cocoa:{n:'Black Pod Disease',c:'medium',s:'Moderate',t:'Remove infected pods. Apply Ridomil Gold. Improve drainage.',r:'90%',p:'Regular harvesting. Shade management. Proper spacing.'},beans:{n:'Bean Rust',c:'medium',s:'Moderate',t:'Apply Mancozeb fungicide. Remove affected leaves.',r:'85%',p:'Resistant varieties. Crop rotation.'},groundnuts:{n:'Early Leaf Spot',c:'medium',s:'Moderate',t:'Apply fungicide. Remove debris. Rotate crops.',r:'85%',p:'2-3 year rotation. Resistant varieties.'},cassava:{n:'Cassava Mosaic',c:'high',s:'High',t:'Remove infected plants. Control whiteflies.',r:'70%',p:'Resistant varieties. Clean planting material.'},banana:{n:'Banana Wilt (BXW)',c:'high',s:'High',t:'Destroy infected plants. Sterilize tools.',r:'60%',p:'Disease-free planting material. Debud flowers.'},rice:{n:'Rice Blast',c:'medium',s:'Moderate',t:'Apply Tricyclazole. Reduce nitrogen.',r:'80%',p:'Resistant varieties. Balanced fertilization.'}};var d=D[crop]||D.maize;var cc=d.c==='high'?'high':d.c==='medium'?'medium':'low';var cl=d.c==='high'?'High Confidence':d.c==='medium'?'Medium Confidence':'Low Confidence';var pct=d.c==='high'?'92':d.c==='medium'?'78':'65';addBot(' <strong>Disease Analysis — '+crop.charAt(0).toUpperCase()+crop.slice(1)+'</strong><br><br><div class="ai-conf '+cc+'"> '+cl+' ('+pct+'%)</div><br> <strong>Detected: '+d.n+'</strong><br>️ Severity: <strong>'+d.s+'</strong><br><br> <strong>Treatment:</strong><br>'+d.t+'<br><br>️ <strong>Prevention:</strong><br>'+d.p+'<br><br> Recovery: <strong>'+d.r+'</strong> with treatment<br><br><em>️ AI guidance only. For serious outbreaks, consult an agronomist.</em>')},2000)}
 
-function requestExpert(t){var m={agronomist:'👨‍🌾 <strong>Live Agronomist Requested</strong><br><br>Your request has been submitted. A verified agronomist will connect shortly.<br><br>📱 SMS notification when available.<br>⏱️ Average wait: 15-30 min.',consultation:'📅 <strong>Consultation Booked</strong><br><br>An extension officer will contact you to schedule.<br><br>📞 Callback within 24 hours.',photo:'📸 <strong>Photo Sent to Expert</strong><br><br>Your photo has been forwarded to a qualified agronomist.<br><br>📱 Response within 24 hours.',callback:'📞 <strong>Callback Requested</strong><br><br>A representative will call within 2 hours (8AM-6PM EAT).',cooperative:'👥 <strong>Cooperative Chat</strong><br><br>Connecting with your cooperative representative...<br><br>💬 Chat available once they accept.'};addBot(m[t]||m.agronomist)}
-function joinCommunity(g){var n={maize:'Maize Farmers Group',coffee:'Coffee Growers Uganda',local:'Mayuge District Forum'};addBot('👥 <strong>Joined: '+(n[g]||g)+'</strong><br><br>Welcome! You can now:<br>• Ask other farmers<br>• Share experiences<br>• View tips & best practices<br>• Join webinars<br><br><em>All content is moderated.</em>')}
-function askCommunity(){addBot('💬 <strong>Ask the Community</strong><br><br>Your question will be posted to your local farming community. Type your question below.')}
+function requestExpert(t){var m={agronomist:'‍ <strong>Live Agronomist Requested</strong><br><br>Your request has been submitted. A verified agronomist will connect shortly.<br><br> SMS notification when available.<br>⏱️ Average wait: 15-30 min.',consultation:' <strong>Consultation Booked</strong><br><br>An extension officer will contact you to schedule.<br><br> Callback within 24 hours.',photo:' <strong>Photo Sent to Expert</strong><br><br>Your photo has been forwarded to a qualified agronomist.<br><br> Response within 24 hours.',callback:' <strong>Callback Requested</strong><br><br>A representative will call within 2 hours (8AM-6PM EAT).',cooperative:' <strong>Cooperative Chat</strong><br><br>Connecting with your cooperative representative...<br><br> Chat available once they accept.'};addBot(m[t]||m.agronomist)}
+function joinCommunity(g){var n={maize:'Maize Farmers Group',coffee:'Coffee Growers Uganda',local:'Mayuge District Forum'};addBot(' <strong>Joined: '+(n[g]||g)+'</strong><br><br>Welcome! You can now:<br>• Ask other farmers<br>• Share experiences<br>• View tips & best practices<br>• Join webinars<br><br><em>All content is moderated.</em>')}
+function askCommunity(){addBot(' <strong>Ask the Community</strong><br><br>Your question will be posted to your local farming community. Type your question below.')}
 function toggleVoiceInput(){var b=document.getElementById('voiceInputBtn');if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){showToast('Voice not supported','error');return}voiceInputActive=!voiceInputActive;b.classList.toggle('active',voiceInputActive);if(voiceInputActive){var S=window.SpeechRecognition||window.webkitSpeechRecognition;recognition=new S();recognition.lang='en-UG';recognition.continuous=false;recognition.onresult=function(e){document.getElementById('aiInput').value=e.results[0][0].transcript;voiceInputActive=false;b.classList.remove('active');askAI()};recognition.onerror=function(){voiceInputActive=false;b.classList.remove('active')};recognition.onend=function(){voiceInputActive=false;b.classList.remove('active')};recognition.start()}else{if(recognition)recognition.stop()}}
 function toggleVoiceOutput(){voiceOutputActive=!voiceOutputActive;document.getElementById('voiceOutputBtn').classList.toggle('active',voiceOutputActive);if(!voiceOutputActive&&window.speechSynthesis)window.speechSynthesis.cancel()}
 function speak(t){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='en-UG';u.rate=.9;window.speechSynthesis.speak(u)}
 function switchLanguage(l){currentLang=l;var g={en:'Language: <strong>English</strong>. How can I help?',lg:'Oluganda luteekebwawo. <strong>Nkuyamba otya leero?</strong><br><br><em>(Luganda activated)</em>',so:'Olusoga luteekebwawo. <strong>Nkhuukhonya otya leelo?</strong><br><br><em>(Lusoga activated)</em>',rn:'Orunyankore ruteekebwaho. <strong>Ninkukushemereza otya?</strong><br><br><em>(Runyankole activated)</em>',ac:'Leb Acholi omede. <strong>An atwero konyi nining?</strong><br><br><em>(Acholi activated)</em>',sw:'Lugha: <strong>Kiswahili</strong>. Ninawezaje kukusaidia leo?'};addBot(g[l]||g.en)}
-function editContext(){addBot('✏️ <strong>Update Farm Context</strong><br><br>Tell me about your farm:<br><br>• <strong>Location/district?</strong><br>• <strong>Crops</strong> you grow?<br>• <strong>Farm size?</strong><br>• <strong>Growth stage?</strong><br><br>Type your answers and I\'ll update!')}
-function clearChat(){document.getElementById('aiChat').innerHTML='<div class="ai-msg"><div class="ai-avatar bot"><i class="fas fa-seedling"></i></div><div><div class="ai-badge ai-tag">🤖 AI Advice</div><div class="ai-bubble bot">🔄 Conversation cleared. How can I help?</div></div></div>'}
+function editContext(){addBot('️ <strong>Update Farm Context</strong><br><br>Tell me about your farm:<br><br>• <strong>Location/district?</strong><br>• <strong>Crops</strong> you grow?<br>• <strong>Farm size?</strong><br>• <strong>Growth stage?</strong><br><br>Type your answers and I\'ll update!')}
+function clearChat(){document.getElementById('aiChat').innerHTML='<div class="ai-msg"><div class="ai-avatar bot"><i class="fas fa-seedling"></i></div><div><div class="ai-badge ai-tag"> AI Advice</div><div class="ai-bubble bot"> Conversation cleared. How can I help?</div></div></div>'}
 function exportChat(){showToast('Chat exported','success')}
 function rmEl(id){var e=document.getElementById(id);if(e)e.remove()}
 function escapeHtml(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
-function showToast(m,t){var e=document.createElement('div');e.style.cssText='position:fixed;top:80px;right:24px;z-index:200;background:white;border:1px solid #e0e0e0;border-radius:14px;padding:14px 20px;box-shadow:0 12px 40px rgba(0,0,0,.1);font-size:.85rem;border-left:4px solid '+(t==='error'?'#c62828':'#1B5E20');e.innerHTML=(t==='error'?'⚠️':'✅')+' '+m;document.body.appendChild(e);setTimeout(function(){e.style.opacity='0';e.style.transition='opacity .3s';setTimeout(function(){e.remove()},300)},3500)}
+function showToast(m,t){var e=document.createElement('div');e.style.cssText='position:fixed;top:80px;right:24px;z-index:200;background:white;border:1px solid #e0e0e0;border-radius:14px;padding:14px 20px;box-shadow:0 12px 40px rgba(0,0,0,.1);font-size:.85rem;border-left:4px solid '+(t==='error'?'#c62828':'#1B5E20');e.innerHTML=(t==='error'?'️':'')+' '+m;document.body.appendChild(e);setTimeout(function(){e.style.opacity='0';e.style.transition='opacity .3s';setTimeout(function(){e.remove()},300)},3500)}
 document.addEventListener('DOMContentLoaded',function(){var d=document.getElementById('photoDrop');if(d){d.addEventListener('dragover',function(e){e.preventDefault();d.classList.add('dragover')});d.addEventListener('dragleave',function(){d.classList.remove('dragover')});d.addEventListener('drop',function(e){e.preventDefault();d.classList.remove('dragover');if(e.dataTransfer.files.length){document.getElementById('photoFileInput').files=e.dataTransfer.files;handlePhotoUpload(document.getElementById('photoFileInput'))}})}});
 </script>

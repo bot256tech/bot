@@ -140,14 +140,6 @@ Balance: UGX 2,472,600`;
     res.send(response);
 });
 
-// USSD Test Page
-router.get('/ussd-test', (req, res) => {
-    res.render('layout', {
-        title: 'USSD Simulator — AGRICHAIN 360',
-        page: 'ussd-test',
-        data: {},
-        body: 'ussdTest'
-    });
-});
+
 
 module.exports = router;

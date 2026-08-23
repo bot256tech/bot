@@ -1,41 +1,19 @@
-<div class="card mb20">
-  <h2 style="font-weight:800">🛠️ Admin Dashboard</h2>
-  <div style="color:var(--tx2)">System Overview & Management</div>
-</div>
-
-<div class="grid grid4 mb20">
-  <div class="metric"><div class="metric-val">847</div><div class="metric-lbl">Total Farmers</div></div>
-  <div class="metric"><div class="metric-val">142</div><div class="metric-lbl">Active Buyers</div></div>
-  <div class="metric"><div class="metric-val">UGX 15.6M</div><div class="metric-lbl">Monthly Revenue</div></div>
-  <div class="metric"><div class="metric-val">94</div><div class="metric-lbl">IoT Devices Online</div></div>
-</div>
-
-<div class="grid grid2">
-  <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px">Revenue Streams</h3>
-    <div style="font-size:.9rem">
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
-        <span>Enterprise Buyer Accounts</span> <strong>UGX 5.0M</strong>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
-        <span>Market Intelligence</span> <strong>UGX 2.4M</strong>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
-        <span>Sponsored Advertising</span> <strong>UGX 2.5M</strong>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 0">
-        <span>Other Streams</span> <strong>UGX 5.7M</strong>
-      </div>
-    </div>
-  </div>
-  
-  <div class="card">
-    <h3 style="font-weight:800;margin-bottom:16px">Quick Actions</h3>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <a href="/analytics" class="btn btn-o">📊 View Full Analytics</a>
-      <a href="/pricing" class="btn btn-o">💰 Manage Pricing Tiers</a>
-      <a href="/roles" class="btn btn-o">👥 Manage User Roles</a>
-      <button class="btn btn-o" onclick="showToast('System backup initiated', 'success')">🗄️ Backup Database</button>
-    </div>
-  </div>
-</div>
+<!-- Admin Dashboard — platform metrics from PostgreSQL -->
+<%
+  var c = data.counts || {};
+  var ps = data.passportStats || {};
+%> <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:22px"> <div> <h2 style="font-weight:800;margin-bottom:4px">Admin Dashboard</h2> <div style="color:var(--tx2);font-size:.9rem">Platform overview — users, verification and marketplace activity</div> </div> <a href="/verify" class="btn btn-o btn-sm"><i class="fas fa-certificate"></i> Verify Passport</a>
+</div> <% if (data.success) { %> <div style="background:#e8f5e9;border:1px solid #4caf50;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#1b5e20"> <i class="fas fa-check-circle"></i> <%= data.success %> </div>
+<% } %> <!-- Platform metrics -->
+<div class="grid grid4" style="margin-bottom:22px"> <div class="metric"><div class="metric-val"><%= c.users || 0 %></div><div class="metric-lbl">Registered Users</div></div> <div class="metric"><div class="metric-val"><%= c.farmers || 0 %></div><div class="metric-lbl">Farmer Profiles</div></div> <div class="metric"><div class="metric-val"><%= c.buyers || 0 %></div><div class="metric-lbl">Buyer Profiles</div></div> <div class="metric"><div class="metric-val"><%= c.partners || 0 %></div><div class="metric-lbl">Service Partners</div></div> <div class="metric"><div class="metric-val"><%= c.products || 0 %></div><div class="metric-lbl">Produce Listings</div></div> <div class="metric"><div class="metric-val"><%= ps.total || 0 %></div><div class="metric-lbl">Quality Passports</div></div> <div class="metric"><div class="metric-val" style="color:var(--a)"><%= c.orders || 0 %></div><div class="metric-lbl">Orders</div></div> <div class="metric"><div class="metric-val" style="color:var(--g)">UGX <%= Math.round(parseFloat(c.order_value || 0)).toLocaleString() %></div><div class="metric-lbl">Order Value</div></div>
+</div> <div class="grid grid2"> <!-- Verification queue --> <div class="card"> <h3 style="font-weight:800;margin-bottom:14px"><i class="fas fa-user-check" style="color:var(--g)"></i> Farmer Verification Queue</h3> <% if (!data.pendingFarmers || data.pendingFarmers.length === 0) { %> <div style="text-align:center;padding:28px;color:var(--tx2);font-size:.86rem"> No farmers awaiting verification.
+      </div> <% } else { %> <% data.pendingFarmers.forEach(function(f){ %> <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--bd)"> <div> <div style="font-weight:700;font-size:.9rem"><%= f.name %></div> <div style="color:var(--tx2);font-size:.78rem"><%= f.phone %> · <%= f.district || 'district not set' %> · joined <%= new Date(f.created_at).toLocaleDateString() %></div> </div> <form method="POST" action="/admin/verify-farmer/<%= f.id %>"> <button type="submit" class="btn btn-p btn-sm"><i class="fas fa-check"></i> Verify</button> </form> </div> <% }) %> <% } %> </div> <!-- Role distribution + passport quality --> <div class="card"> <h3 style="font-weight:800;margin-bottom:14px">Accounts & Quality Overview</h3> <table style="width:100%;font-size:.86rem;border-collapse:collapse"> <% (data.roleCounts || []).forEach(function(r){ %> <tr> <td style="padding:8px 0;color:var(--tx2)"><%= r.role %> accounts</td> <td style="padding:8px 0;text-align:right"><strong><%= r.n %></strong></td> </tr> <% }) %> <tr><td colspan="2" style="border-top:1px solid var(--bd);padding:4px 0"></td></tr> <tr><td style="padding:8px 0;color:var(--tx2)">Grade A passports</td><td style="text-align:right"><strong><%= ps.grade_a || 0 %></strong></td></tr> <tr><td style="padding:8px 0;color:var(--tx2)">Grade B passports</td><td style="text-align:right"><strong><%= ps.grade_b || 0 %></strong></td></tr> <tr><td style="padding:8px 0;color:var(--tx2)">Grade C passports</td><td style="text-align:right"><strong><%= ps.grade_c || 0 %></strong></td></tr> <tr><td style="padding:8px 0;color:var(--tx2)">Rejected batches</td><td style="text-align:right"><strong style="color:#c62828"><%= ps.rejected || 0 %></strong></td></tr> </table> </div>
+</div> <!-- Recent orders -->
+<div class="card" style="margin-top:20px"> <h3 style="font-weight:800;margin-bottom:14px">Recent Marketplace Orders</h3> <% if (!data.recentOrders || data.recentOrders.length === 0) { %> <div style="text-align:center;padding:28px;color:var(--tx2);font-size:.86rem">No orders placed yet.</div> <% } else { %> <div class="tbl-wrap"> <table> <thead><tr><th>Date</th><th>Buyer</th><th>Farmer</th><th>Crop</th><th>Quantity</th><th>Value</th><th>Commission</th><th>Status</th></tr></thead> <tbody> <% data.recentOrders.forEach(function(o){ %> <tr> <td><%= new Date(o.created_at).toLocaleDateString() %></td> <td><%= o.buyer_name %></td> <td><%= o.farmer_name %></td> <td><strong><%= o.crop %></strong></td> <td><%= parseFloat(o.quantity).toLocaleString() %></td> <td>UGX <%= parseFloat(o.total_amount).toLocaleString() %></td> <td>UGX <%= parseFloat(o.commission).toLocaleString() %></td> <td> <% if (o.status === 'pending') { %><span class="tag tag-a">Pending</span> <% } else if (o.status === 'completed') { %><span class="tag tag-g">Completed</span> <% } else if (o.status === 'confirmed') { %><span class="tag tag-b">Confirmed</span> <% } else { %><span class="tag tag-r">Cancelled</span><% } %> </td> </tr> <% }) %> </tbody> </table> </div> <% } %>
+</div> <!-- Recent users -->
+<div class="card" style="margin-top:20px"> <h3 style="font-weight:800;margin-bottom:14px">Newest Accounts</h3> <div class="tbl-wrap"> <table> <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead> <tbody> <% (data.latestUsers || []).forEach(function(u){ %> <tr> <td><strong><%= u.name %></strong></td> <td><%= u.phone %></td> <td><span class="tag tag-b"><%= u.role %></span></td> <td><%= u.status %></td> <td><%= new Date(u.created_at).toLocaleDateString() %></td> </tr> <% }) %> </tbody> </table> </div>
+</div> <style> table{width:100%;border-collapse:collapse;font-size:.84rem}
+  thead th{text-align:left;padding:10px 12px;background:var(--bg2);color:var(--tx2);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+  tbody td{padding:10px 12px;border-top:1px solid var(--bd);vertical-align:middle}
+  tbody tr:hover{background:var(--bg2)}
+</style>

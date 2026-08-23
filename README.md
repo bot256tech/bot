@@ -1,69 +1,73 @@
-# AGRICHAIN 360™
+# AGRICHAIN 360
 
-## Premium Coffee, Cocoa & Maize Post-Harvest B2B Platform
+Agricultural post-harvest platform for Uganda — marketplace, Digital Quality
+Passports, partner services and a local decision-support advisor. Busoga
+region pilot (Mayuge, Bugiri, Iganga, Jinja, Kamuli).
 
-**AYuTe Africa Challenge Uganda 2026 — Season 5**
-**GO BIG. GO BOLD.**
+## What it does
 
----
+**Farmer → Produce → Quality → Digital Passport → Decision Support → Marketplace → Buyer → Verification**
 
-### 🚀 Quick Start
+- **Accounts & roles** — Farmer, Buyer, Partner (dryer / lab / transporter / warehouse), Admin. Phone + password authentication (bcrypt), JWT for the API, server-side sessions for the web app.
+- **Produce registry** — farmers register harvested batches (crop, quantity, price).
+- **Quality records** — moisture and aflatoxin readings, entered by the farmer or a registered testing partner.
+- **Digital Quality Passport** — one verifiable passport per batch with a deterministic grade (A/B/C/REJECTED), public verification page at `/verify`, and clear provenance labels (farmer-entered, partner-entered, or demonstration data).
+- **AGRICHAIN Decision Advisor** — a local, rules-based advisor that answers from stored platform data (no external AI service required). Example: *"Can I list this coffee for sale?"* returns a readiness decision based on the farmer's own batch records.
+- **Marketplace** — buyers browse, search and filter listings, inspect quality information and passports, and place order requests. Farmers manage listings and respond to orders.
+- **Pilot economics** — drying/testing fee schedule and 3% marketplace commission (see `/pricing`).
+
+## Architecture
+
+```
+Internet → Nginx (reverse proxy) → Node.js/Express (PM2) → PostgreSQL 16
+                                     ├── EJS server-rendered web app
+                                     └── REST API /api/v1 (JWT)
+```
+
+PostgreSQL is the single source of truth. The process manager (PM2) restarts
+the app after crashes and reboots.
+
+## Run locally
 
 ```bash
 npm install
-npm start
-# Open http://localhost:3000
+cp .env.example .env          # set DATABASE_URL, JWT_SECRET, SESSION_SECRET
+npm run migrate               # create schema
+npm run seed                  # optional: clearly-labelled demo data
+npm start                     # http://localhost:3000
 ```
 
-### 📋 Development
+Demo accounts (seeded, sample data): farmer `+256700111111`, buyer
+`+256700222222`, partner `+256700333333` — password `Demo@2026`.
+The admin account password is set by the operator at seed time; rotate it
+before real use.
 
-```bash
-npm run dev
-# Uses nodemon for auto-reload
-```
+## API overview
 
-### 🌍 Deploy
+See `GET /api/v1` for a live index. Key areas:
 
-This app is ready to deploy to:
+| Area | Endpoints |
+|---|---|
+| Auth | `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me` |
+| Marketplace | `GET /api/v1/marketplace/products`, `GET /product/:id`, `POST /listing` (farmer), `POST /calculate-fees`, `POST /orders` (buyer), `GET /orders` (buyer) |
+| Quality | `GET /api/v1/quality/verify/:batch_number`, `POST /issue` (partner), `PUT /update/:id` (partner) |
+| Advisor | `POST /api/v1/ai/ask`, `GET /api/v1/ai/suggestions` |
+| Health | `GET /health` (app + database status) |
 
-- **Render.com** (recommended — free tier)
-- **Railway.app**
-- **Fly.io**
-- **DigitalOcean App Platform**
+## Documentation
 
-See [DEPLOYMENT.md](#) for detailed instructions.
+- [DEPLOYMENT.md](DEPLOYMENT.md) — full VPS deployment, operations, backup/restore
+- [docs/CONFERENCE_RUNBOOK.md](docs/CONFERENCE_RUNBOOK.md) — demo script, test checklist, troubleshooting
+- [docs/PITCH_SCRIPT.md](docs/PITCH_SCRIPT.md) — pitch narrative
+- `mobile/` — React Native client · `firmware/` — ESP32 solar-dryer firmware
 
----
+## Security notes
 
-### 📁 Project Structure
+Secrets live only in the server's `.env` (never in Git). Passwords are bcrypt
+hashed; sessions are stored in PostgreSQL; API endpoints are validated,
+rate-limited and role-protected; PostgreSQL and PM2 bind to localhost only,
+with Nginx as the sole public entry point.
 
-- `server.js` — Express app entry point
-- `routes/` — Route handlers
-- `views/` — EJS templates
-- `data/` — Simulated data layer (swap for database in production)
-- `public/` — Static assets (CSS, JS, images, downloads)
+## License
 
----
-
-### 🎯 Target Districts
-
-Jinja | Iganga | Kamuli | Mayuge (Busoga Sub-Region, Uganda)
-
-### 🌾 Focus Crops
-
-Coffee (Robusta) | Cocoa | Maize
-
-### 💰 Business Model
-
-**B2B Subscriptions** — Businesses pay, farmers access free.
-Farmers only pay UGX 200/month for SMS alerts.
-
-### 📞 Contact
-
-**Batesa Ibrahim**
-- Phone: 0746022547
-- Email: batesaibra6@gmail.com
-
----
-
-*Powered by Heifer International Uganda | Backed by Mastercard Foundation | Implemented with CURAD*
+UNLICENSED — proprietary.

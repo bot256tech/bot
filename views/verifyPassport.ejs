@@ -1,0 +1,5 @@
+<!-- Public passport verification form -->
+<div style="max-width:560px;margin:40px auto;padding:0 16px"> <div class="card" style="padding:32px;text-align:center"> <div style="font-size:12px;letter-spacing:3px;color:var(--tx2);text-transform:uppercase;margin-bottom:6px">AGRICHAIN 360</div> <h2 style="font-weight:800;margin-bottom:8px">Verify a Digital Quality Passport</h2> <p style="color:var(--tx2);font-size:.88rem;margin-bottom:22px"> Enter a batch number to inspect its recorded quality information, grade and verification status.
+    </p> <form method="POST" action="/verify" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"> <input type="text" name="batch" placeholder="e.g. AGR-2026-8F3A21C9" value="<%= data.batch %>" required style="flex:1;min-width:220px"> <button type="submit" class="btn btn-p"><i class="fas fa-search"></i> Verify</button> </form> <div style="margin-top:18px;font-size:.78rem;color:var(--tx2)"> Batch numbers appear on marketplace listings and farmer dashboards.
+    </div> </div>
+</div>

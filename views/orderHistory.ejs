@@ -1,72 +1,15 @@
-<div class="card mb20">
-  <h3 style="font-weight:800;margin-bottom:16px">🧾 Order History — Buyer Dashboard</h3>
-  
-  <div class="grid grid4 mb20">
-    <div class="metric"><div class="metric-val">25</div><div class="metric-lbl">Total Orders</div></div>
-    <div class="metric"><div class="metric-val">UGX 98M</div><div class="metric-lbl">Total Spent</div></div>
-    <div class="metric"><div class="metric-val">94%</div><div class="metric-lbl">Repeat Rate</div></div>
-    <div class="metric"><div class="metric-val">12</div><div class="metric-lbl">Active Contracts</div></div>
-  </div>
-  
-  <div class="tbl-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Date</th>
-          <th>Crop</th>
-          <th>Quantity</th>
-          <th>Amount</th>
-          <th>Commission (2%)</th>
-          <th>Status</th>
-          <th>Passport</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>ORD-7842</strong></td>
-          <td>14 Jul 2026</td>
-          <td>Maize</td>
-          <td>15 tons</td>
-          <td>UGX 27.0M</td>
-          <td>UGX 540,000</td>
-          <td><span class="tag tag-g">Delivered</span></td>
-          <td><a href="/passport/B247391">View</a></td>
-        </tr>
-        <tr>
-          <td><strong>ORD-7831</strong></td>
-          <td>10 Jul 2026</td>
-          <td>Groundnuts</td>
-          <td>8 tons</td>
-          <td>UGX 25.6M</td>
-          <td>UGX 512,000</td>
-          <td><span class="tag tag-g">Delivered</span></td>
-          <td><a href="/passport/B089">View</a></td>
-        </tr>
-        <tr>
-          <td><strong>ORD-7825</strong></td>
-          <td>05 Jul 2026</td>
-          <td>Coffee</td>
-          <td>5 tons</td>
-          <td>UGX 42.5M</td>
-          <td>UGX 850,000</td>
-          <td><span class="tag tag-a">In Transit</span></td>
-          <td><a href="/passport/B155">View</a></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="card">
-  <h4 style="margin-bottom:12px">Commission Summary (This Month)</h4>
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <div>
-      <div style="font-size:1.8rem;font-weight:800">UGX 1.9M</div>
-      <div style="color:var(--tx2)">Total Commission Paid</div>
-    </div>
-    <div>
-      <a href="/finance" class="btn btn-o btn-sm">View Full Finance</a>
-    </div>
-  </div>
-</div>
+<!-- Order History — buyer's orders -->
+<%
+  var orders = data.orders || [];
+  var totalValue = orders.reduce(function(s, o){ return s + parseFloat(o.total_amount || 0); }, 0);
+%>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:22px"> <div> <h2 style="font-weight:800;margin-bottom:4px">Order History</h2> <div style="color:var(--tx2);font-size:.9rem"><%= orders.length %> order request<%= orders.length === 1 ? '' : 's' %> · total value UGX <%= Math.round(totalValue).toLocaleString() %></div> </div> <a href="/buyer-dashboard" class="btn btn-o btn-sm"><i class="fas fa-arrow-left"></i> Dashboard</a>
+</div> <% if (data.success) { %> <div style="background:#e8f5e9;border:1px solid #4caf50;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#1b5e20"> <i class="fas fa-check-circle"></i> <%= data.success %> </div>
+<% } %>
+<% if (data.error) { %> <div style="background:#fff3e0;border:1px solid #ff9800;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#e65100"><%= data.error %></div>
+<% } %> <div class="card"> <% if (orders.length === 0) { %> <div style="text-align:center;padding:44px 20px"> <i class="fas fa-receipt" style="font-size:2rem;color:var(--tx2);opacity:.5"></i> <h3 style="font-weight:800;margin-top:12px">No orders yet</h3> <p style="color:var(--tx2);font-size:.86rem;margin:6px 0 14px">Browse the marketplace and place an order request on a verified batch.</p> <a href="/marketplace" class="btn btn-p btn-sm">Browse Marketplace</a> </div> <% } else { %> <div class="tbl-wrap"> <table> <thead><tr><th>Date</th><th>Crop</th><th>Farmer</th><th>Quantity</th><th>Unit Price</th><th>Total</th><th>Commission</th><th>Status</th><th></th></tr></thead> <tbody> <% orders.forEach(function(o){ %> <tr> <td><%= new Date(o.created_at).toLocaleDateString() %></td> <td><strong><%= o.crop %></strong></td> <td><%= o.farmer_name %> <span style="color:var(--tx2);font-size:.74rem"><%= [o.village, o.district].filter(Boolean).join(', ') %></span></td> <td><%= parseFloat(o.quantity).toLocaleString() %> <%= o.unit %></td> <td>UGX <%= parseFloat(o.price_per_unit).toLocaleString() %></td> <td><strong>UGX <%= parseFloat(o.total_amount).toLocaleString() %></strong></td> <td>UGX <%= parseFloat(o.commission).toLocaleString() %></td> <td> <% if (o.status === 'pending') { %><span class="tag tag-a">Pending</span> <% } else if (o.status === 'completed') { %><span class="tag tag-g">Completed</span> <% } else if (o.status === 'confirmed') { %><span class="tag tag-b">Confirmed</span> <% } else { %><span class="tag tag-r">Cancelled</span><% } %> </td> <td> <% if (o.status === 'pending') { %> <form method="POST" action="/orders/<%= o.id %>/cancel"> <button type="submit" class="btn btn-o btn-sm">Cancel</button> </form> <% } %> </td> </tr> <% }) %> </tbody> </table> </div> <% } %>
+</div> <style> table{width:100%;border-collapse:collapse;font-size:.84rem}
+  thead th{text-align:left;padding:10px 12px;background:var(--bg2);color:var(--tx2);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+  tbody td{padding:10px 12px;border-top:1px solid var(--bd);vertical-align:middle}
+  tbody tr:hover{background:var(--bg2)}
+</style>

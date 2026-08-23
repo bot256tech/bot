@@ -21,7 +21,9 @@ function getPool() {
     poolConfig.password = process.env.DB_PASSWORD || 'postgres';
   }
 
-  if (process.env.NODE_ENV === 'production') {
+  // TLS only when explicitly enabled (managed databases). Local PostgreSQL
+  // connections on the VPS do not need SSL.
+  if (process.env.DB_SSL === 'true') {
     poolConfig.ssl = { rejectUnauthorized: false };
   }
 
@@ -33,13 +35,13 @@ function getPool() {
   });
 
   pool.on('error', (err) => {
-    console.error('❌ PostgreSQL idle client error:', err.message);
+    console.error('PostgreSQL idle client error:', err.message);
     isConnected = false;
   });
 
   pool.on('connect', () => {
     isConnected = true;
-    console.log('✅ PostgreSQL connected');
+    console.log('PostgreSQL client connected');
   });
 
   return pool;
@@ -54,12 +56,12 @@ async function testConnection() {
     const p = getPool();
     await p.query('SELECT 1');
     isConnected = true;
-    console.log('✅ Database connection verified');
+    console.log('Database connection verified');
     return true;
   } catch (err) {
     isConnected = false;
-    console.error('❌ Database connection failed:', err.message);
-    console.warn('⚠️  Server will start WITHOUT database. API endpoints requiring DB will return 503.');
+    console.error('Database connection failed:', err.message);
+    console.warn('Server will start WITHOUT database. API endpoints requiring DB will return errors.');
     return false;
   }
 }

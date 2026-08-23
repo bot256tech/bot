@@ -1,178 +1,199 @@
-# AGRICHAIN 360 — Production Deployment Guide
+# AGRICHAIN 360 — Deployment & Operations Guide
 
-## 1. Server Requirements
+Production target: Ubuntu 24.04 VPS (any provider — nothing in this setup is
+provider-specific). Reference server: 16.192.159.6.
 
-- Ubuntu 22.04 or 24.04 LTS
-- Node.js 18+ (LTS recommended)
-- PostgreSQL 14+
-- Nginx (for reverse proxy)
-- PM2 (Process Manager)
+## 1. Stack
 
----
+| Component | Version (reference) | Role |
+|---|---|---|
+| Node.js | 22.x LTS | application runtime |
+| PostgreSQL | 16 | source of truth (all business data) |
+| PM2 | 7.x | process manager, boot persistence |
+| Nginx | 1.24 | reverse proxy, TLS termination, security headers |
 
-## 2. Initial Server Setup
+## 2. Provision a fresh server
 
 ```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
+sudo apt-get update
+sudo apt-get install -y curl git nginx postgresql postgresql-contrib ufw openssl
 
-# Install Node.js 20
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-
-# Install PostgreSQL
-sudo apt install -y postgresql postgresql-contrib
-
-# Install PM2
+# Node.js 22
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
 sudo npm install -g pm2
-
-# Install Nginx
-sudo apt install -y nginx
 ```
 
----
-
-## 3. Database Setup
+## 3. Database
 
 ```bash
-# Create database
-sudo -u postgres psql
-CREATE DATABASE agrichain360;
-CREATE USER agrichain WITH PASSWORD 'your_strong_password';
-GRANT ALL PRIVILEGES ON DATABASE agrichain360 TO agrichain;
-\q
-
-# Import schema
-psql -U agrichain -d agrichain360 -f /path/to/db/schema.sql
+sudo -u postgres psql <<'SQL'
+CREATE ROLE agrichain LOGIN PASSWORD '<generate-with: openssl rand -hex 24>';
+CREATE DATABASE agrichain OWNER agrichain;
+SQL
 ```
 
----
+PostgreSQL listens on localhost only (default) — it is never exposed
+publicly. Verify: `sudo -u postgres psql -tAc "SHOW listen_addresses;"` → `localhost`.
 
-## 4. Application Setup
+## 4. Application
 
 ```bash
-# Clone repository
-git clone <your-repo-url> /var/www/agrichain360
-cd /var/www/agrichain360
-
-# Install dependencies
-npm install --production
-
-# Create .env file
-cp .env.example .env
-nano .env
+sudo mkdir -p /opt/agrichain360 && sudo chown ubuntu:ubuntu /opt/agrichain360
+cd /opt/agrichain360
+git clone -b main https://github.com/bot256tech/bot.git .   # or your fork
+npm ci            # clean install from package-lock.json
 ```
 
-**Required `.env` variables:**
+Create `/opt/agrichain360/.env` (chmod 600, owner ubuntu). Variable names:
 
-```env
-PORT=3000
+```ini
 NODE_ENV=production
-
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=agrichain360
-DB_USER=agrichain
-DB_PASSWORD=your_strong_password
+PORT=3000
+DATABASE_URL=            # postgres://agrichain:<password>@localhost:5432/agrichain
+JWT_SECRET=              # openssl rand -hex 32
+SESSION_SECRET=          # openssl rand -hex 32
+APP_BASE_URL=            # e.g. http://<SERVER_IP>  (or https://yourdomain later)
+ALLOWED_ORIGINS=         # comma-separated browser origins allowed by CORS
+HTTPS_REDIRECT=          # false until TLS is configured; true afterwards
+SHOW_DEMO_CREDENTIALS=   # set false to hide the demo-login panel
+# Optional integrations (platform works fully without them):
+# AFRICAS_TALKING_API_KEY, AFRICAS_TALKING_USERNAME, SMS_SENDER_ID
+# MQTT_BROKER_URL
 ```
 
----
-
-## 5. Start Application with PM2
+Migrate and (optionally) seed:
 
 ```bash
-# Start the application
-pm2 start server-with-websocket.js --name "agrichain360"
-
-# Save PM2 configuration
-pm2 save
-
-# Enable startup on reboot
-pm2 startup
+npm run migrate   # runs database/migrations/*.sql (also auto-runs at boot)
+npm run seed      # clearly-labelled demo data (idempotent)
 ```
 
----
+## 5. PM2
 
-## 6. Nginx Configuration
+```bash
+cd /opt/agrichain360
+pm2 start ecosystem.config.js --env production
+pm2 save
+pm2 startup systemd -u ubuntu --hp /home/ubuntu   # run the printed sudo command
+pm2 status
+```
 
-Create `/etc/nginx/sites-available/agrichain360`:
+`ecosystem.config.js` runs a single fork instance on port 3000 with logs in
+`./logs/`. PM2 resurrects the app after crashes; the systemd unit resurrects
+PM2 after reboots.
+
+## 6. Nginx
+
+`/etc/nginx/sites-available/agrichain360`:
 
 ```nginx
+limit_req_zone $binary_remote_addr zone=general:10m rate=30r/s;
+
 server {
     listen 80;
-    server_name your-domain.com;
+    server_name _;                     # set to your domain when ready
 
     location / {
-        proxy_pass http://localhost:3000;
+        limit_req zone=general burst=20 nodelay;
+        proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
     }
 
-    # Static files
-    location /images/ {
-        alias /var/www/agrichain360/public/images/;
-        expires 30d;
-    }
+    client_max_body_size 10m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+}
+
+server {
+    listen 443 ssl;
+    server_name _;                     # set to your domain when ready
+    # TLS: install a certificate first (section 8) — placeholder self-signed
+    # cert generated at setup so https://IP responds during staging.
+    ssl_certificate     /etc/nginx/ssl/agrichain.crt;
+    ssl_certificate_key /etc/nginx/ssl/agrichain.key;
+    # ... same location/headers block as above
 }
 ```
 
-Enable the site:
-
 ```bash
 sudo ln -s /etc/nginx/sites-available/agrichain360 /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
----
-
-## 7. SSL Certificate (Let's Encrypt)
+## 7. Firewall
 
 ```bash
-sudo apt install certbot python3-certbot-nginx -y
-sudo certbot --nginx -d your-domain.com
-```
-
----
-
-## 8. Firewall
-
-```bash
-sudo ufw allow 'Nginx Full'
 sudo ufw allow OpenSSH
-sudo ufw enable
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw --force enable
 ```
 
----
+Only 22/80/443 are public. PostgreSQL (5432) and Node (3000) are localhost-only.
 
-## 9. Useful Commands
+## 8. Domain + HTTPS (when DNS is ready)
+
+1. Point an `A` record at the server IP.
+2. Put the domain in `server_name`, set `APP_BASE_URL=https://<domain>`,
+   `ALLOWED_ORIGINS=https://<domain>`, `HTTPS_REDIRECT=true` in `.env`.
+3. Install a certificate:
 
 ```bash
-# View logs
-pm2 logs agrichain360
-
-# Restart application
-pm2 restart agrichain360
-
-# Monitor
-pm2 monit
-
-# Update application
-git pull
-npm install --production
-pm2 restart agrichain360
+sudo apt-get install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d <domain> -d www.<domain>
 ```
 
----
+4. `pm2 restart agrichain360`.
 
-**Your site will be live at:** `https://your-domain.com`
+Until this step, the app is served on `http://<IP>` (with a self-signed TLS
+endpoint on 443 for staging checks).
 
----
+## 9. Health & verification
 
-*Prepared by Batesa Ibrahim — 0746022547*
+```bash
+curl -s http://localhost/health | jq       # from the server
+curl -s http://<IP>/health                 # from anywhere
+pm2 status
+sudo systemctl status nginx postgresql
+```
+
+`/health` reports app status and live database connectivity.
+
+## 10. Backup & restore
+
+Backup (run on the server, e.g. from cron):
+
+```bash
+sudo -u postgres pg_dump agrichain | gzip > /opt/backups/agrichain_$(date +%F_%H%M).sql.gz
+```
+
+Restore into a fresh PostgreSQL:
+
+```bash
+createdb -O agrichain agrichain
+gunzip -c agrichain_<stamp>.sql.gz | psql postgres://agrichain:<password>@localhost/agrichain
+```
+
+## 11. Migrating to another VPS
+
+1. New server: sections 2–3 and 7.
+2. Copy the code (`git clone` this repository at the deployed commit).
+3. Recreate `.env` (values from your password manager — never from Git).
+4. Restore the latest database backup (section 10).
+5. `npm ci`, `pm2 start ecosystem.config.js`, Nginx config, update DNS.
+6. Verify `/health`, log in, confirm data survived.
+
+## 12. Logs
+
+```bash
+pm2 logs agrichain360 --lines 100
+tail -f /opt/agrichain360/logs/err.log
+sudo tail -f /var/log/nginx/error.log
+```
