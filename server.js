@@ -111,7 +111,7 @@ app.get('/health', async (req, res) => {
   res.json({
     success: true,
     message: 'AGRICHAIN 360 is running',
-    version: '3.1.0',
+    version: '3.2.0',
     environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime()),
@@ -131,7 +131,7 @@ app.get('/api/v1', (req, res) => {
   res.json({
     success: true,
     name: 'AGRICHAIN 360™ API',
-    version: '3.1.0',
+    version: '3.2.0',
     description: 'Production-grade agricultural supply chain platform API',
     documentation: 'https://github.com/bot256tech/bot',
     endpoints: {

@@ -1,6 +1,6 @@
 {
   "name": "agrichain360",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "AGRICHAIN 360\u2122 \u2014 AgriTech Ecosystem: Marketplace, Digital Quality Passport, Partnership Network, IoT & AI | Uganda",
   "main": "server.js",
   "scripts": {
