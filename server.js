@@ -41,6 +41,8 @@ const { getCorsConfig } = require('./config/cors');
 const { auditContext } = require('./api/middleware/auditLog');
 
 const app = express();
+// Behind Nginx: use X-Forwarded-For so rate limiting is per-client
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 

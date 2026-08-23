@@ -56,6 +56,7 @@ SESSION_SECRET=          # openssl rand -hex 32
 APP_BASE_URL=            # e.g. http://<SERVER_IP>  (or https://yourdomain later)
 ALLOWED_ORIGINS=         # comma-separated browser origins allowed by CORS
 HTTPS_REDIRECT=          # false until TLS is configured; true afterwards
+COOKIE_SECURE=           # true once HTTPS is active (session cookies over TLS only)
 SHOW_DEMO_CREDENTIALS=   # set false to hide the demo-login panel
 # Optional integrations (platform works fully without them):
 # AFRICAS_TALKING_API_KEY, AFRICAS_TALKING_USERNAME, SMS_SENDER_ID
