@@ -201,6 +201,22 @@ app.get('/api/v1', (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// ANDROID APP DOWNLOAD (served only when the APK has been deployed)
+// ═══════════════════════════════════════════
+
+app.get('/app/agrichain360.apk', (req, res) => {
+  const apkPath = path.join(__dirname, 'public', 'app', 'agrichain360.apk');
+  const fs = require('fs');
+  if (!fs.existsSync(apkPath)) {
+    return res.status(404).json({ success: false, message: 'APK not deployed yet.' });
+  }
+  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+  res.setHeader('Content-Disposition', 'attachment; filename="agrichain360.apk"');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(apkPath);
+});
+
+// ═══════════════════════════════════════════
 // STARTUP SEQUENCE
 // ═══════════════════════════════════════════
 

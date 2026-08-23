@@ -1,9 +1,9 @@
 # AGRICHAIN 360 — Conference Runbook
 
-Live system: `https://16.192.159.6` (self-signed certificate — accept the browser
-warning once; plain `http://` becomes available when TCP port 80 is also opened
-at the cloud edge) · Health: `https://16.192.159.6/health`
-API index: `https://16.192.159.6/api/v1`
+Live system: `https://16.192.159.6` — valid Let's Encrypt certificate (issued
+for the IP address; no browser warning) · Health: `/health`
+API index: `/api/v1` · Android app: `/app/agrichain360.apk`
+The certificate auto-renews every ~4 days via acme.sh cron.
 
 ## Demo accounts (seeded demonstration data)
 
@@ -46,6 +46,15 @@ result.
    queue (verify one), passports by grade, orders and platform value.
 7. **Persistence & resilience** (30s) — `pm2 restart agrichain360` (or
    reboot): every record survives; `/health` shows database connected.
+
+## Mobile demo (Android app)
+
+1. Install the APK (`/app/agrichain360.apk` — direct download).
+2. Log in with the demo farmer — same account as the web, same database.
+3. Register a batch, record quality (watch the grade + passport appear).
+4. Ask the Advisor: "Can I list this coffee for sale?"
+5. Marketplace → open a listing → passport → (as buyer) place an order.
+6. Show the same record appearing on the website — one backend, one database.
 
 ## Pre-demo verification checklist
 

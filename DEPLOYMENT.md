@@ -139,22 +139,24 @@ sudo ufw --force enable
 
 Only 22/80/443 are public. PostgreSQL (5432) and Node (3000) are localhost-only.
 
-## 8. Domain + HTTPS (when DNS is ready)
+## 8. TLS / HTTPS
 
-1. Point an `A` record at the server IP.
-2. Put the domain in `server_name`, set `APP_BASE_URL=https://<domain>`,
-   `ALLOWED_ORIGINS=https://<domain>`, `HTTPS_REDIRECT=true` in `.env`.
-3. Install a certificate:
+The server uses a **Let's Encrypt certificate for the IP address**
+(`shortlived` profile, ~6-day validity) — trusted by all modern browsers
+and Android, no domain required.
 
-```bash
-sudo apt-get install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d <domain> -d www.<domain>
-```
+- Issued via acme.sh with `--alpn --tlsport 8443` and a temporary iptables
+  443→8443 redirect (nginx keeps running).
+- Renewal is automated: acme.sh's cron re-issues every ~4 days using the
+  saved pre/post hooks (redirect in, redirect out, reload nginx).
+  Check with `acme.sh --list` and `crontab -l`.
+- Nginx serves the certificate at `/etc/nginx/ssl/agrichain.{crt,key}`;
+  HTTP (port 80) 301-redirects to HTTPS.
+- App env: `HTTPS_REDIRECT=true`, `COOKIE_SECURE=true`, `APP_BASE_URL=https://16.192.159.6`.
 
-4. `pm2 restart agrichain360`.
-
-Until this step, the app is served on `http://<IP>` (with a self-signed TLS
-endpoint on 443 for staging checks).
+When a real domain is pointed at the server, prefer a normal 90-day cert:
+`certbot --nginx -d <domain>` and update `server_name`, `APP_BASE_URL`,
+`ALLOWED_ORIGINS`.
 
 ## 9. Health & verification
 
@@ -191,7 +193,31 @@ gunzip -c agrichain_<stamp>.sql.gz | psql postgres://agrichain:<password>@localh
 5. `npm ci`, `pm2 start ecosystem.config.js`, Nginx config, update DNS.
 6. Verify `/health`, log in, confirm data survived.
 
-## 12. Logs
+## 12. Android app (mobile client)
+
+The React Native (Expo) client lives in `mobile/` and talks to the same
+backend/API as the web app — one database, shared accounts.
+
+```bash
+# on the server (JDK 17 + Android SDK are installed at /home/ubuntu/android-sdk)
+cd /opt/agrichain360/mobile
+npm install
+npx expo prebuild -p android --no-install
+cd android && ./gradlew assembleRelease
+# output: app/build/outputs/apk/release/
+```
+
+Release signing uses the keystore at `/home/ubuntu/agrichain-release.keystore`
+(password in `/home/ubuntu/.agrichain_keystore.env`, owner ubuntu, mode 600 —
+never committed). The build script `/tmp/build-apk.sh` automates the whole
+flow; the APK is published at `/app/agrichain360.apk` on the website.
+The committed `mobile/agrichain360-release.keystore` (unknown provenance)
+is deprecated — do not use it.
+
+The API base URL defaults to `https://16.192.159.6` (see
+`mobile/src/services/api.js`, override with `EXPO_PUBLIC_API_BASE`).
+
+## 13. Logs
 
 ```bash
 pm2 logs agrichain360 --lines 100
