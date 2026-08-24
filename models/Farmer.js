@@ -1,4 +1,5 @@
 const db = require('../database/connection');
+const { encryptField } = require('../services/crypto.util');
 
 class Farmer {
   static async create({ user_id, district, village, crops, farm_size, national_id }) {
@@ -7,7 +8,8 @@ class Farmer {
       VALUES ($1, $2, $3, $4, $5, $6, 'PENDING', NOW())
       RETURNING *;
     `;
-    const values = [user_id, district, village, crops, farm_size, national_id];
+    const values = [user_id, district, village, crops, farm_size,
+      national_id ? encryptField(national_id) : null]; // AES-256-GCM at rest
     const { rows } = await db.query(query, values);
     return rows[0];
   }

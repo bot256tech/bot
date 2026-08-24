@@ -1,6 +1,7 @@
 const QualityPassport = require('../models/QualityPassport');
 const Product = require('../models/Product');
 const crypto = require('crypto');
+const { signPassport } = require('./crypto.util');
 const logger = require('../config/logger');
 
 function baseUrl() {
@@ -38,6 +39,16 @@ class QualityService {
       record_source: data.record_source || 'user',
       qr_code
     });
+
+    // Cryptographically sign the passport (tamper-evident)
+    try {
+      const signature = signPassport(passport);
+      await require('../database/connection').query(
+        'UPDATE quality_passports SET passport_signature = $1 WHERE id = $2;', [signature, passport.id]);
+      passport.passport_signature = signature;
+    } catch (err) {
+      logger.warn('Passport signing skipped (key not configured?)', { error: err.message });
+    }
 
     // Keep the linked listing in sync with the initial grade
     if (passport && passport.farmer_id && quality_grade && quality_grade !== 'PENDING') {

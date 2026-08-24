@@ -185,10 +185,17 @@ router.post('/verify', (req, res) => {
 router.get('/passport/:batchId', async (req, res) => {
   try {
     const passport = await QualityService.verifyPassport(req.params.batchId);
+    let signature = null;
+    if (passport) {
+      try {
+        const { verifyPassportSignature } = require('../services/crypto.util');
+        signature = verifyPassportSignature(passport);
+      } catch (e) { signature = null; }
+    }
     res.render('layout', {
       title: `Digital Quality Passport — ${req.params.batchId}`,
       page: 'passport',
-      data: { batchId: req.params.batchId, passport, user: req.session ? req.session.user : null },
+      data: { batchId: req.params.batchId, passport, signature, user: req.session ? req.session.user : null },
       body: 'passportVerify',
     });
   } catch (err) {

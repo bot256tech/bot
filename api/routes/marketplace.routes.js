@@ -107,6 +107,18 @@ router.put('/listing/:id/availability', protect(['FARMER', 'farmer']), idParamVa
       return res.status(400).json({ success: false, message: 'available must be true or false' });
     }
 
+    // Ownership check: a farmer may only change their own listing
+    const Farmer = require('../../models/Farmer');
+    const Product = require('../../models/Product');
+    const farmer = await Farmer.findByUserId(req.user.id);
+    const existing = await Product.findById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Product not found.' });
+    }
+    if (!farmer || existing.farmer_id !== farmer.id) {
+      return res.status(403).json({ success: false, message: 'You do not own this listing.' });
+    }
+
     const product = await MarketplaceService.updateProductAvailability(req.params.id, available);
 
     if (!product) {

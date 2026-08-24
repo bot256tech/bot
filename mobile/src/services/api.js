@@ -9,6 +9,49 @@ const API_BASE = (process.env.EXPO_PUBLIC_API_BASE || 'https://16.192.159.6') + 
 
 const TOKEN_KEY = '@agrichain_token';
 const USER_KEY = '@agrichain_user';
+const QUEUE_KEY = '@agrichain_offline_queue';
+
+/**
+ * Offline-to-online sync: mutations that fail due to connectivity are
+ * queued locally (AsyncStorage) and automatically replayed against the
+ * PostgreSQL backend as soon as any request succeeds again — so village
+ * agents can keep recording data in zero-connectivity zones.
+ */
+const offlineQueue = {
+  async items() {
+    try { return JSON.parse(await AsyncStorage.getItem(QUEUE_KEY)) || []; }
+    catch (e) { return []; }
+  },
+  async push(entry) {
+    const q = await this.items();
+    // idempotency: one queued mutation per endpoint+payload hash
+    const key = entry.endpoint + ':' + JSON.stringify(entry.body || {});
+    if (!q.some(i => i.key === key)) {
+      q.push({ key, ...entry, queuedAt: Date.now() });
+      await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(q));
+    }
+  },
+  async drain() {
+    const q = await this.items();
+    if (!q.length) return { synced: 0 };
+    const remaining = [];
+    let synced = 0;
+    for (const item of q) {
+      try {
+        const resp = await fetch(item.url, {
+          method: item.method || 'POST',
+          headers: { 'Content-Type': 'application/json', ...(item.token ? { Authorization: 'Bearer ' + item.token } : {}) },
+          body: item.body ? JSON.stringify(item.body) : undefined
+        });
+        if (resp.ok) { synced++; }
+        else if (resp.status >= 500) { remaining.push(item); } // retry server errors later
+        // 4xx = permanent rejection (e.g. duplicate) → drop
+      } catch (e) { remaining.push(item); } // still offline
+    }
+    await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(remaining));
+    return { synced, remaining: remaining.length };
+  }
+};
 
 class ApiService {
   constructor() {
@@ -17,6 +60,10 @@ class ApiService {
   }
 
   // ── Session persistence ──────────────────────────
+  // Exposed for the Profile screen / diagnostics
+  async syncNow() { return offlineQueue.drain(); }
+  async pendingSyncCount() { return (await offlineQueue.items()).length; }
+
   async restoreSession() {
     try {
       const [token, user] = await Promise.all([
@@ -28,6 +75,7 @@ class ApiService {
     } catch (e) {
       // storage unavailable — treat as logged out
     }
+    offlineQueue.drain().catch(() => {});
     return { token: this.token, user: this.user };
   }
 
@@ -66,8 +114,22 @@ class ApiService {
     let response;
     try {
       response = await fetch(url, { ...options, headers });
+      // We are online — drain any queued offline mutations (sync)
+      if ((options.method || 'GET').toUpperCase() !== 'GET') {
+        offlineQueue.drain().catch(() => {});
+      }
     } catch (err) {
-      throw new Error('Cannot reach the AGRICHAIN server. Check your internet connection and try again.');
+      // Offline: queue write operations for auto-sync instead of losing them
+      if ((options.method || 'GET').toUpperCase() !== 'GET') {
+        const body = options.body ? JSON.parse(options.body) : null;
+        await offlineQueue.push({
+          url,
+          method: options.method,
+          body,
+          token: this.token
+        });
+      }
+      throw new Error('You appear to be offline. Your changes are saved on this device and will sync automatically when the connection returns.');
     }
 
     let data = null;

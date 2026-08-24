@@ -24,6 +24,30 @@ router.post('/issue', protect(['PARTNER', 'ADMIN', 'lab', 'quality_officer', 'ad
 });
 
 // Verify Passport by Batch Number (Public — anyone can scan QR)
+// GET /api/v1/quality/verify-signature/:batch_number — public cryptographic authenticity check
+router.get('/verify-signature/:batch_number', batchNumberValidation, async (req, res) => {
+  try {
+    const { verifyPassportSignature } = require('../../services/crypto.util');
+    const passport = await QualityPassport.findByBatchNumber(req.params.batch_number);
+    if (!passport) {
+      return res.status(404).json({ success: false, message: 'Passport not found.' });
+    }
+    const sig = verifyPassportSignature(passport);
+    res.json({
+      success: true,
+      data: {
+        batch_number: passport.batch_number,
+        crop_type: passport.crop_type,
+        quality_grade: passport.quality_grade,
+        signature_valid: sig.valid,
+        detail: sig.reason
+      }
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 router.get('/verify/:batch_number', batchNumberValidation, async (req, res) => {
   try {
     const passport = await QualityService.verifyPassport(req.params.batch_number);

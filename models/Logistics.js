@@ -35,11 +35,14 @@ class Logistics {
   }
 
   static async updateTracking(tracking_id, status, extra) {
+    // Whitelisted columns only — keys are never interpolated from raw input
+    const ALLOWED = ['origin', 'destination', 'assigned_provider_id', 'actual_cost', 'notes'];
     const updates = [`status = $1`];
     const values = [status];
     let p = 2;
     if (extra) {
       for (const [k, v] of Object.entries(extra)) {
+        if (!ALLOWED.includes(k)) continue;
         updates.push(`${k} = $${p}`); values.push(v); p++;
       }
     }
