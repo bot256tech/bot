@@ -206,13 +206,20 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ══ Page Load Transition ══
-  window.addEventListener('load', function() {
+  // Reveal as soon as the DOM is ready — never make users wait for images/CDNs.
+  function dismissLoader() {
     var loader = document.querySelector('.page-loader');
     if (loader) {
-      setTimeout(function() { loader.classList.add('loaded'); }, 300);
-      setTimeout(function() { loader.remove(); }, 1000);
+      setTimeout(function() { loader.classList.add('loaded'); }, 150);
+      setTimeout(function() { loader.remove(); }, 600);
     }
-  });
+  }
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    dismissLoader();
+  } else {
+    document.addEventListener('DOMContentLoaded', dismissLoader);
+    setTimeout(dismissLoader, 1200); // absolute safety
+  }
 
   // ══ Intersection Observer — Scroll Animations ══
   document.addEventListener('DOMContentLoaded', function() {
