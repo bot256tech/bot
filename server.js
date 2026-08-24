@@ -81,7 +81,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '7d',
   setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+    if (filePath.endsWith('.html') || filePath.endsWith('.apk')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
   }
 }));
 
@@ -206,29 +208,6 @@ app.get('/api/v1', (req, res) => {
 });
 
 // ═══════════════════════════════════════════
-// ANDROID APP DOWNLOAD (served only when the APK has been deployed)
-// ═══════════════════════════════════════════
-
-function serveApk(filename, downloadName) {
-  return (req, res) => {
-    const apkPath = path.join(__dirname, 'public', 'app', filename);
-    if (!require('fs').existsSync(apkPath)) {
-      return res.status(404).json({ success: false, message: 'APK not deployed yet.' });
-    }
-    res.setHeader('Content-Type', 'application/vnd.android.package-archive');
-    res.setHeader('Content-Disposition', 'attachment; filename="' + downloadName + '"');
-    // Always deliver the current build (no stale cached installs)
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.sendFile(apkPath);
-  };
-}
-
-// arm64 build — most Android phones (much smaller download)
-app.get('/app/agrichain360-arm64.apk', serveApk('agrichain360-arm64.apk', 'agrichain360-v1.1.1-arm64.apk'));
-
-// universal build — 32-bit / older devices
-app.get('/app/agrichain360.apk', serveApk('agrichain360.apk', 'agrichain360-v1.1.1-full.apk'));
-
 // STARTUP SEQUENCE
 // ═══════════════════════════════════════════
 
