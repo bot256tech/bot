@@ -42,7 +42,7 @@ async function main() {
 
   // 2. RBAC: farmer token on web dashboard API
   r = await api('GET', '/api/v1/auth/me', { token: farmerTok });
-  (r.status === 200 && r.json.data.role === 'FARMER') ? ok('RBAC: /auth/me returns FARMER role') : bad('RBAC /auth/me', `status ${r.status}`);
+  (r.status === 200 && r.json.data && r.json.data.user && r.json.data.user.role === 'FARMER') ? ok('RBAC: /auth/me returns FARMER role') : bad('RBAC /auth/me', `status ${r.status}`);
 
   // 3. Telemetry: valid reading stored
   r = await api('POST', '/api/v1/telemetry', {
