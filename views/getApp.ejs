@@ -35,11 +35,14 @@
             advisor and farmer tools in one app. Works on Android 7 and newer.
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <a href="/app/agrichain360.apk" class="btn btn-p" download><i class="fas fa-download"></i> Download Android App</a>
+            <a href="/app/agrichain360-arm64.apk" class="btn btn-p" download><i class="fas fa-download"></i> Download Android App</a>
             <button id="gaPwaBtn" class="btn btn-o" style="display:none"><i class="fas fa-window-maximize"></i> Install the Web App instead</button>
+            <a href="/app/agrichain360.apk" class="btn btn-o" download style="display:none" id="gaApkFull"><i class="fas fa-download"></i> Older / 32-bit phone — full version</a>
           </div>
           <div style="font-size:.75rem;color:var(--tx2);margin-top:10px">
             After downloading, open the file and allow installation from this source if asked.
+            If an older AGRICHAIN app is already installed, uninstall it first
+            (Settings &rarr; Apps &rarr; AGRICHAIN 360 &rarr; Uninstall) or Android will report a package conflict.
           </div>
         </div>
       </div>
@@ -163,6 +166,13 @@
       dBtn.style.display = 'none';
       show('gaDesktopFallback');
     }
+  }
+
+  // Older / 32-bit Android: also offer the universal APK
+  var fullBtn = document.getElementById('gaApkFull');
+  if (fullBtn && s.platform === 'android') {
+    var ua = navigator.userAgent || '';
+    if (/Android [4-8]\./.test(ua)) { fullBtn.style.display = 'inline-flex'; }
   }
 
   // React to successful installation
