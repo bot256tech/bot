@@ -2,7 +2,7 @@
   "expo": {
     "name": "AGRICHAIN 360",
     "slug": "agrichain360",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -29,7 +29,7 @@
         "backgroundColor": "#1B5E20"
       },
       "package": "com.agrichain360.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "permissions": [
         "CAMERA",
         "INTERNET"
@@ -38,11 +38,7 @@
     "web": {
       "favicon": "./assets/icon.png"
     },
-    "plugins": [
-      "expo-camera",
-      "expo-location",
-      "expo-secure-store"
-    ],
+    "plugins": [],
     "extra": {
       "eas": {
         "projectId": "your-project-id"
