@@ -16,16 +16,16 @@ const bcrypt = require('bcryptjs');
 
 async function main() {
   await db.testConnection();
-  const pool = db.getPool();
+  
 
   // ── Clear existing products/passports (keep users and orders) ──
   console.log('Clearing old products and passports…');
-  await pool.query('DELETE FROM quality_passports WHERE record_source = $1 OR record_source = $2', ['demo', 'user']);
-  await pool.query('DELETE FROM products');
+  await db.query('DELETE FROM quality_passports WHERE record_source = $1 OR record_source = $2', ['demo', 'user']);
+  await db.query('DELETE FROM products');
 
   // ── Reset sequences for clean batch numbers ──
-  await pool.query("SELECT setval('products_id_seq', 1, false)");
-  await pool.query("SELECT setval('quality_passports_id_seq', 1, false)");
+  await db.query("SELECT setval('products_id_seq', 1, false)");
+  await db.query("SELECT setval('quality_passports_id_seq', 1, false)");
 
   const DEMO_PASSWORD = 'Demo@2026';
   const hash = await bcrypt.hash(DEMO_PASSWORD, 10);
@@ -56,12 +56,12 @@ async function main() {
 
   const farmerIds = {};
   for (const f of farmers) {
-    const u = await pool.query(
+    const u = await db.query(
       `INSERT INTO users (name, phone, email, password_hash, role, status, created_at)
        VALUES ($1, $2, NULL, $3, 'FARMER', 'ACTIVE', NOW())
        ON CONFLICT (phone) DO UPDATE SET name = EXCLUDED.name
        RETURNING id;`, [f.name, f.phone, hash]);
-    const fr = await pool.query(
+    const fr = await db.query(
       `INSERT INTO farmers (user_id, district, village, crops, farm_size, verification_status, created_at)
        VALUES ($1, $2, $3, $4, $5, 'VERIFIED', NOW())
        ON CONFLICT (user_id) DO UPDATE SET district = EXCLUDED.district, village = EXCLUDED.village
@@ -103,14 +103,14 @@ async function main() {
 
   let count = 0;
   for (const l of listings) {
-    const pr = await pool.query(
+    const pr = await db.query(
       `INSERT INTO products (farmer_id, crop, quantity, unit, price_per_unit, quality_status, available, record_source, created_at)
        VALUES ($1, $2, $3, 'kg', $4, $5, true, 'demo', NOW()) RETURNING id;`,
       [farmerIds[l.f], l.crop, l.qty, l.price,
        l.g === 'A' || l.g === 'B' ? 'APPROVED' : 'PENDING']);
 
     const batch = `AGR-DEMO-${String(++count).padStart(3, '0')}`;
-    await pool.query(
+    await db.query(
       `INSERT INTO quality_passports (batch_number, farmer_id, crop_type, quantity, moisture_level,
                                       aflatoxin_result, quality_grade, record_source, qr_code, created_at, verified_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, 'demo', $8, NOW(), NOW());`,
@@ -119,7 +119,7 @@ async function main() {
   }
 
   // ── Summary ──
-  const summary = await pool.query(`
+  const summary = await db.query(`
     SELECT f.district, p.crop, COUNT(*) as listings, SUM(p.quantity) as total_kg
     FROM products p JOIN farmers f ON p.farmer_id = f.id
     GROUP BY f.district, p.crop ORDER BY f.district, p.crop;`);
@@ -128,7 +128,7 @@ async function main() {
     console.log(`  ${r.district.padEnd(10)} ${r.crop.padEnd(14)} ${r.listings} listings  ${Math.round(r.total_kg).toLocaleString()} kg`);
   });
 
-  const totals = await pool.query(`
+  const totals = await db.query(`
     SELECT f.district, COUNT(*) as n FROM products p JOIN farmers f ON p.farmer_id = f.id GROUP BY f.district ORDER BY n DESC;`);
   console.log('\nListings per district:');
   totals.rows.forEach(r => console.log(`  ${r.district}: ${r.n}`));
