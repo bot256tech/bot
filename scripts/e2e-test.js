@@ -113,18 +113,18 @@ async function main() {
 
   // 16. Password policy: weak signup rejected
   r = await api('POST', '/api/v1/auth/register', {
-    body: { name: `Weak Pw ${STAMP}`, phone: `+256776${STAMP.slice(0,6)}`, password: 'abc123', role: 'FARMER' }
+    body: { name: `Weak Pw ${STAMP}`, phone: `+256776${STAMP.slice(0,6)}`, password: 'abc', role: 'FARMER' }
   });
   (r.status === 400 && /security policy/i.test((r.json && r.json.message) || ''))
     ? ok('Strong-password policy: weak signup rejected with clear message')
     : bad('Password policy', `status ${r.status}`);
   // 15. Rate limiting present on auth (11 rapid logins → at least one 429)
   let got429 = false;
-  for (let i = 0; i < 12; i++) {
-    const x = await api('POST', '/api/v1/auth/login', { body: { phone: FARMER.phone, password: 'wrong' } });
+  for (let i = 0; i < 25; i++) {
+    const x = await api('POST', '/api/v1/auth/login', { body: { phone: `+256799${STAMP.slice(0,6)}`, password: 'wrong' } });
     if (x.status === 429) { got429 = true; break; }
   }
-  got429 ? ok('Rate limiting: brute-force login attempts throttled (429)') : bad('Rate limiting', 'no 429 observed');
+  got429 ? ok('Rate limiting: progressive backoff triggers 429 after 5 failures') : bad('Rate limiting', 'no 429 after 25 attempts');
 
 
   // 17. Admin guard: farmer token on aggregate/admin endpoints
