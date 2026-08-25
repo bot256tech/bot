@@ -5,7 +5,8 @@
 <% } %>
 <% if (data.error) { %> <div style="background:#fff3e0;border:1px solid #ff9800;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#e65100"> <i class="fas fa-exclamation-circle"></i> <%= data.error %> </div>
 <% } %> <!-- Summary — only rendered when live data exists -->
-<% if (data.stats && data.stats.listings !== undefined && data.stats.listings !== null) { %>
+<% var _u = typeof user !== 'undefined' ? user : (data.user || null); %>
+<% if (_u && data.stats && data.stats.listings !== undefined && data.stats.listings !== null) { %>
 <div class="grid grid3" style="margin-bottom:20px">
   <div class="metric" style="border-left:3px solid var(--g)">
     <div class="metric-val"><%= data.stats.listings %></div>
