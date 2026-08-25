@@ -397,6 +397,7 @@ router.post('/signup', registerLimiter, async (req, res) => {
           website: body.website || body.org_website || null
         });
       } catch (e) { /* profile optional */ }
+      try { await SubscriptionGating.grantTrial(userId); } catch (e) { /* non-fatal */ }
     }
 
     if (backendRole === 'PARTNER') {
