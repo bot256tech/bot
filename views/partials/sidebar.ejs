@@ -22,6 +22,9 @@
         <a href="/marketplace" class="nav-item"><i class="fas fa-th-large"></i> Browse & Transact</a>
       <% } %>
       <a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+          <% if (typeof user !== 'undefined' && user && user.role !== 'ADMIN') { %>
+          <a href="/profile-settings" class="nav-item"><i class="fas fa-user-cog"></i> Profile &amp; Account</a>
+          <% } %></a>
     <% } else { %>
       <div class="nav-section">Get Started</div>
       <a href="/login" class="nav-item <%= page === 'login' ? 'active' : '' %>"><i class="fas fa-sign-in-alt"></i> Log In</a>

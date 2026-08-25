@@ -1,0 +1,119 @@
+<!-- Admin: User Management -->
+<%
+  var users = data.users || [];
+  var q = data.query || '';
+%>
+
+<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:22px">
+  <div>
+    <h2 style="font-weight:800;margin-bottom:4px">User Management</h2>
+    <div style="color:var(--tx2);font-size:.9rem"><%= users.length %> account<%= users.length === 1 ? '' : 's' %> — search, suspend, reactivate or delete</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="/admin-dashboard" class="btn btn-o btn-sm"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="/admin-database" class="btn btn-o btn-sm"><i class="fas fa-database"></i> Database</a>
+  </div>
+</div>
+
+<% if (data.success) { %>
+<div style="background:#e8f5e9;border:1px solid #4caf50;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:.85rem;color:#1b5e20">
+  <i class="fas fa-check-circle"></i> <%= data.success %>
+</div>
+<% } %>
+<% if (data.error) { %>
+<div style="background:#ffebee;border:1px solid #ef5350;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:.85rem;color:#c62828">
+  <i class="fas fa-exclamation-circle"></i> <%= data.error %>
+</div>
+<% } %>
+
+<!-- Search -->
+<div class="card" style="margin-bottom:16px">
+  <form method="GET" action="/admin/users" style="display:flex;gap:10px;flex-wrap:wrap">
+    <input type="text" name="q" placeholder="Search by name or phone number" value="<%= q %>"
+           style="flex:1;min-width:200px;padding:12px 16px;border:1px solid var(--bd);border-radius:12px;font-size:.9rem;background:var(--bg);color:var(--tx)">
+    <button type="submit" class="btn btn-p btn-sm"><i class="fas fa-search"></i> Search</button>
+    <% if (q) { %><a href="/admin/users" class="btn btn-o btn-sm">Clear</a><% } %>
+  </form>
+</div>
+
+<!-- Users table -->
+<div class="card">
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>District</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function(u) { %>
+        <tr>
+          <td><strong><%= u.name %></strong></td>
+          <td style="font-family:ui-monospace,monospace;font-size:.8rem"><%= u.phone %></td>
+          <td><span class="tag tag-b"><%= u.role %></span></td>
+          <td>
+            <% if (u.status === 'ACTIVE') { %>
+              <span class="tag tag-g">Active</span>
+            <% } else { %>
+              <span class="tag tag-r"><%= u.status %></span>
+            <% } %>
+          </td>
+          <td><%= u.district || '—' %></td>
+          <td style="font-size:.78rem"><%= new Date(u.created_at).toLocaleDateString() %></td>
+          <td>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <% if (u.status === 'ACTIVE') { %>
+                <form method="POST" action="/admin/users/<%= u.id %>/status" style="display:inline">
+                  <input type="hidden" name="status" value="SUSPENDED">
+                  <button type="submit" class="btn btn-o btn-sm" style="font-size:.7rem;padding:4px 10px" title="Suspend this account"
+                          onclick="return confirm('Suspend <%= u.name %>? They will not be able to log in.')">
+                    <i class="fas fa-pause"></i> Suspend
+                  </button>
+                </form>
+              <% } else { %>
+                <form method="POST" action="/admin/users/<%= u.id %>/status" style="display:inline">
+                  <input type="hidden" name="status" value="ACTIVE">
+                  <button type="submit" class="btn btn-p btn-sm" style="font-size:.7rem;padding:4px 10px">
+                    <i class="fas fa-play"></i> Reactivate
+                  </button>
+                </form>
+              <% } %>
+              <form method="POST" action="/admin/users/<%= u.id %>/delete" style="display:inline"
+                    onsubmit="return confirm('DELETE <%= u.name %>?\\n\\nThis permanently removes:\\n- Their account\\n- Farmer/buyer/partner profiles\\n- All their produce listings\\n- All their quality passports\\n- All their orders\\n\\nThis cannot be undone.')">
+                <button type="submit" class="btn btn-o btn-sm" style="font-size:.7rem;padding:4px 10px;color:#c62828;border-color:#ffcdd2">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }) %>
+        <% if (!users.length) { %>
+        <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--tx2)">No users found<%= q ? ' matching "' + q + '"' : '' %>.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px;background:var(--bg2);border:1px dashed var(--bd)">
+  <div style="font-size:.78rem;color:var(--tx2);line-height:1.6">
+    <i class="fas fa-info-circle" style="color:var(--g)"></i>
+    <strong>Suspend</strong> = temporary (user cannot log in but data is preserved — use for investigations, disputes, death pending family contact).
+    <strong>Delete</strong> = permanent (removes the account and all associated records — use for confirmed account closures, duplicate registrations, or data cleanup).
+    Users can also delete their own account from their Profile page (requires password confirmation).
+  </div>
+</div>
+
+<style>
+  table{width:100%;border-collapse:collapse;font-size:.84rem}
+  thead th{text-align:left;padding:10px 12px;background:var(--bg2);color:var(--tx2);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+  tbody td{padding:10px 12px;border-top:1px solid var(--bd);vertical-align:middle}
+  tbody tr:hover{background:var(--bg2)}
+</style>

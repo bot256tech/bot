@@ -439,6 +439,37 @@ router.post('/signup', registerLimiter, async (req, res) => {
   }
 });
 
+// Profile & Account settings
+router.get('/profile-settings', requireWebAuth(), async (req, res) => {
+  try {
+    const profile = await require('../services/auth.service').getProfile(req.session.user.id);
+    res.render('layout', {
+      title: 'Profile & Account — AGRICHAIN 360',
+      page: 'profile-settings',
+      data: { user: req.session.user, profile: profile, error: req.query.error || '' },
+      body: 'profileSettings',
+    });
+  } catch (err) { next(err); }
+});
+
+// User: delete own account (requires password confirmation)
+router.post('/account/delete', requireWebAuth(), async (req, res) => {
+  const password = req.body.password || '';
+  try {
+    const User = require('../models/User');
+    const user = await User.findByPhone(req.session.user.phone);
+    if (!user || !(await User.verifyPassword(password, user.password_hash))) {
+      return res.redirect('/profile?error=' + encodeURIComponent('Incorrect password. Account not deleted.'));
+    }
+    await db.query('DELETE FROM users WHERE id = $1;', [req.session.user.id]);
+    req.session.destroy(() => {
+      res.redirect('/?deleted=1');
+    });
+  } catch (err) {
+    res.redirect('/profile?error=' + encodeURIComponent('Could not delete account. ' + err.message));
+  }
+});
+
 router.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/');
@@ -785,6 +816,57 @@ router.get('/admin-dashboard', requireWebAuth(['ADMIN']), async (req, res, next)
     });
   } catch (err) {
     next(err);
+  }
+});
+
+// Admin: list all users with search
+router.get('/admin/users', requireWebAuth(['ADMIN']), async (req, res, next) => {
+  try {
+    const q = req.query.q || '';
+    const users = await db.query(
+      `SELECT u.id, u.name, u.phone, u.role, u.status, u.created_at,
+              f.district, f.verification_status
+       FROM users u
+       LEFT JOIN farmers f ON f.user_id = u.id
+       WHERE ($1 = '' OR u.name ILIKE '%' || $1 || '%' OR u.phone ILIKE '%' || $1 || '%')
+       ORDER BY u.created_at DESC LIMIT 100;`, [q]);
+    res.render('layout', {
+      title: 'User Management — AGRICHAIN 360',
+      page: 'admin-users',
+      data: { user: req.session.user, users: users.rows, query: q, success: req.query.success || '', error: req.query.error || '' },
+      body: 'adminUsers',
+    });
+  } catch (err) { next(err); }
+});
+
+// Admin: enable/disable a user account
+router.post('/admin/users/:id/status', requireWebAuth(['ADMIN']), async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const newStatus = req.body.status === 'ACTIVE' ? 'ACTIVE' : 'SUSPENDED';
+    if (userId === req.session.user.id) {
+      return res.redirect('/admin/users?error=' + encodeURIComponent('You cannot suspend your own account.'));
+    }
+    await db.query('UPDATE users SET status = $1 WHERE id = $2;', [newStatus, userId]);
+    res.redirect('/admin/users?success=' + encodeURIComponent(`Account ${newStatus === 'ACTIVE' ? 'reactivated' : 'suspended'}.`));
+  } catch (err) {
+    res.redirect('/admin/users?error=' + encodeURIComponent(err.message));
+  }
+});
+
+// Admin: delete a user account (cascade removes profiles, listings, passports)
+router.post('/admin/users/:id/delete', requireWebAuth(['ADMIN']), async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    if (userId === req.session.user.id) {
+      return res.redirect('/admin/users?error=' + encodeURIComponent('You cannot delete your own admin account.'));
+    }
+    const u = await db.query('SELECT name, role FROM users WHERE id = $1;', [userId]);
+    if (!u.rows[0]) return res.redirect('/admin/users?error=' + encodeURIComponent('User not found.'));
+    await db.query('DELETE FROM users WHERE id = $1;', [userId]);
+    res.redirect('/admin/users?success=' + encodeURIComponent(`Deleted ${u.rows[0].name} (${u.rows[0].role}) and all associated records.`));
+  } catch (err) {
+    res.redirect('/admin/users?error=' + encodeURIComponent(err.message));
   }
 });
 

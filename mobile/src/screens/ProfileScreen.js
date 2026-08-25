@@ -18,6 +18,29 @@ export default function ProfileScreen({ navigation }) {
     })();
   }, []);
 
+  const deleteAccount = () => {
+    Alert.alert(
+      'Delete account',
+      'This permanently deletes your account, produce listings, quality passports and orders. This cannot be undone.\n\nType your password to confirm:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete permanently',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.request('/auth/delete-account', { method: 'POST', body: JSON.stringify({}) });
+              await api.clearSession();
+              navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+            } catch (e) {
+              Alert.alert('Could not delete', e.message);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const logout = () => {
     Alert.alert('Log out', 'End your session on this device?', [
       { text: 'Cancel', style: 'cancel' },
@@ -97,6 +120,11 @@ export default function ProfileScreen({ navigation }) {
         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
           <Ionicons name="log-out-outline" size={18} color={COLORS.red} />
           <Text style={styles.logoutText}>Log Out</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.logoutBtn, { marginTop: 8, borderColor: '#FFCDD2' }]} onPress={deleteAccount}>
+          <Ionicons name="trash-outline" size={16} color={COLORS.red} />
+          <Text style={[styles.logoutText, { fontSize: 12 }]}>Delete My Account</Text>
         </TouchableOpacity>
 
         <View style={{ height: 30 }} />
