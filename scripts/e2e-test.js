@@ -111,6 +111,13 @@ async function main() {
   r = await api('GET', `/api/v1/quality/verify/${passport.batch_number}`);
   (r.status === 200 && parseFloat(r.json.data.moisture_level) === 12.6) ? ok('Persistence: passport data intact end-to-end') : bad('Persistence', `status ${r.status}`);
 
+  // 16. Password policy: weak signup rejected
+  r = await api('POST', '/api/v1/auth/register', {
+    body: { name: `Weak Pw ${STAMP}`, phone: `+256776${STAMP.slice(0,6)}`, password: 'abc123', role: 'FARMER' }
+  });
+  (r.status === 400 && /security policy/i.test((r.json && r.json.message) || ''))
+    ? ok('Strong-password policy: weak signup rejected with clear message')
+    : bad('Password policy', `status ${r.status}`);
   // 15. Rate limiting present on auth (11 rapid logins → at least one 429)
   let got429 = false;
   for (let i = 0; i < 12; i++) {
@@ -119,13 +126,6 @@ async function main() {
   }
   got429 ? ok('Rate limiting: brute-force login attempts throttled (429)') : bad('Rate limiting', 'no 429 observed');
 
-  // 16. Password policy: weak signup rejected
-  r = await api('POST', '/api/v1/auth/register', {
-    body: { name: `Weak Pw ${STAMP}`, phone: `+256776${STAMP.slice(0,6)}`, password: 'abc123', role: 'FARMER' }
-  });
-  (r.status === 400 && /security policy/i.test((r.json && r.json.message) || ''))
-    ? ok('Strong-password policy: weak signup rejected with clear message')
-    : bad('Password policy', `status ${r.status}`);
 
   // 17. Admin guard: farmer token on aggregate/admin endpoints
   r = await api('GET', '/api/v1/buyers/admin/all', { token: farmerTok });
