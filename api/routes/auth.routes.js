@@ -3,7 +3,7 @@ const router = express.Router();
 const AuthService = require('../../services/auth.service');
 const { protect } = require('../middleware/authMiddleware');
 const { registerValidation, loginValidation } = require('../middleware/validate');
-const { registerLimiter, authLimiter } = require('../../config/rateLimiter');
+const { registerLimiter, authLimiter, recordLoginFailure, clearLoginAttempts } = require('../../config/rateLimiter');
 
 // ─────────────────────────────────────────────────────
 // AUTHENTICATION ROUTES
@@ -37,6 +37,8 @@ router.post('/login', authLimiter, loginValidation, async (req, res) => {
   try {
     const { phone, password } = req.body;
     const result = await AuthService.loginUser(phone, password, req);
+    // On successful login, clear the progressive attempt counter
+    if (req._loginAttemptKey) clearLoginAttempts(req._loginAttemptKey);
 
     res.json({
       success: true,

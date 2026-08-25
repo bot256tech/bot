@@ -3,7 +3,7 @@ const router = express.Router();
 const path = require('path');
 const db = require('../database/connection');
 const { requireWebAuth } = require('../middleware/webAuth');
-const { authLimiter, registerLimiter } = require('../config/rateLimiter');
+const { authLimiter, registerLimiter, recordLoginFailure, clearLoginAttempts } = require('../config/rateLimiter');
 const ussdRouter = require('./ussd');
 
 const Farmer = require('../models/Farmer');
@@ -282,6 +282,7 @@ router.post('/login', authLimiter, async (req, res) => {
     const AuthService = require('../services/auth.service');
     const result = await AuthService.loginUser(phone, password, req);
     const user = result.user;
+    if (req._loginAttemptKey) clearLoginAttempts(req._loginAttemptKey);
 
     req.session.user = {
       id: user.id,
@@ -302,6 +303,9 @@ router.post('/login', authLimiter, async (req, res) => {
     if (role === 'ADMIN') return res.redirect('/admin-dashboard');
     return res.redirect('/marketplace');
   } catch (err) {
+    if (req._loginAttemptKey && req._loginAttemptRecord) {
+      recordLoginFailure(req._loginAttemptKey, req._loginAttemptRecord);
+    }
     const msg = (err && err.message) || 'Login failed';
     return res.redirect('/login?error=' + encodeURIComponent(msg));
   }

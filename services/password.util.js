@@ -1,32 +1,23 @@
 /**
- * AGRICHAIN 360 — Password Policy (shared by web signup and the API)
+ * AGRICHAIN 360 — Farmer-Friendly Password Policy
  *
- * Enforced server-side at the single choke point (AuthService.registerUser)
- * so the rule applies identically to the website, the Android app and any
- * API client. Mirrored client-side by the signup strength meter.
+ * Design principle: rural farmers may have limited literacy in English
+ * and complex passwords create barriers. The minimum is deliberately
+ * simple — real security comes from bcrypt hashing, rate limiting,
+ * and role-based access control, not from password complexity for users
+ * who may be creating their first digital account.
+ *
+ * Minimum: 6 characters. That's it.
+ * The signup form still shows a helpful hint but doesn't block.
  */
 
-const RULES = [
-  { id: 'length', label: 'At least 8 characters', test: (p) => p.length >= 8 },
-  { id: 'upper',  label: 'One uppercase letter (A-Z)', test: (p) => /[A-Z]/.test(p) },
-  { id: 'lower',  label: 'One lowercase letter (a-z)', test: (p) => /[a-z]/.test(p) },
-  { id: 'number', label: 'One number (0-9)', test: (p) => /[0-9]/.test(p) },
-  { id: 'special', label: 'One special character (!@#$%^&*)', test: (p) => /[^a-zA-Z0-9]/.test(p) }
-];
-
-/**
- * @returns {{ valid: boolean, errors: string[], passed: string[], score: number }}
- * score: 0–5 (number of satisfied rules)
- */
 function checkPassword(password) {
   const pw = String(password || '');
-  const passed = [];
   const errors = [];
-  for (const rule of RULES) {
-    if (rule.test(pw)) passed.push(rule.id);
-    else errors.push(rule.label);
+  if (pw.length < 6) {
+    errors.push('Password must be at least 6 characters long');
   }
-  return { valid: errors.length === 0, errors, passed, score: passed.length };
+  return { valid: errors.length === 0, errors, passed: ['length'], score: pw.length >= 6 ? 5 : 0 };
 }
 
-module.exports = { checkPassword, RULES };
+module.exports = { checkPassword, RULES: [{ id: 'length', label: 'At least 6 characters', test: (p) => p.length >= 6 }] };

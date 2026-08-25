@@ -5,7 +5,7 @@
     <% } %>
     <form id="signupForm" method="POST" action="/signup">
       <input type="hidden" name="claimBatch" value="<%= typeof claimBatch !== 'undefined' ? claimBatch : '' %>"> <!-- Role Selection --> <div style="margin-bottom:18px;width:100%;max-width:100%;position:relative;z-index:20"> <label style="display:block;margin-bottom:6px;font-weight:700;font-size:.85rem">I am a...</label> <select name="role" id="roleSelect" required onchange="showRoleFields()" style="width:100%;padding:12px;border-radius:10px;font-size:.9rem"> <option value="">-- Select your role --</option> <option value="farmer"> Farmer</option> <option value="village_agent"> Village Agent</option> <option value="buyer"> Enterprise Buyer / Exporter</option> <option value="partner"> Service Partner (Dryer/Lab/Transport)</option> <option value="input_dealer"> Agro-Input Dealer</option> <option value="cooperative"> Cooperative</option> <option value="ngo"> NGO / Development Partner</option> <option value="finance"> Financial Institution</option> <option value="researcher"> Researcher / Agronomist</option> <option value="field_officer"> Field Officer</option> <option value="quality_officer"> Quality Officer</option> <option value="lab"> Laboratory Staff</option> <option value="admin"> Administrator</option> </select> </div> <!-- Common Fields (always shown) --> <div id="commonFields" style="display:none"> <div style="margin-bottom:14px"> <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Full Name / Organization Name</label> <input type="text" name="name" id="nameField" placeholder="e.g. John Mukasa or ABC Exporters Ltd" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem"> </div> <div style="margin-bottom:14px"> <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Phone Number</label> <input type="tel" name="phone" placeholder="+256 7XX XXX XXX" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem" value="+256"> </div> <div style="margin-bottom:14px"> <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Email (optional)</label> <input type="email" name="email" placeholder="you@example.com" style="width:100%;padding:12px;border-radius:10px;font-size:.9rem"> </div> <div style="margin-bottom:18px"> <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Password</label> <div style="position:relative">
-          <input type="password" name="password" id="signupPassword" placeholder="Create a secure password" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem;padding-right:46px">
+          <input type="password" name="password" id="signupPassword" placeholder="Enter a password (at least 6 characters)" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem;padding-right:46px">
           <button type="button" data-pwd-toggle data-for="signupPassword" aria-label="Show password" title="Show password" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;padding:8px;cursor:pointer;color:var(--tx2)">
             <i class="fas fa-eye" aria-hidden="true"></i>
           </button>
@@ -108,11 +108,11 @@ function showRoleFields() {
 <script>
 (function () {
   var RULES = [
-    ['length', 'At least 8 characters'],
-    ['upper', 'One uppercase letter'],
-    ['lower', 'One lowercase letter'],
-    ['number', 'One number'],
-    ['special', 'One special character (!@#$%^&*)']
+    ['length', 'At least 6 characters'],
+    ['upper', 'Tip: add a number'],
+    ['lower', 'Tip: mix letters'],
+    ['number', 'Tip: avoid common words'],
+    ['special', 'That's enough']
   ];
   var input = document.getElementById('signupPassword');
   var meter = document.getElementById('pwdMeter');
