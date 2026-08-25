@@ -18,7 +18,7 @@ class QualityService {
     const year = new Date().getFullYear();
     const randomHex = crypto.randomBytes(4).toString('hex').toUpperCase();
     const batch_number = `AGR-${year}-${randomHex}`;
-    const qr_code = `${baseUrl()}/passport/${batch_number}`;
+    const qr_code = `${baseUrl()}/verify?batchId=${batch_number}&action=view`;
 
     const moisture = data.moisture_level !== undefined && data.moisture_level !== null && data.moisture_level !== ''
       ? data.moisture_level : null;

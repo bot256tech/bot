@@ -1,5 +1,249 @@
-<!-- Public passport verification form -->
-<div style="max-width:560px;margin:40px auto;padding:0 16px"> <div class="card" style="padding:32px;text-align:center"> <div style="font-size:12px;letter-spacing:3px;color:var(--tx2);text-transform:uppercase;margin-bottom:6px">AGRICHAIN 360</div> <h2 style="font-weight:800;margin-bottom:8px">Verify a Digital Quality Passport</h2> <p style="color:var(--tx2);font-size:.88rem;margin-bottom:22px"> Enter a batch number to inspect its recorded quality information, grade and verification status.
-    </p> <form method="POST" action="/verify" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"> <input type="text" name="batch" placeholder="e.g. AGR-2026-8F3A21C9" value="<%= data.batch %>" required style="flex:1;min-width:220px"> <button type="submit" class="btn btn-p"><i class="fas fa-search"></i> Verify</button> </form> <div style="margin-top:18px;font-size:.78rem;color:var(--tx2)"> Batch numbers appear on marketplace listings and farmer dashboards.
-    </div> </div>
+<!-- Public passport verification: smart QR landing + camera scanner + manual entry -->
+<% var scanned = data.batchId || ''; var action = data.action || 'view'; %>
+
+<div style="max-width:640px;margin:0 auto;padding:0 4px">
+
+  <% if (scanned) { %>
+  <!-- ══ Smart QR landing: action card ══ -->
+  <div class="card" style="margin-top:20px;border:1px solid var(--g)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <i class="fas fa-qrcode" style="font-size:1.4rem;color:var(--g)"></i>
+      <div>
+        <div style="font-weight:800;font-size:.95rem">Scanned batch <span style="font-family:ui-monospace,monospace"><%= scanned %></span></div>
+        <div style="font-size:.75rem;color:var(--tx2)">
+          <% if (data.scannedPassport) { %>
+            <%= data.scannedPassport.crop_type %> · Grade <%= data.scannedPassport.quality_grade || 'pending' %>
+            <% if (data.scannedPassport.moisture_level != null) { %> · moisture <%= data.scannedPassport.moisture_level %><% } %>
+            <% if (data.scannedSignatureValid) { %> · <span style="color:var(--g);font-weight:700">signature verified</span><% } %>
+          <% } else { %>
+            No passport found for this batch number
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;gap:10px;margin-top:14px">
+      <% if (data.scannedPassport) { %>
+        <a class="btn btn-p" href="/passport/<%= scanned %>" style="justify-content:flex-start">
+          <i class="fas fa-certificate"></i>
+          <span style="text-align:left"><strong>View Batch Quality Passport</strong><br>
+          <small style="font-weight:500;opacity:.85">Moisture, lab results and telemetry — verified in the browser, no app required</small></span>
+        </a>
+      <% } %>
+        <a class="btn btn-o" href="/signup?claimBatch=<%= encodeURIComponent(scanned) %>" style="justify-content:flex-start">
+          <i class="fas fa-user-plus"></i>
+          <span style="text-align:left"><strong>Sign Up / Claim Batch</strong><br>
+          <small style="font-weight:500;opacity:.8">Create a free account and link this batch to it</small></span>
+        </a>
+        <a class="btn btn-o" href="/get-app" style="justify-content:flex-start">
+          <i class="fab fa-android"></i>
+          <span style="text-align:left"><strong>Get the App</strong><br>
+          <small style="font-weight:500;opacity:.8">Install the AGRICHAIN 360 app on your phone</small></span>
+        </a>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- ══ Verification tools ══ -->
+  <div class="card" style="margin-top:20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <i class="fas fa-shield-halved" style="font-size:1.5rem;color:var(--g)"></i>
+      <div>
+        <h2 style="font-weight:800;font-size:1.05rem;margin:0">Verify a Quality Passport</h2>
+        <div style="font-size:.8rem;color:var(--tx2)">Scan the QR code, upload an image of it, or type the batch number.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
+      <button class="btn btn-p" id="scanBtn" type="button"><i class="fas fa-camera"></i> Scan QR code</button>
+      <button class="btn btn-o" id="uploadBtn" type="button"><i class="fas fa-image"></i> Upload QR image</button>
+      <input type="file" id="qrFile" accept="image/*" style="display:none">
+    </div>
+
+    <form method="POST" action="/verify" style="display:flex;gap:10px;flex-wrap:wrap">
+      <input type="text" name="batch" placeholder="e.g. AGR-DEMO-001 or AGR-2026-8F3A21C9" value="<%= data.batch || (!scanned ? '' : '') %><%= data.batch %>" required
+             style="flex:1;min-width:220px;padding:12px 16px;border:1px solid var(--bd);border-radius:12px;font-size:.9rem;background:var(--bg);color:var(--tx);outline:none">
+      <button class="btn btn-p" type="submit"><i class="fas fa-search"></i> Verify</button>
+    </form>
+  </div>
+
+  <% if (data.batch && data.passport) { %>
+  <div class="card" style="margin-top:16px">
+    <% var p = data.passport; var gr = p.quality_grade; %>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-family:ui-monospace,monospace;font-weight:800"><%= p.batch_number %></div>
+        <div style="font-size:.8rem;color:var(--tx2)"><%= p.crop_type %> · <%= parseFloat(p.quantity).toLocaleString() %> kg</div>
+      </div>
+      <span class="tag <%= gr === 'A' || gr === 'B' ? 'tag-g' : (gr === 'REJECTED' ? 'tag-r' : 'tag-a') %>"><%= gr ? 'Grade ' + gr : 'Pending' %></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:12px;font-size:.85rem">
+      <div>Moisture: <strong><%= p.moisture_level != null ? p.moisture_level + '%' : '—' %></strong></div>
+      <div>Aflatoxin: <strong><%= p.aflatoxin_result != null ? p.aflatoxin_result + ' ppb' : '—' %></strong></div>
+      <div>Source: <strong><%= p.record_source === 'demo' ? 'Demonstration' : (p.record_source === 'partner' ? 'Partner-entered' : 'Farmer-entered') %></strong></div>
+      <div>Status: <strong><%= p.verified_at ? 'Verified' : 'Pending' %></strong></div>
+    </div>
+    <a href="/passport/<%= p.batch_number %>" class="btn btn-o btn-sm" style="margin-top:12px">Open full passport</a>
+  </div>
+  <% } else if (data.batch && !data.passport) { %>
+  <div class="card" style="margin-top:16px;text-align:center;color:var(--tx2)">
+    No passport found for <strong><%= data.batch %></strong>. Check the batch number and try again.
+  </div>
+  <% } %>
 </div>
+
+<!-- ══ Camera scanner modal ══ -->
+<div id="scanModal" style="display:none;position:fixed;inset:0;background:rgba(10,15,30,.92);z-index:1200;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--card);border-radius:18px;max-width:420px;width:100%;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--bd)">
+      <strong style="font-size:.9rem">Scan QR code</strong>
+      <button id="scanClose" class="btn btn-o btn-sm" type="button">Close</button>
+    </div>
+    <div style="position:relative;background:#0a0f1a">
+      <video id="scanVideo" playsinline style="width:100%;display:block;max-height:340px;object-fit:cover"></video>
+      <div id="scanHint" style="position:absolute;left:0;right:0;bottom:0;padding:10px;text-align:center;font-size:.78rem;color:#cdd7e5;background:rgba(10,15,26,.7)">Point the camera at the batch QR code…</div>
+    </div>
+    <div id="scanError" style="display:none;padding:14px 16px;font-size:.82rem;color:var(--tx2);line-height:1.5"></div>
+    <div style="padding:12px 16px;border-top:1px solid var(--bd);display:flex;gap:10px;flex-wrap:wrap">
+      <button id="scanUploadFallback" class="btn btn-o btn-sm" type="button"><i class="fas fa-image"></i> Upload QR image instead</button>
+    </div>
+  </div>
+</div>
+
+<script src="/vendor/jsQR.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var modal = document.getElementById('scanModal');
+  var video = document.getElementById('scanVideo');
+  var closeBtn = document.getElementById('scanClose');
+  var errBox = document.getElementById('scanError');
+  var stream = null, rafId = null, canvas = null, active = false;
+
+  // ── extract a batch reference from any scanned payload ──
+  function batchFromPayload(text) {
+    var t = String(text || '').trim();
+    var m = t.match(/[?&]batchId=([A-Za-z0-9-]+)/);
+    if (m) return m[1];
+    m = t.match(/(AGR-[A-Za-z0-9-]+)/);
+    if (m) return m[1];
+    return /^[A-Za-z0-9-]+$/.test(t) ? t : null;
+  }
+
+  // ── camera lifecycle: stop EVERY track, cancel the loop ──
+  function stopCamera() {
+    active = false;
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    if (stream) {
+      stream.getTracks().forEach(function (tr) { try { tr.stop(); } catch (e) {} });
+      stream = null;
+    }
+    if (video) { try { video.srcObject = null; } catch (e) {} }
+  }
+
+  function closeScanner() { stopCamera(); modal.style.display = 'none'; }
+
+  closeBtn.addEventListener('click', closeScanner);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeScanner(); });
+  // never hold the camera when the page is hidden or left
+  document.addEventListener('visibilitychange', function () { if (document.hidden) closeScanner(); });
+  window.addEventListener('pagehide', stopCamera);
+
+  function onDecoded(text) {
+    var batch = batchFromPayload(text);
+    stopCamera();
+    modal.style.display = 'none';
+    if (batch) {
+      window.location.href = '/verify?batchId=' + encodeURIComponent(batch) + '&action=view';
+    } else {
+      errBox.style.display = 'block';
+      errBox.textContent = 'That QR code is not an AGRICHAIN batch code. Try the image upload or type the batch number.';
+      modal.style.display = 'flex';
+    }
+  }
+
+  function decodeLoop() {
+    if (!active) return;
+    try {
+      if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth) {
+        if (!canvas) canvas = document.createElement('canvas');
+        var w = 340, h = Math.round(video.videoHeight * (w / video.videoWidth));
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(video, 0, 0, w, h);
+        var img = ctx.getImageData(0, 0, w, h);
+        var code = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+        if (code && code.data) { onDecoded(code.data); return; }
+      }
+    } catch (e) { /* keep scanning */ }
+    rafId = requestAnimationFrame(decodeLoop);
+  }
+
+  document.getElementById('scanBtn').addEventListener('click', async function () {
+    errBox.style.display = 'none';
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+      showFallback('Live camera scanning is not supported by this browser. Use the image upload or type the batch number.');
+      return;
+    }
+    modal.style.display = 'flex';
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 720 } },
+        audio: false
+      });
+      video.srcObject = stream;
+      await video.play();
+      active = true;
+      decodeLoop();
+    } catch (err) {
+      stopCamera();
+      modal.style.display = 'none';
+      var why = (err && err.name === 'NotAllowedError')
+        ? 'Camera permission was denied.'
+        : (err && err.name === 'NotFoundError' ? 'No camera found on this device.' : 'The camera could not be started.');
+      showFallback(why + ' You can upload a photo of the QR code instead — it works exactly the same.');
+    }
+  });
+
+  function showFallback(msg) {
+    errBox.style.display = 'block';
+    errBox.textContent = msg;
+    modal.style.display = 'flex';
+    stopCamera();
+    document.getElementById('scanVideo').style.display = 'none';
+    document.getElementById('scanHint').style.display = 'none';
+  }
+
+  // ── image upload fallback (works even with no camera at all) ──
+  function decodeImageFile(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var c = document.createElement('canvas');
+        var scale = Math.min(1, 900 / Math.max(img.width, img.height));
+        c.width = img.width * scale; c.height = img.height * scale;
+        var ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        var d = ctx.getImageData(0, 0, c.width, c.height);
+        var code = window.jsQR ? window.jsQR(d.data, d.width, d.height) : null;
+        if (code && code.data) { onDecoded(code.data); }
+        else { errBox.style.display = 'block'; errBox.textContent = 'No QR code detected in that image. Try a clearer, well-lit photo of the code, or type the batch number.'; modal.style.display = 'flex'; }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.getElementById('uploadBtn').addEventListener('click', function () {
+    document.getElementById('qrFile').click();
+  });
+  document.getElementById('scanUploadFallback').addEventListener('click', function () {
+    closeScanner();
+    document.getElementById('qrFile').click();
+  });
+  document.getElementById('qrFile').addEventListener('change', function () {
+    if (this.files && this.files[0]) decodeImageFile(this.files[0]);
+    this.value = '';
+  });
+})();
+</script>

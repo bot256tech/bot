@@ -1,5 +1,5 @@
 <!-- Get the App — public installation page (no account required) -->
-<div id="getAppRoot" style="max-width:840px;margin:0 auto;padding:0 4px">
+<div id="getAppRoot" style="max-width:840px;margin:0 auto;padding:0 4px 110px">
 
   <div style="text-align:center;padding:8px 0 4px">
     <div style="width:84px;height:84px;border-radius:26px;background:var(--g);display:inline-flex;align-items:center;justify-content:center;box-shadow:var(--sh)">
@@ -35,7 +35,7 @@
             advisor and farmer tools in one app. Works on Android 7 and newer.
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <a href="/download/agrichain360-arm64-v1.1.3.apk" class="btn btn-p" download><i class="fas fa-download"></i> Download Android App <span style="font-weight:600;font-size:.72rem;opacity:.85">(v1.1.3 · 29 MB)</span></a>
+            <a href="/download/agrichain360-arm64-v1.1.3.apk" class="btn btn-p" download style="padding:16px 26px;font-size:1.02rem"><i class="fas fa-download"></i> Download Android App <span style="background:rgba(255,255,255,.22);border-radius:9px;padding:3px 10px;font-size:.72rem;font-weight:800;letter-spacing:.4px;margin-left:6px;white-space:nowrap">v1.1.3 · 29 MB</span></a>
             <button id="gaPwaBtn" class="btn btn-o" style="display:none"><i class="fas fa-window-maximize"></i> Install the Web App instead</button>
             <a href="/download/agrichain360-universal-v1.1.3.apk" class="btn btn-o" download style="display:none" id="gaApkFull"><i class="fas fa-download"></i> Older / 32-bit phone — full version (70 MB)</a>
           </div>
@@ -43,7 +43,7 @@
             After downloading, open the file and allow installation from this source if asked.
             If an older AGRICHAIN app is already installed, uninstall it first
             (Settings &rarr; Apps &rarr; AGRICHAIN 360 &rarr; Uninstall) or Android will report a package conflict.
-            <br>Downloaded straight from the AGRICHAIN server with resume support. If it is slow on your network, <a href="https://github.com/bot256tech/bot/releases/download/v1.1.3/agrichain360-arm64-v1.1.3.apk" style="color:var(--g);font-weight:600">use the global CDN mirror instead</a>.
+            <br>Downloaded straight from the AGRICHAIN server with resume support.
           </div>
         </div>
       </div>
@@ -181,5 +181,16 @@
     show('gaInstalled');
     hide('gaChoices');
   });
+})();
+</script>
+
+<script>
+// This page IS the installation page — suppress the floating PWA prompt.
+(function () {
+  var hide = function () { var el = document.getElementById('installPrompt'); if (el) el.style.display = 'none'; };
+  hide();
+  setTimeout(hide, 500); setTimeout(hide, 5500);
+  document.addEventListener('DOMContentLoaded', hide);
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); });
 })();
 </script>

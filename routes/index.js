@@ -182,11 +182,28 @@ router.get('/product/:id', async (req, res, next) => {
 // QUALITY PASSPORT VERIFICATION (public)
 // ─────────────────────────────────────────────────────
 
-router.get('/verify', (req, res) => {
+router.get('/verify', async (req, res) => {
+  // Smart QR landing: /verify?batchId=AGR-...&action=view (encoded in every QR code)
+  const batchId = req.query.batchId ? String(req.query.batchId).trim().slice(0, 60) : '';
+  let scannedPassport = null, scannedSignatureValid = false;
+  if (batchId) {
+    try {
+      scannedPassport = await QualityService.verifyPassport(batchId);
+      if (scannedPassport && scannedPassport.passport_signature) {
+        const { verifyPassportSignature } = require('../services/crypto.util');
+        scannedSignatureValid = verifyPassportSignature(scannedPassport).valid;
+      }
+    } catch (e) { scannedPassport = null; }
+  }
   res.render('layout', {
-    title: 'Verify a Quality Passport — AGRICHAIN 360',
+    title: batchId ? `Batch ${batchId} — AGRICHAIN 360` : 'Verify a Quality Passport — AGRICHAIN 360',
     page: 'verify',
-    data: { batch: req.query.batch || '', user: req.session ? req.session.user : null },
+    data: {
+      batch: req.query.batch || '',
+      batchId, action: req.query.action || 'view',
+      scannedPassport, scannedSignatureValid,
+      user: req.session ? req.session.user : null
+    },
     body: 'verifyPassport',
   });
 });
@@ -194,7 +211,7 @@ router.get('/verify', (req, res) => {
 router.post('/verify', (req, res) => {
   const batch = (req.body.batch || '').trim();
   if (!batch) return res.redirect('/verify');
-  res.redirect(`/passport/${encodeURIComponent(batch)}`);
+  res.redirect(`/verify?batchId=${encodeURIComponent(batch)}&action=view`);
 });
 
 router.get('/passport/:batchId', async (req, res) => {
@@ -291,7 +308,11 @@ router.get('/signup', (req, res) => {
   res.render('layout', {
     title: 'Create Account — AGRICHAIN 360',
     page: 'signup',
-    data: { error: req.query.error || '', selectedRole: req.query.role || '' },
+    data: {
+      error: req.query.error || '',
+      selectedRole: req.query.role || '',
+      claimBatch: (req.query.claimBatch || '').trim().slice(0, 60)
+    },
     body: 'signup',
   });
 });
@@ -390,11 +411,17 @@ router.post('/signup', registerLimiter, async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
+    // Batch claim flow (from a scanned QR code): send the new user straight to the batch
+    if (body.claimBatch) {
+      return res.redirect(`/verify?batchId=${encodeURIComponent(body.claimBatch)}&action=view`);
+    }
     if (backendRole === 'FARMER') return res.redirect('/farmer-dashboard');
     if (backendRole === 'BUYER') return res.redirect('/buyer-dashboard');
     return res.redirect('/marketplace');
   } catch (err) {
-    return res.redirect('/signup?error=' + encodeURIComponent(err.message || 'Registration failed'));
+    const q = err.message || 'Registration failed';
+    const claim = body.claimBatch ? `&claimBatch=${encodeURIComponent(body.claimBatch)}` : '';
+    return res.redirect('/signup?error=' + encodeURIComponent(q) + claim);
   }
 });
 
