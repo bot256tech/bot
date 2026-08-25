@@ -26,7 +26,14 @@ export default function LoginScreen({ navigation }) {
   const handleAuth = async () => {
     setError('');
     if (!phone || phone.replace(/\D/g, '').length < 9) { setError('Enter a valid phone number (e.g. +256 7XX XXX XXX).'); return; }
-    if (!password || password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (!isLogin) {
+      const strong = password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) &&
+                     /[0-9]/.test(password) && /[^a-zA-Z0-9]/.test(password);
+      if (!strong) {
+        setError('Password needs 8+ characters with an uppercase letter, a lowercase letter, a number and a special character.');
+        return;
+      }
+    } else if (!password) { setError('Enter your password.'); return; }
     if (!isLogin && (!name || name.trim().length < 2)) { setError('Enter your full name.'); return; }
 
     setLoading(true);

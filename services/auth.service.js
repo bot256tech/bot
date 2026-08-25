@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { checkPassword } = require('./password.util');
 const Farmer = require('../models/Farmer');
 const jwt = require('jsonwebtoken');
 const NotificationService = require('./notification.service');
@@ -15,6 +16,12 @@ class AuthService {
     // Validate required fields
     if (!name || !phone || !password) {
       throw new Error('Name, phone, and password are required.');
+    }
+
+    // Strong-password policy (applies to web, mobile and API signups alike)
+    const pwCheck = checkPassword(password);
+    if (!pwCheck.valid) {
+      throw new Error('Password does not meet the security policy: ' + pwCheck.errors.join('; ') + '.');
     }
     if (!role) {
       throw new Error('Role is required (FARMER, BUYER, PARTNER, or ADMIN).');

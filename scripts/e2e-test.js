@@ -119,6 +119,22 @@ async function main() {
   }
   got429 ? ok('Rate limiting: brute-force login attempts throttled (429)') : bad('Rate limiting', 'no 429 observed');
 
+  // 16. Password policy: weak signup rejected
+  r = await api('POST', '/api/v1/auth/register', {
+    body: { name: `Weak Pw ${STAMP}`, phone: `+256776${STAMP.slice(0,6)}`, password: 'abc123', role: 'FARMER' }
+  });
+  (r.status === 400 && /security policy/i.test((r.json && r.json.message) || ''))
+    ? ok('Strong-password policy: weak signup rejected with clear message')
+    : bad('Password policy', `status ${r.status}`);
+
+  // 17. Admin guard: farmer token on aggregate/admin endpoints
+  r = await api('GET', '/api/v1/buyers/admin/all', { token: farmerTok });
+  (r.status === 403) ? ok('Admin guard: farmer blocked from aggregate user list (403)') : bad('Admin guard buyers', `status ${r.status}`);
+  r = await api('GET', '/api/v1/telemetry/anomalies', { token: farmerTok });
+  (r.status === 403) ? ok('Admin guard: farmer blocked from telemetry QA queue (403)') : bad('Admin guard telemetry', `status ${r.status}`);
+  r = await api('GET', '/api/v1/payments/admin/revenue', { token: farmerTok });
+  (r.status === 403) ? ok('Admin guard: farmer blocked from revenue aggregates (403)') : bad('Admin guard revenue', `status ${r.status}`);
+
   console.log(`\nResult: ${passed} passed, ${failed} failed\n`);
   process.exit(failed ? 1 : 0);
 }
