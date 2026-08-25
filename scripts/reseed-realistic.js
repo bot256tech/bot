@@ -20,7 +20,8 @@ async function main() {
 
   // ── Clear existing products/passports (keep users and orders) ──
   console.log('Clearing old products and passports…');
-  await db.query('DELETE FROM quality_passports WHERE record_source = $1 OR record_source = $2', ['demo', 'user']);
+  await db.query('DELETE FROM orders');
+  await db.query('DELETE FROM quality_passports');
   await db.query('DELETE FROM products');
 
   // ── Reset sequences for clean batch numbers ──
