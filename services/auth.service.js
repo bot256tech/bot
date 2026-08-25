@@ -66,6 +66,20 @@ class AuthService {
       { expiresIn: '30d' }
     );
 
+    // Create buyer profile + grant trial (for API registrations that
+    // don't go through the web signup route's profile-creation section)
+    if (user.role === 'BUYER') {
+      try {
+        const Buyer = require('../models/Buyer');
+        await Buyer.createProfile({
+          user_id: user.id,
+          company_name: name,
+          business_type: 'OTHER'
+        });
+      } catch (e) { /* profile may already exist from web signup */ }
+      try { await SubscriptionGating.grantTrial(user.id); } catch (e) { /* non-fatal */ }
+    }
+
     // Send welcome SMS (non-blocking)
     try {
       await NotificationService.notifyWelcome(phone, name);
