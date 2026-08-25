@@ -1,0 +1,122 @@
+<!-- Legal pages: Privacy (default), Terms, Security — selected via `page` -->
+<%
+  var which = page;
+%>
+
+<div style="max-width:820px;margin:0 auto;padding:0 4px">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px">
+    <a class="btn btn-sm <%= which === 'privacy' ? 'btn-p' : 'btn-o' %>" href="/privacy">Privacy Policy</a>
+    <a class="btn btn-sm <%= which === 'terms' ? 'btn-p' : 'btn-o' %>" href="/terms">Terms &amp; Conditions</a>
+    <a class="btn btn-sm <%= which === 'security' ? 'btn-p' : 'btn-o' %>" href="/security">Data &amp; Security</a>
+  </div>
+
+  <% if (which === 'terms') { %>
+  <div class="card">
+    <h2 style="font-weight:800;margin-bottom:4px">Terms &amp; Conditions</h2>
+    <div style="font-size:.78rem;color:var(--tx2);margin-bottom:18px">Last updated: August 2026</div>
+    <div class="legal-body">
+      <h3>1. About these terms</h3>
+      <p>These Terms &amp; Conditions govern your use of the AGRICHAIN 360 platform (website, Android application and programming interfaces) operated by the AGRICHAIN 360 team ("AGRICHAIN", "we", "us"). By creating an account or using the platform you agree to these terms.</p>
+
+      <h3>2. Accounts</h3>
+      <p>Accounts are personal. You are responsible for keeping your password confidential and for activity under your account. You must provide accurate information when registering, including a phone number you can be reached on. We may suspend accounts that abuse the platform, submit false data, or attempt to access other users' records.</p>
+
+      <h3>3. Produce listings and quality data</h3>
+      <p>Farmers and their agents are responsible for the accuracy of produce listings. Quality readings entered by farmers are recorded as <strong>farmer-entered</strong> data; results entered by registered testing partners are recorded as <strong>partner-entered</strong>. The platform assigns grades automatically from recorded values (Grade A: moisture ≤ 13% and aflatoxin ≤ 5 ppb; B: ≤ 14% / ≤ 10 ppb; C: ≤ 15% / ≤ 20 ppb). Digital Quality Passports state their data source clearly. A passport is a record of values entered on the platform — it is not a substitute for a regulatory export certificate.</p>
+
+      <h3>4. Marketplace transactions</h3>
+      <p>Order requests placed through the marketplace are requests to transact. The final price, delivery and payment terms are agreed between buyer and farmer; AGRICHAIN facilitates the connection and records the transaction. The platform charges service fees (drying, testing and a marketplace commission) as published on the Pricing page. Dishonest listings or orders may lead to account suspension.</p>
+
+      <h3>5. Acceptable use</h3>
+      <p>You will not attempt to breach platform security, falsify quality readings, forge or alter passport records, scrape the service at scale, or upload malicious content. Quality Passports are cryptographically signed; tampering attempts are detectable and prohibited.</p>
+
+      <h3>6. Service availability</h3>
+      <p>We aim for continuous availability and protect data with backups, but we do not guarantee uninterrupted service. Field sensor data may be delayed by connectivity; offline entries sync when a connection returns.</p>
+
+      <h3>7. Limitation of liability</h3>
+      <p>To the extent permitted by law, AGRICHAIN is not liable for indirect losses arising from use of the platform, including crop losses or trading decisions made on the basis of recorded data. Nothing in these terms limits liability that cannot be limited by law.</p>
+
+      <h3>8. Changes</h3>
+      <p>We may update these terms; material changes will be announced on the platform. Continued use after changes means you accept them.</p>
+
+      <h3>9. Contact</h3>
+      <p>Questions about these terms: support via the contacts on the platform homepage.</p>
+    </div>
+  </div>
+
+  <% } else if (which === 'security') { %>
+  <div class="card">
+    <h2 style="font-weight:800;margin-bottom:4px">Data &amp; Security</h2>
+    <div style="font-size:.78rem;color:var(--tx2);margin-bottom:18px">How AGRICHAIN 360 protects your information</div>
+    <div class="legal-body">
+      <h3>Encryption in transit</h3>
+      <p>All traffic to and from the platform is encrypted with TLS over HTTPS. Plain HTTP requests are redirected to HTTPS.</p>
+
+      <h3>Encryption at rest</h3>
+      <p>Sensitive personal identifiers (such as farmer national ID numbers) are encrypted with AES-256-GCM before storage. Passwords are never stored — only one-way bcrypt hashes.</p>
+
+      <h3>Tamper-evident quality records</h3>
+      <p>Every Digital Quality Passport is signed with HMAC-SHA256 at the moment it is issued, and re-signed whenever its results change. Anyone can verify a passport's authenticity through the public verification endpoint — altered records fail verification.</p>
+
+      <h3>Access control</h3>
+      <p>Role-based access control (Farmer, Buyer, Partner, Administrator) restricts what each account can see and do. Farmers can only access their own batches and listings; quality-write permissions belong to registered testing partners and administrators. Every attempt is checked on the server, not just hidden in the interface.</p>
+
+      <h3>Sensor data integrity</h3>
+      <p>Incoming dryer-hub telemetry is authenticated per device and passes a validation engine: physically impossible readings are rejected, and suspicious readings are flagged for human review rather than silently accepted.</p>
+
+      <h3>Infrastructure</h3>
+      <p>The database accepts connections only from the application server itself. Secrets live only in a protected server environment — never in the application code or this website. Login and signup endpoints are rate-limited against automated attacks.</p>
+
+      <h3>Your choices</h3>
+      <p>You may request a copy or deletion of your personal data at any time (see the Privacy Policy). Deleting an account removes access; records required for quality traceability may be retained in anonymised form.</p>
+    </div>
+  </div>
+
+  <% } else { %>
+  <div class="card">
+    <h2 style="font-weight:800;margin-bottom:4px">Privacy Policy</h2>
+    <div style="font-size:.78rem;color:var(--tx2);margin-bottom:18px">Last updated: August 2026</div>
+    <div class="legal-body">
+      <h3>1. Who we are</h3>
+      <p>AGRICHAIN 360 operates an agricultural platform in Uganda connecting farmers, buyers and service partners. This policy explains what personal data we collect, why, and the choices you have.</p>
+
+      <h3>2. What we collect</h3>
+      <p><strong>Account data:</strong> name, phone number, optional email, role, and a bcrypt hash of your password (the password itself is never stored).</p>
+      <p><strong>Profile data:</strong> for farmers — district, village, crops grown, farm size, and optionally a national ID number, which is stored encrypted (AES-256).</p>
+      <p><strong>Activity data:</strong> produce listings, quality readings, passports, order requests, and drying-hub telemetry from devices you operate.</p>
+      <p><strong>Technical data:</strong> standard server logs (IP address, timestamps) used for security and rate limiting.</p>
+
+      <h3>3. Why we process it</h3>
+      <p>To operate your account, record and verify produce quality, connect farmers with buyers, send transactional notifications (for example SMS order alerts), secure the platform, and meet record-keeping obligations. Where personal data identifies you, we process it on the basis of providing the service you requested.</p>
+
+      <h3>4. Sharing</h3>
+      <p>We do not sell personal data. We share the minimum necessary: counterparties in a transaction see the name and phone number needed to complete it; SMS delivery providers process phone numbers to send notifications you have requested; and authorities where the law requires.</p>
+
+      <h3>5. Retention</h3>
+      <p>Account and activity data are retained while your account is active. Quality-traceability records may be retained after account closure in anonymised form, because the integrity of a batch's history protects everyone in the chain.</p>
+
+      <h3>6. Your rights</h3>
+      <p>You may request access to your data, correction of inaccuracies, or deletion of your account. Farmers' cooperative or agent-assisted registrations may be made on your behalf — you may contact us to take direct control of the account at any time.</p>
+
+      <h3>7. Security</h3>
+      <p>Measures are described on the <a href="/security">Data &amp; Security</a> page, including TLS encryption, encryption of sensitive identifiers, signed tamper-evident quality records, role-based access control, and rate limiting.</p>
+
+      <h3>8. Children</h3>
+      <p>The platform is intended for adults managing agricultural activity. We do not knowingly collect data from children.</p>
+
+      <h3>9. Contact &amp; changes</h3>
+      <p>Questions or requests: use the support contacts on the homepage. We will notify users of material changes to this policy on the platform.</p>
+    </div>
+  </div>
+  <% } %>
+
+  <div style="margin-top:18px;font-size:.75rem;color:var(--tx2)">
+    <i class="fas fa-circle-info"></i> These documents are provided as a clear, good-faith summary for the platform's current stage and should be reviewed by qualified counsel before formal commercial rollout.
+  </div>
+</div>
+
+<style>
+  .legal-body h3{font-size:.95rem;font-weight:800;margin:20px 0 6px;color:var(--tx)}
+  .legal-body p{font-size:.87rem;color:var(--tx2);line-height:1.65;margin-bottom:8px}
+  .legal-body a{color:var(--g);font-weight:600}
+</style>

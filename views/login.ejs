@@ -1,2 +1,26 @@
-    <div style="max-width:440px;margin:40px auto;padding:0 16px"> <div class="card" style="padding:28px"> <h2 style="font-weight:800;margin-bottom:4px">Login to AGRICHAIN 360</h2> <p style="color:var(--tx2);margin-bottom:20px;font-size:.9rem">Enter your phone number and password</p> <% if (typeof error !== 'undefined' && error) { %> <div style="background:#fff3e0;border:1px solid #ff9800;border-radius:10px;padding:12px;margin-bottom:16px;font-size:.85rem;color:#e65100"> <i class="fas fa-exclamation-circle"></i> <%= error %> </div> <% } %> <form action="/login" method="POST"> <input type="hidden" name="redirect" value="<%= typeof redirect !== 'undefined' ? redirect : '' %>"> <div style="margin-bottom:14px"> <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Phone Number</label> <input type="tel" name="phone" placeholder="+256 7XX XXX XXX" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem" value="+256"> </div> <div style="margin-bottom:20px"> <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Password</label> <input type="password" name="password" placeholder="Your password" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem"> </div> <button type="submit" class="btn btn-p" style="width:100%;padding:14px;font-size:1rem;justify-content:center">Login</button> </form> <div style="margin-top:20px;text-align:center;font-size:.85rem;color:var(--tx2);border-top:1px solid var(--bd);padding-top:16px"> Don't have an account? <a href="/roles" style="font-weight:700">Create one here</a> </div> <% if (typeof showDemo !== 'undefined' && showDemo) { %> <div style="margin-top:14px;background:var(--bg2);border:1px dashed var(--bd);border-radius:10px;padding:12px 14px;font-size:.78rem;color:var(--tx2)"> <strong style="color:var(--tx)">Demonstration accounts</strong> (seeded sample data):<br> Farmer <code>+256700111111</code> · Buyer <code>+256700222222</code> · Partner <code>+256700333333</code><br> Password for all three: <code>Demo@2026</code> </div> <% } %> </div>
+    <div style="max-width:440px;margin:40px auto;padding:0 16px"> <div class="card" style="padding:28px"> <h2 style="font-weight:800;margin-bottom:4px">Login to AGRICHAIN 360</h2> <p style="color:var(--tx2);margin-bottom:20px;font-size:.9rem">Enter your phone number and password</p> <% if (typeof error !== 'undefined' && error) { %> <div style="background:#fff3e0;border:1px solid #ff9800;border-radius:10px;padding:12px;margin-bottom:16px;font-size:.85rem;color:#e65100"> <i class="fas fa-exclamation-circle"></i> <%= error %> </div> <% } %> <form action="/login" method="POST"> <input type="hidden" name="redirect" value="<%= typeof redirect !== 'undefined' ? redirect : '' %>"> <div style="margin-bottom:14px"> <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Phone Number</label> <input type="tel" name="phone" placeholder="+256 7XX XXX XXX" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem" value="+256"> </div> <div style="margin-bottom:20px"> <label style="display:block;margin-bottom:5px;font-weight:600;font-size:.85rem">Password</label> <div style="position:relative">
+        <input type="password" name="password" id="loginPassword" placeholder="Your password" required style="width:100%;padding:12px;border-radius:10px;font-size:.9rem;padding-right:46px">
+        <button type="button" data-pwd-toggle data-for="loginPassword" aria-label="Show password" title="Show password" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;padding:8px;cursor:pointer;color:var(--tx2)">
+          <i class="fas fa-eye" aria-hidden="true"></i>
+        </button>
+      </div> </div> <button type="submit" class="btn btn-p" style="width:100%;padding:14px;font-size:1rem;justify-content:center">Login</button> </form> <div style="margin-top:20px;text-align:center;font-size:.85rem;color:var(--tx2);border-top:1px solid var(--bd);padding-top:16px"> Don't have an account? <a href="/roles" style="font-weight:700">Create one here</a> </div> <% if (typeof showDemo !== 'undefined' && showDemo) { %> <div style="margin-top:14px;background:var(--bg2);border:1px dashed var(--bd);border-radius:10px;padding:12px 14px;font-size:.78rem;color:var(--tx2)"> <strong style="color:var(--tx)">Demonstration accounts</strong> (seeded sample data):<br> Farmer <code>+256700111111</code> · Buyer <code>+256700222222</code> · Partner <code>+256700333333</code><br> Password for all three: <code>Demo@2026</code> </div> <% } %> </div>
 </div>
+
+<script>
+(function () {
+  function togglePasswordVisibility(btn) {
+    var input = document.getElementById(btn.getAttribute('data-for'));
+    if (!input) return;
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.innerHTML = show
+      ? '<i class="fas fa-eye-slash" aria-hidden="true"></i>'
+      : '<i class="fas fa-eye" aria-hidden="true"></i>';
+    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    btn.title = btn.getAttribute('aria-label');
+  }
+  document.querySelectorAll('[data-pwd-toggle]').forEach(function (btn) {
+    btn.addEventListener('click', function () { togglePasswordVisibility(btn); });
+  });
+})();
+</script>

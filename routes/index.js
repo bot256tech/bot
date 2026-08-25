@@ -24,6 +24,21 @@ router.get('/', (req, res) => {
 // Legacy landing → redirect
 router.get('/home', (req, res) => res.redirect('/'));
 
+// Privacy Policy (public)
+router.get('/privacy', (req, res) => {
+  res.render('layout', { title: 'Privacy Policy — AGRICHAIN 360', page: 'privacy', data: {}, body: 'legal' });
+});
+
+// Terms & Conditions (public)
+router.get('/terms', (req, res) => {
+  res.render('layout', { title: 'Terms & Conditions — AGRICHAIN 360', page: 'terms', data: {}, body: 'legal' });
+});
+
+// Data & Security (public)
+router.get('/security', (req, res) => {
+  res.render('layout', { title: 'Data & Security — AGRICHAIN 360', page: 'security', data: {}, body: 'legal' });
+});
+
 // Get the App — public installation page (no account required)
 router.get('/get-app', (req, res) => {
   res.render('layout', {
@@ -733,6 +748,41 @@ router.post('/admin/verify-farmer/:id', requireWebAuth(['ADMIN']), async (req, r
   } catch (err) {
     next(err);
   }
+});
+
+// Live database view (Admin only) — shows judges the real PostgreSQL layer
+router.get('/admin-database', requireWebAuth(['ADMIN']), async (req, res, next) => {
+  try {
+    const tables = ['users', 'farmers', 'buyer_profiles', 'partners', 'products',
+      'quality_passports', 'orders', 'bookings', 'payments', 'dryer_telemetry', 'sessions', 'audit_logs'];
+    const counts = [];
+    for (const t of tables) {
+      try {
+        const c = await db.query(`SELECT COUNT(*)::int AS n FROM ${t};`);
+        counts.push({ table: t, rows: c.rows[0].n });
+      } catch (e) { counts.push({ table: t, rows: null }); }
+    }
+    const [meta, passports, telemetry, roles] = await Promise.all([
+      db.query(`SELECT version() AS v, pg_size_pretty(pg_database_size(current_database())) AS size;`),
+      db.query(`SELECT batch_number, crop_type, quality_grade, record_source,
+                       (passport_signature IS NOT NULL) AS signed, created_at
+                FROM quality_passports ORDER BY created_at DESC LIMIT 8;`),
+      db.query(`SELECT device_id, hub, temperature_c, humidity_pct, grain_moisture_pct,
+                       anomaly_flag, anomaly_reasons, received_at
+                FROM dryer_telemetry ORDER BY received_at DESC LIMIT 8;`),
+      db.query(`SELECT role, COUNT(*)::int AS n FROM users GROUP BY role ORDER BY role;`)
+    ]);
+    res.render('layout', {
+      title: 'Database — AGRICHAIN 360',
+      page: 'admin-database',
+      data: {
+        user: req.session.user, counts, roles: roles.rows,
+        version: meta.rows[0].v.split(',')[0], size: meta.rows[0].size,
+        passports: passports.rows, telemetry: telemetry.rows
+      },
+      body: 'adminDatabase',
+    });
+  } catch (err) { next(err); }
 });
 
 // ─────────────────────────────────────────────────────
