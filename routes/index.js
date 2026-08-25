@@ -128,13 +128,16 @@ router.get('/marketplace', async (req, res, next) => {
     const crops = await db.query(`SELECT DISTINCT crop FROM products WHERE available = true ORDER BY crop;`);
     const districts = await db.query(`SELECT DISTINCT f.district FROM products p JOIN farmers f ON p.farmer_id = f.id WHERE p.available = true AND f.district IS NOT NULL ORDER BY f.district;`);
 
-    // Summary stats (real)
-    const stats = await db.query(`
+    // Summary stats (real) — failures won't block the page
+    let stats;
+    try {
+      stats = await db.query(`
       SELECT
         (SELECT COUNT(*) FROM products WHERE available = true)::int AS listings,
         (SELECT COALESCE(SUM(quantity), 0) FROM products WHERE available = true)::int AS total_kg,
         (SELECT COUNT(*) FROM quality_passports WHERE quality_grade IN ('A','B'))::int AS certified
     `);
+    } catch (e) { stats = { rows: [null] }; }
 
     res.render('layout', {
       title: 'Marketplace — AGRICHAIN 360',
