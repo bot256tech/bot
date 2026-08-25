@@ -273,6 +273,7 @@ async function startServer() {
     { path: '/api/v1/partners', module: './api/routes/partner.routes', name: 'Partners', limiter: apiLimiter },
     { path: '/api/v1/quality', module: './api/routes/quality.routes', name: 'Quality', limiter: apiLimiter },
     { path: '/api/v1/telemetry', module: './api/routes/telemetry.routes', name: 'Telemetry', limiter: apiLimiter },
+    { path: '/api/v1/subscriptions', module: './api/routes/subscriptions.routes', name: 'Subscriptions', limiter: apiLimiter },
     { path: '/api/v1/marketplace', module: './api/routes/marketplace.routes', name: 'Marketplace', limiter: apiLimiter },
     { path: '/api/v1/bookings', module: './api/routes/booking.routes', name: 'Bookings', limiter: apiLimiter },
     { path: '/api/v1/payments', module: './api/routes/payment.routes', name: 'Payments', limiter: paymentLimiter },

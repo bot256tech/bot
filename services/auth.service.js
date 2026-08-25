@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { checkPassword } = require('./password.util');
+const SubscriptionGating = require('./subscription-gating.service');
 const Farmer = require('../models/Farmer');
 const jwt = require('jsonwebtoken');
 const NotificationService = require('./notification.service');

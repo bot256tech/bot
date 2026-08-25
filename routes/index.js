@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const db = require('../database/connection');
 const { requireWebAuth } = require('../middleware/webAuth');
+const SubscriptionGating = require('../services/subscription-gating.service');
 const { authLimiter, registerLimiter, recordLoginFailure, clearLoginAttempts } = require('../config/rateLimiter');
 const ussdRouter = require('./ussd');
 
@@ -139,11 +140,16 @@ router.get('/marketplace', async (req, res, next) => {
     `);
     } catch (e) { stats = { rows: [null] }; }
 
+    // Gate farmer identity for anonymous visitors
+    const mktUser = req.session ? req.session.user : null;
+    const products = mktUser ? result.rows : result.rows.map(p => SubscriptionGating.maskForPublic(p));
+
     res.render('layout', {
       title: 'Marketplace — AGRICHAIN 360',
       page: 'marketplace',
+      user: mktUser,
       data: {
-        products: result.rows,
+        products,
         crops: crops.rows.map((r) => r.crop),
         districts: districts.rows.map((r) => r.district),
         stats: stats.rows[0],
@@ -654,6 +660,12 @@ router.get('/buyer-dashboard', requireWebAuth(['BUYER']), async (req, res, next)
       profile = await Buyer.findByUserId(req.session.user.id);
     } catch (e) { profile = null; }
 
+    // Subscription/trial status
+    let subscription = null;
+    try {
+      subscription = await require('../services/subscription-gating.service').getAccess(req.session.user.id);
+    } catch (e) { subscription = null; }
+
     res.render('layout', {
       title: 'Buyer Dashboard — AGRICHAIN 360',
       page: 'buyer-dashboard',
@@ -662,6 +674,7 @@ router.get('/buyer-dashboard', requireWebAuth(['BUYER']), async (req, res, next)
         profile,
         products: productsResult.rows,
         orders,
+        subscription,
         query: q,
         success: req.query.success || '',
         error: req.query.error || ''
@@ -883,6 +896,15 @@ router.get('/api/check-login', (req, res) => {
 router.get('/download/proposal', (req, res) => {
   const file = path.join(__dirname, '..', 'public', 'downloads', 'AGRICHAIN_360_AYuTe_Proposal.pdf');
   res.download(file);
+});
+
+// USSD callback stub — Africa's Talking USSD gateway
+// Activates when pilot funding deploys and the USSD short code is assigned.
+router.post('/api/v1/ussd/callback', (req, res) => {
+  const { sessionId, serviceCode, phoneNumber, text } = req.body || {};
+  // Stub response — the real USSD menu tree activates on pilot funding
+  res.set('Content-Type', 'text/plain');
+  res.send('CON Welcome to AGRICHAIN 360\n1. Check grain price\n2. Find drying centre\n3. My batches\n0. Exit');
 });
 
 // USSD gateway endpoint (integration point for telecom USSD providers)
